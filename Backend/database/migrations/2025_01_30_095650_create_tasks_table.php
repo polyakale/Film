@@ -12,10 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tasks', function (Blueprint $table) {
-            $table->id()->int()->autoIncrement();
-            $table->foreignId('filmId')->references('id')->on('films');
-            $table->foreignId('personId')->references('id')->on('people');
-            $table->foreignId('roleId')->references('id')->on('roles');
+            $table->Integer('id')->autoIncrement();
+            $table->Integer('filmId')->nullable();
+            $table->Integer('personId')->nullable();
+            $table->Integer('roleId')->nullable();
+            $table->foreign('filmId')->references('id')->on('films');
+            $table->foreign('personId')->references('id')->on('people');
+            $table->foreign('roleId')->references('id')->on('roles');
             $table->timestamps();
         });
     }

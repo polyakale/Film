@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('videos', function (Blueprint $table) {
-            $table->id()->int()->autoIncrement();
-            $table->Integer('filmId')->unsigned();
+            $table->Integer('id')->autoIncrement();
+            $table->Integer('filmId')->nullable();
             $table->foreign('filmId')->references('id')->on('films');
             $table->string('link', 255)->nullable();
             $table->string('embedLink', 255)->nullable();

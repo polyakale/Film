@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('films', function (Blueprint $table) {
-            $table->id()->int()->autoIncrement();
+            $table->Integer('id')->autoIncrement();
             $table->string('title', 60);
-            $table->integer('production')->nullable();
-            $table->integer('length')->nullable();
+            $table->Integer('production')->nullable();
+            $table->Integer('length')->nullable();
             $table->date('presentation')->nullable();
             $table->string('imbdLink',255)->nullable();
             // $table->timestamps();
