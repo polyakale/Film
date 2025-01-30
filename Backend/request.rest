@@ -1,0 +1,8 @@
+### változók
+@protocol = http://
+@hostname = localhost
+@port = 8000
+@host = {{protocol}}{{hostname}}:{{port}}
+
+### teszt
+get {{host}}/api/
