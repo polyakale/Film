@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id()->int()->autoIncrement();
-            $table->int('positionId')->nullable();
-            $table->foreign('positionId')->references('id')->on('positions');
+            // $table->int('positionId')->nullable();
+            // $table->foreign('positionId')->references('id')->on('positions');
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
