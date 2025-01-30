@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('videos', function (Blueprint $table) {
-            $table->id();
+            $table->id()->int()->autoIncrement();
             $table->Integer('filmId')->unsigned();
             $table->foreign('filmId')->references('id')->on('films');
             $table->string('link', 255)->nullable();
