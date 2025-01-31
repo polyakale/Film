@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreign('filmId')->references('id')->on('films');
             $table->string('link', 255)->nullable();
             $table->string('embedLink', 255)->nullable();
-            $table->timestamps();
+            // $table->timestamps();
         });
     }
 

@@ -11,7 +11,7 @@ class Task extends Model
     /** @use HasFactory<\Database\Factories\TaskFactory> */
     use HasFactory, Notifiable;
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
         'id',
