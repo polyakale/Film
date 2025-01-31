@@ -12,7 +12,6 @@ class FilmSeeder extends Seeder
     {
         // $filePath = database_path('csv/filmek.csv');
         // $data = [];
-
         // if (($handle = fopen($filePath, "r")) !== FALSE) {
         //     while (($row = fgetcsv($handle, 1000, ";")) !== FALSE) {
         //         $data[] = [
@@ -25,9 +24,6 @@ class FilmSeeder extends Seeder
         //         ];
         //     }
         //     fclose($handle);
-        // }
-        // if (Film::count() === 0) {
-        //     Film::factory()->createMany($data);
         // }
         $filmData = [
             ['id' => 1, 'title' => 'Tree-5004','production' => 1992,'length' => 330,'presentation'=>'1994.09.11', 'imbdLink' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'],
