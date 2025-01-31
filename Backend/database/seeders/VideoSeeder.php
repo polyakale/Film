@@ -13,12 +13,12 @@ class VideoSeeder extends Seeder
      */
     public function run(): void
     {
-        $videData = [
+        $videoData = [
             ['id' => 1, 'filmId' => 1, 'link' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'embedLink'=> 'élklké'],
         ];
     
         if (Video::count() === 0) {
-            Video::factory()->createMany($videData);
+            Video::factory()->createMany($videoData);
         }
     }
 }

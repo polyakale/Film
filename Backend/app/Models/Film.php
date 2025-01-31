@@ -19,7 +19,7 @@ class Film extends Model
         'production',
         'length',
         'presentation',
-        'imbdLink',
+        'imdbLink',
     ];
 
     protected function casts(): array

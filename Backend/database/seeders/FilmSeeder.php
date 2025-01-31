@@ -26,7 +26,7 @@ class FilmSeeder extends Seeder
         //     fclose($handle);
         // }
         $filmData = [
-            ['id' => 1, 'title' => 'Tree-5004','production' => 1992,'length' => 330,'presentation'=>'1994.09.11', 'imbdLink' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'],
+            ['id' => 1, 'title' => 'Tree-5004','production' => 1992,'length' => 330,'presentation'=>'1994.09.11', 'imdbLink' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'],
         ];
     
         if (Film::count() === 0) {

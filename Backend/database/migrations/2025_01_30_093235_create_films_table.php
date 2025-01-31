@@ -17,7 +17,7 @@ return new class extends Migration
             $table->Integer('production')->nullable();
             $table->Integer('length')->nullable();
             $table->date('presentation')->nullable();
-            $table->string('imbdLink',255)->nullable();
+            $table->string('imdbLink',255)->nullable();
             // $table->timestamps();
         });
     }

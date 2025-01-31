@@ -26,7 +26,7 @@ class PersonSeeder extends Seeder
         //     fclose($handle);
         // }
         $personData = [
-            ['id' => 1, 'name' => 'A. H.','gender' => 1,'photo' => 'AH.jpg', 'imbdLink'=>'https://www.youtube.com/watch?v=dQw4w9WgXcQ'],
+            ['id' => 1, 'name' => 'A. H.','gender' => 1,'photo' => 'AH.jpg', 'imdbLink'=>'https://www.youtube.com/watch?v=dQw4w9WgXcQ'],
         ];
     
         if (Person::count() === 0) {

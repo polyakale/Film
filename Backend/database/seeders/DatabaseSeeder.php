@@ -24,9 +24,18 @@ class DatabaseSeeder extends Seeder
         //     ['email' => 'test@example.com'],
         //     ['name' => 'Test User']
         // );
+        DB::statement('DELETE FROM tasks');
+        DB::statement('DELETE FROM people');
         DB::statement('DELETE FROM roles');
+        DB::statement('DELETE FROM videos');
+        DB::statement('DELETE FROM films');
+
         $this->call([
-           RolesSeeder::class
+            FilmSeeder::class,
+            VideoSeeder::class,
+            RolesSeeder::class,
+            PersonSeeder::class,
+            TaskSeeder::class,
             // ... (más seederek)
         ]);
     }
