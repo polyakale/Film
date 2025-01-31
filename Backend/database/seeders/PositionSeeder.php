@@ -12,6 +12,9 @@ class PositionSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        Position::insert([
+            ['id' => 1, 'name' => 'admin'],
+            ['id' => 2, 'name' => 'guest']
+        ]);
     }
 }
