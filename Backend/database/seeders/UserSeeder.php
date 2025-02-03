@@ -16,9 +16,9 @@ class UserSeeder extends Seeder
         if (User::count() === 0) {
             User::factory()->create([
                 'name' => 'test',
+                'positionId' => '1',
                 'email' => 'test@example.com',
                 'password' => '123',
-                'position' => '1',
             ]);
         }
     }
