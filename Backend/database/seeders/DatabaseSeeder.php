@@ -29,6 +29,9 @@ class DatabaseSeeder extends Seeder
         DB::statement('DELETE FROM roles');
         DB::statement('DELETE FROM videos');
         DB::statement('DELETE FROM films');
+        DB::statement('DELETE FROM positions');
+        DB::statement('DELETE FROM users');
+        DB::statement('DELETE FROM favourites');
 
         $this->call([
             FilmSeeder::class,
@@ -36,6 +39,9 @@ class DatabaseSeeder extends Seeder
             RolesSeeder::class,
             PersonSeeder::class,
             TaskSeeder::class,
+            UserSeeder::class,
+            PositionSeeder::class,
+            FavouriteSeeder::class,
             // ... (más seederek)
         ]);
     }
