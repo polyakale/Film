@@ -9,7 +9,7 @@ class TaskSeeder extends Seeder
 {
     public function run(): void
     {
-        $filePath = database_path('sources\tasks.csv');
+        $filePath = database_path('sources/tasks.csv');
         $data = [];
         if (($handle = fopen($filePath, "r")) !== FALSE) {
             while (($row = fgetcsv($handle, 1000, ";")) !== FALSE) {
@@ -28,7 +28,7 @@ class TaskSeeder extends Seeder
         }
 
         if (Task::count() === 0) {
-            Task::insert($data);  // Use insert instead of createMany for performance
+            Task::insert($data);
         }
     }
 }
