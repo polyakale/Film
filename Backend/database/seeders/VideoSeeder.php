@@ -25,7 +25,7 @@ class VideoSeeder extends Seeder
         //     fclose($handle);
         // }
         $videoData = [
-            ['id' => 1, 'filmId' => 1, 'link' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'embedLink'=> 'élklké'],
+            ['id' => 1, 'filmId' => 5, 'link' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'embedLink'=> 'élklké'],
         ];
     
         if (Video::count() === 0) {
