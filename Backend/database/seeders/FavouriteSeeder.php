@@ -13,6 +13,15 @@ class FavouriteSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        $favouriteData=
+        [
+            ['id', 'userId', 'filmId', 'evaluation'],
+        ];
+
+        if(Favourite::count() === 0){
+            foreach ($favouriteData as $item) {
+                Favourite::create($item);
+            }
+        };
     }
 }
