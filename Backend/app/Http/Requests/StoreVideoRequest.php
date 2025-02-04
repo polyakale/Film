@@ -11,7 +11,7 @@ class StoreVideoRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,9 @@ class StoreVideoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'filmId' => 'required|integer',
+            'link' => 'required|string',
+            'embedLink' => 'required|string',
         ];
     }
 }

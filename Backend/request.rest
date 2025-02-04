@@ -6,6 +6,10 @@
 
 ### teszt
 get {{host}}/api/
+
+
+# FILMS
+
 ### get films
 get {{host}}/api/films
 ### get films by id
@@ -25,15 +29,104 @@ Content-Type: application/json
 PATCH {{host}}/api/films/1
 Accept: application/json
 Content-Type: application/json
+
 {
     "title": "Cica mica GQ",
     "production": 1951,
     "length": 87,
     "presentation": "1951.09.22",
-    "imdbLink": "https://oiiaoiia.org/",
+    "imdbLink": "https://oiiaoiia.org/"
 }
+
 ### delete films by id
 DELETE {{host}}/api/films/1
+Accept: application/json
+Content-Type: application/json
+#---------------------------------------
+# TASKS
+
+### get tasks
+get {{host}}/api/tasks
+### get tasks by id
+get {{host}}/api/tasks/1
+### post tasks
+POST {{host}}/api/tasks
+Accept: application/json
+Content-Type: application/json
+{
+    "filmId": 11,
+    "personId": 74,
+    "roleId": 3,
+}
+### patch tasks
+PATCH {{host}}/api/tasks/1
+Accept: application/json
+Content-Type: application/json
+{
+    "filmId": 7,
+    "personId": 74,
+    "roleId": 3,
+}
+### delete tasks by id
+DELETE {{host}}/api/tasks/1
+Accept: application/json
+Content-Type: application/json
+#---------------------------------------
+# VIDEOS
+
+### get videos
+get {{host}}/api/videos
+### get videos by id
+get {{host}}/api/videos/1
+### post videos
+POST {{host}}/api/videos
+Accept: application/json
+Content-Type: application/json
+{
+    "filmId": 11,
+    "personId": 74,
+    "roleId": 3,
+}
+### patch videos
+PATCH {{host}}/api/videos/1
+Accept: application/json
+Content-Type: application/json
+{
+    "filmId": 7,
+    "personId": 74,
+    "roleId": 3,
+}
+### delete videos by id
+DELETE {{host}}/api/videos/1
+Accept: application/json
+Content-Type: application/json
+#---------------------------------------
+# PEOPLE
+
+### get people
+get {{host}}/api/people
+### get people by id
+get {{host}}/api/people/1
+### post people
+POST {{host}}/api/people
+Accept: application/json
+Content-Type: application/json
+{
+    "filmId": 11,
+    "personId": 74,
+    "roleId": 3,
+}
+### patch people
+PATCH {{host}}/api/people/1
+Accept: application/json
+Content-Type: application/json
+{
+    "filmId": 7,
+    "personId": 74,
+    "roleId": 3,
+}
+### delete people by id
+DELETE {{host}}/api/people/1
 Accept: application/json
 Content-Type: application/json
 #---------------------------------------

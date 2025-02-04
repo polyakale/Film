@@ -22,7 +22,9 @@ class UpdateTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'filmId' => 'nullable|integer',
+            'personId' => 'nullable|integer',
+            'roleId' => 'nullable|integer',
         ];
     }
 }

@@ -11,7 +11,7 @@ class UpdateVideoRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,9 @@ class UpdateVideoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'filmId' => 'nullable|integer',
+            'link' => 'nullable|string',
+            'embedLink' => 'nullable|string',
         ];
     }
 }
