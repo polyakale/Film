@@ -23,7 +23,7 @@ class StoreFilmRequest extends FormRequest
     {
         return [
             'title' => 'required|string|min:3',
-            'production' => 'required|int|min:4|max:4',
+            'production' => 'required|int|min:4',
             'length' => 'required|int|min:2',
             'presentation' => 'date',
             'imdbLink' => 'string',

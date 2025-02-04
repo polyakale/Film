@@ -18,12 +18,13 @@ get {{host}}/api/films/1
 POST {{host}}/api/films
 Accept: application/json
 Content-Type: application/json
+
 {
-    "title": "Sajt Merész",
+    "title": "Cica GQ",
     "production": 1951,
-    "length": 110,
-    "presentation": "1951.09.18",
-    "imdbLink": "https://oiiaoiia.org/",
+    "length": 87,
+    "presentation": "1951-09-22",
+    "imdbLink": "https://oiiaoiia.org/"
 }
 ### patch films
 PATCH {{host}}/api/films/1
@@ -34,9 +35,10 @@ Content-Type: application/json
     "title": "Cica mica GQ",
     "production": 1951,
     "length": 87,
-    "presentation": "1951.09.22",
+    "presentation": "1951-09-22",
     "imdbLink": "https://oiiaoiia.org/"
 }
+
 
 ### delete films by id
 DELETE {{host}}/api/films/1
@@ -53,6 +55,7 @@ get {{host}}/api/tasks/1
 POST {{host}}/api/tasks
 Accept: application/json
 Content-Type: application/json
+
 {
     "filmId": 11,
     "personId": 74,
@@ -62,10 +65,13 @@ Content-Type: application/json
 PATCH {{host}}/api/tasks/1
 Accept: application/json
 Content-Type: application/json
+
 {
-    "filmId": 7,
-    "personId": 74,
-    "roleId": 3,
+    "title": "Cica mica GQ",
+    "production": 1951,
+    "length": 87,
+    "presentation": "1951.09.22",
+    "imdbLink": "https://oiiaoiia.org/"
 }
 ### delete tasks by id
 DELETE {{host}}/api/tasks/1
@@ -82,6 +88,7 @@ get {{host}}/api/videos/1
 POST {{host}}/api/videos
 Accept: application/json
 Content-Type: application/json
+
 {
     "filmId": 11,
     "personId": 74,
@@ -91,6 +98,7 @@ Content-Type: application/json
 PATCH {{host}}/api/videos/1
 Accept: application/json
 Content-Type: application/json
+
 {
     "filmId": 7,
     "personId": 74,
@@ -111,6 +119,7 @@ get {{host}}/api/people/1
 POST {{host}}/api/people
 Accept: application/json
 Content-Type: application/json
+
 {
     "filmId": 11,
     "personId": 74,
@@ -120,6 +129,7 @@ Content-Type: application/json
 PATCH {{host}}/api/people/1
 Accept: application/json
 Content-Type: application/json
+
 {
     "filmId": 7,
     "personId": 74,

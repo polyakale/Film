@@ -23,7 +23,7 @@ class UpdateFilmRequest extends FormRequest
     {
         return [
             'title' => 'nullable|string|min:3',
-            'production' => 'nullable|int|min:4|max:4',
+            'production' => 'nullable|int|min:4',
             'length' => 'nullable|int|min:2',
             'presentation' => 'nullable|date',
             'imdbLink' => 'nullable|string',
