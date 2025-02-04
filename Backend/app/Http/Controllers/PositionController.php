@@ -13,38 +13,82 @@ class PositionController extends Controller
      */
     public function index()
     {
-        //
+        $rows = Position::all();
+        $data = [
+            'message' => 'ok',
+            'data' => $rows
+        ];
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StorePositionRequest $request)
     {
-        //
+        $row = Position::create($request->all());
+        $data = [
+            'message' => 'ok',
+            'data' => $row
+        ];
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Position $position)
+    public function show(int $id)
     {
-        //
+        $row = Position::find($id);
+
+        if ($row) {
+            $data = [
+                'message' => 'ok',
+                'data' => $row
+            ];
+        } else {
+            $data = [
+                'message' => 'Not found',
+                'data' => [
+                    'id' => $id
+                ]
+            ];
+        }
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdatePositionRequest $request, Position $position)
+    public function update(UpdatePositionRequest $request,  $id)
     {
-        //
+        //Keresd meg az adott product-ot
+        $row = Position::find($id);
+        if ($row) {
+            $row->update($request->all());
+            $data = [
+                'message' => 'ok',
+                'data' => $row
+            ];
+        } else {
+            $data = [
+                'message' => 'Not found',
+                'data' => [
+                    'id' => $id
+                ]
+            ];
+        }
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Position $position)
+    public function destroy(int $id)
     {
-        //
+        $row = Position::find($id);
+        if ($row) {
+            $row->delete();
+            $data = [
+                'message' => 'ok',
+                'data' => [
+                    'id' => $id
+                ]
+            ];
+        } else {
+            $data = [
+                'message' => 'Not found',
+                'data' => [
+                    'id' => $id
+                ]
+            ];
+        }
+        //Írd felül a küldött adatokkal
+        //visszaküldjük a módosított rekordot
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
 }

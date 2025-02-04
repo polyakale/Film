@@ -22,7 +22,8 @@ class UpdatePositionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'id' => 'int|min:1',
+            'name' => 'string|min:5|max:5',
         ];
     }
 }

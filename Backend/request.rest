@@ -37,3 +37,8 @@ DELETE {{host}}/api/films/1
 Accept: application/json
 Content-Type: application/json
 #---------------------------------------
+
+# USERS
+
+### get user
+get {{host}}/api/users
