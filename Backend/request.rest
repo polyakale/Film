@@ -6,30 +6,34 @@
 
 ### teszt
 get {{host}}/api/
-
 ### get films
 get {{host}}/api/films
-
 ### get films by id
 get {{host}}/api/films/1
-
 ### post films
 POST {{host}}/api/films
 Accept: application/json
 Content-Type: application/json
 {
-    "osztalyNev": "1.a"
+    "title": "Sajt Merész",
+    "production": 1951,
+    "length": 110,
+    "presentation": "1951.09.18",
+    "imdbLink": "https://oiiaoiia.org/",
 }
-
 ### patch films
 PATCH {{host}}/api/films/1
 Accept: application/json
 Content-Type: application/json
 {
-    "osztalyNev": "1.b"
+    "title": "Cica mica GQ",
+    "production": 1951,
+    "length": 87,
+    "presentation": "1951.09.22",
+    "imdbLink": "https://oiiaoiia.org/",
 }
-
 ### delete films by id
 DELETE {{host}}/api/films/1
 Accept: application/json
 Content-Type: application/json
+#---------------------------------------
