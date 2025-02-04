@@ -1,6 +1,6 @@
 <?php
-
 use App\Http\Controllers\PositionController;
+use App\Http\Controllers\UsersController;
 use App\Http\Controllers\FilmController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\FavouriteController;
@@ -9,6 +9,17 @@ use App\Http\Controllers\PersonController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+// users
+// Route::post('users/login', [UsersController::class, 'login']);
+// Route::post('users/logout', [UsersController::class, 'logout']);
+// Route::get('users', [UsersController::class, 'index']);
+
+// Route::get('users/{id}', [UsersController::class, 'show']);
+// Route::post('users', [UsersController::class, 'store']);
+       
+// Route::patch('users/{id}', [UsersController::class, 'update']);    
+// Route::delete('users/{id}', [UsersController::class, 'destroy']);  
 
 // positions
 Route::get('positions', [PositionController::class, 'index']);
