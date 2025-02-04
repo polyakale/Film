@@ -1,6 +1,6 @@
 <?php
 use App\Http\Controllers\PositionController;
-use App\Http\Controllers\UsersController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\FilmController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\FavouriteController;
@@ -11,15 +11,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // users
-// Route::post('users/login', [UsersController::class, 'login']);
-// Route::post('users/logout', [UsersController::class, 'logout']);
-// Route::get('users', [UsersController::class, 'index']);
+Route::post('users/login', [UserController::class, 'login']);
+Route::post('users/logout', [UserController::class, 'logout']);
+Route::get('users', [UserController::class, 'index']);
 
-// Route::get('users/{id}', [UsersController::class, 'show']);
-// Route::post('users', [UsersController::class, 'store']);
+Route::get('users/{id}', [UserController::class, 'show']);
+Route::post('users', [UserController::class, 'store']);
        
-// Route::patch('users/{id}', [UsersController::class, 'update']);    
-// Route::delete('users/{id}', [UsersController::class, 'destroy']);  
+Route::patch('users/{id}', [UserController::class, 'update']);    
+Route::delete('users/{id}', [UserController::class, 'destroy']);  
 
 // positions
 Route::get('positions', [PositionController::class, 'index']);
