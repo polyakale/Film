@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Task;
+use App\Models\Person;
+use App\Models\Film;
 use Illuminate\Database\Seeder;
 
 class TaskSeeder extends Seeder
@@ -11,23 +13,28 @@ class TaskSeeder extends Seeder
     {
         $filePath = database_path('sources/tasks.csv');
         $data = [];
+        $people = Person::pluck('id')->toArray();  // Get all valid person IDs
+        $films = Film::pluck('id')->toArray();  // Get all valid filmIds
+
         if (($handle = fopen($filePath, "r")) !== FALSE) {
             while (($row = fgetcsv($handle, 1000, ";")) !== FALSE) {
                 if (count($row) >= 4) {
-                    $data[] = [
-                        'id' => $row[0],
-                        'filmId' => $row[1],
-                        'personId' => $row[2],
-                        'roleId' => $row[3],
-                        'updated_at' => now(),
-                        'created_at' => now(),
-                    ];
+                    $filmId = (int) $row[1];
+                    $personId = (int) $row[2];
+                    // Ensure that the filmId exists in the films table
+                    if (in_array($filmId, $films) && in_array($personId, $people)) {
+                        $data[] = [
+                            'filmId' => $filmId,
+                            'personId' => $personId,
+                            'roleId' => (int) $row[3],
+                        ];
+                    }
                 }
             }
             fclose($handle);
         }
 
-        if (Task::count() === 0) {
+        if (Task::count() === 0 && !empty($data)) {
             Task::insert($data);
         }
     }

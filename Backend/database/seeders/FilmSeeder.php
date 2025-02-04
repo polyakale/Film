@@ -17,7 +17,6 @@ class FilmSeeder extends Seeder
         if (($handle = fopen($filePath, "r")) !== FALSE) {
             while (($row = fgetcsv($handle, 1000, ";")) !== FALSE) {
                 $presentation = $row[4];  // Assuming 'presentation' is at index 4
-                
                 // Handle potential formatting issues with date (e.g., '2025.02.03' -> '2025-02-03')
                 try {
                     // Ensure correct format (if needed, you can adjust this to match your CSV date format)

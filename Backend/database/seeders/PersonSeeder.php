@@ -16,9 +16,8 @@ class PersonSeeder extends Seeder
         if (($handle = fopen($filePath, "r")) !== FALSE) {
             while (($row = fgetcsv($handle, 1000, ";")) !== FALSE) {
                 $data[] = [
-                    'id' => $row[0],
                     'name' => $row[1],
-                    'gender' => $row[2],
+                    'gender' => strtolower($row[2]) === 'male' ? true : false,
                     'photo' => $row[3],
                     'imdbLink' => $row[4],
                 ];

@@ -26,22 +26,18 @@ class DatabaseSeeder extends Seeder
         // );
         DB::statement('DELETE FROM tasks');
         DB::statement('DELETE FROM people');
-        DB::statement('DELETE FROM roles');
         DB::statement('DELETE FROM videos');
         DB::statement('DELETE FROM films');
-        DB::statement('DELETE FROM positions');
-        DB::statement('DELETE FROM users');
-        DB::statement('DELETE FROM favourites');
 
         $this->call([
+            PositionSeeder::class,
+            UserSeeder::class,
             FilmSeeder::class,
             VideoSeeder::class,
+            FavouriteSeeder::class,
             RolesSeeder::class,
             PersonSeeder::class,
             TaskSeeder::class,
-            UserSeeder::class,
-            PositionSeeder::class,
-            FavouriteSeeder::class,
             // ... (más seederek)
         ]);
     }
