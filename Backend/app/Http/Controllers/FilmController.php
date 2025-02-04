@@ -8,43 +8,84 @@ use App\Http\Requests\UpdateFilmRequest;
 
 class FilmController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $rows = Film::all();
+        $data = [
+            'message' => 'ok',
+            'data' => $rows
+        ];
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreFilmRequest $request)
     {
-        //
+        $row = Film::create($request->all());
+        $data = [
+            'message' => 'ok',
+            'data' => $row
+        ];
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Film $film)
+    public function show(int $id)
     {
-        //
+        $row = Film::find($id);
+
+        if ($row) {
+            $data = [
+                'message' => 'ok',
+                'data' => $row
+            ];
+        } else {
+            $data = [
+                'message' => 'Not found',
+                'data' => [
+                    'id' => $id
+                ]
+            ];
+        }
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateFilmRequest $request, Film $film)
+    public function update(UpdateFilmRequest $request,  $id)
     {
-        //
+        //Keresd meg az adott product-ot
+        $row = Film::find($id);
+        if ($row) {
+            $row->update($request->all());
+            $data = [
+                'message' => 'ok',
+                'data' => $row
+            ];
+        } else {
+            $data = [
+                'message' => 'Not found',
+                'data' => [
+                    'id' => $id
+                ]
+            ];
+        }
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Film $film)
+    public function destroy(int $id)
     {
-        //
+        $row = Film::find($id);
+        if ($row) {
+            $row->delete();
+            $data = [
+                'message' => 'ok',
+                'data' => [
+                    'id' => $id
+                ]
+            ];
+        } else {
+            $data = [
+                'message' => 'Not found',
+                'data' => [
+                    'id' => $id
+                ]
+            ];
+        }
+        //Írd felül a küldött adatokkal
+        //visszaküldjük a módosított rekordot
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
 }
