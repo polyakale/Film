@@ -6,3 +6,30 @@
 
 ### teszt
 get {{host}}/api/
+
+### get films
+get {{host}}/api/films
+
+### get films by id
+get {{host}}/api/films/1
+
+### post films
+POST {{host}}/api/films
+Accept: application/json
+Content-Type: application/json
+{
+    "osztalyNev": "1.a"
+}
+
+### patch films
+PATCH {{host}}/api/films/1
+Accept: application/json
+Content-Type: application/json
+{
+    "osztalyNev": "1.b"
+}
+
+### delete films by id
+DELETE {{host}}/api/films/1
+Accept: application/json
+Content-Type: application/json
