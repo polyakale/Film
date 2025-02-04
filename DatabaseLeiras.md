@@ -8,7 +8,7 @@
     - Guest (böngészés, keresés valamint a kedvencek kigyűjtése)
     - Az oldalon nem regisztrált felhasználó csak böngészhet
 
- - A feladatot mySQL adatbázissal, laravel alapú backend, vue.js alapú frontend és a csoportmunkát git, github technológiával valósítjuk meg. 
+ - A feladatot mySQL adatbázissal, laravel alapú backend, vue.js alapú frontend és a csoportmunkát git, github, a dizájnt saját css és bootstrap technológiával valósítjuk meg. 
  - A feladat megvalósításának része a backend s frontend tesztek elkészítése valamint az alkalmazás teljes dokumentációjának létrehozása
  - A feladat csoportmunkában készült.
     - Csoportvezető: Polyák Alex János
