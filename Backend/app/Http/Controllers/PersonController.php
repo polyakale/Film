@@ -8,43 +8,84 @@ use App\Http\Requests\UpdatePersonRequest;
 
 class PersonController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $rows = Person::all();
+        $data = [
+            'message' => 'ok',
+            'data' => $rows
+        ];
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StorePersonRequest $request)
     {
-        //
+        $row = Person::create($request->all());
+        $data = [
+            'message' => 'ok',
+            'data' => $row
+        ];
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Person $person)
+    public function show(int $id)
     {
-        //
+        $row = Person::find($id);
+
+        if ($row) {
+            $data = [
+                'message' => 'ok',
+                'data' => $row
+            ];
+        } else {
+            $data = [
+                'message' => 'Not found',
+                'data' => [
+                    'id' => $id
+                ]
+            ];
+        }
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdatePersonRequest $request, Person $person)
+    public function update(UpdatePersonRequest $request,  $id)
     {
-        //
+        //Keresd meg az adott product-ot
+        $row = Person::find($id);
+        if ($row) {
+            $row->update($request->all());
+            $data = [
+                'message' => 'ok',
+                'data' => $row
+            ];
+        } else {
+            $data = [
+                'message' => 'Not found',
+                'data' => [
+                    'id' => $id
+                ]
+            ];
+        }
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Person $person)
+    public function destroy(int $id)
     {
-        //
+        $row = Person::find($id);
+        if ($row) {
+            $row->delete();
+            $data = [
+                'message' => 'ok',
+                'data' => [
+                    'id' => $id
+                ]
+            ];
+        } else {
+            $data = [
+                'message' => 'Not found',
+                'data' => [
+                    'id' => $id
+                ]
+            ];
+        }
+        //Írd felül a küldött adatokkal
+        //visszaküldjük a módosított rekordot
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
 }

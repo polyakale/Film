@@ -22,7 +22,9 @@ class StoreTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'filmId' => 'required|integer',
+            'personId' => 'required|integer',
+            'roleId' => 'required|integer',
         ];
     }
 }

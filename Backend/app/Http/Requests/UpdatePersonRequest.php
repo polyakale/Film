@@ -11,7 +11,7 @@ class UpdatePersonRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,10 @@ class UpdatePersonRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => 'nullable|string|min:8',
+            'gender' => 'nullable|boolean',
+            'photo' => 'nullable|string|min:5',
+            'imdbLink' => 'nullable|string',
         ];
     }
 }
