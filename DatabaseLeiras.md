@@ -1,4 +1,25 @@
+# A feladat leírása!
+- csv formátumban forrásként megkaptuk a két világhború közzött gyártott magyar filmek adatbázisát amiben a filmek és készítőik szerepőik találhatók.
+- Ezt kiegészítve, kibővítve célunk egy olyan webalkalmazás készítése ahol ezeket az adatokat szerkeszthessük kiegészítsük videólinkekkel fotókkal és imdb hivatkozásokkal.
+    - Feladatunk egy jelentős része gyűjtőmunka is lessz ahol videókat, fotókat kell megkeresni letölteni és bevinni az datbázisba.
+- Az így feltöltött adatbázis célja hogy az oldalon regisztrált felhasználó böngészhesse nézhesse a hozzátartozó videókat és egyéb hivatkozásokat valamint kigyűjthesse a neki tetsző alkotásokat egy erre kailakított felületen.
+- Az alkalmazás három szerepkörre készül, amiknek megfelelő módon férhet hozzá a tartalmakhoz. 
+    - Admin (az adatbázis feltöltését karbantartását végzi)
+    - Guest (böngészés, keresés valamint a kedvencek kigyűjtése)
+    - Az oldalon nem regisztrált felhasználó csak böngészhet
+
+ - A feladatot mySQL adatbázissal, laravel alapú backend, vue.js alapú frontend és a csoportmunkát git, github, a dizájnt saját css és bootstrap technológiával valósítjuk meg. 
+ - A feladat megvalósításának része a backend s frontend tesztek elkészítése valamint az alkalmazás teljes dokumentációjának létrehozása
+ - A feladat csoportmunkában készült.
+    - Csoportvezető: Polyák Alex János
+    - Csapattag: Hajdu István 
+ - A projekt ütemezéséhez, feladat megosztásához, egymás közti kommunikációhoz a github projekt tervező felületét valamit a teams-t használjuk.   
+
 # Adatbázis
+
+
+
+
 ## Diagarm
 
 ![diagram](Documents/diagram.png)
@@ -50,3 +71,5 @@
 - filmId (ezt a films táblázatból kapja meg)
 - personId (szemelyId: ezt a people táblázatból kapja meg)
 - roleId (szerepkorId: ezt a roles táblázatból kapja meg)
+
+
