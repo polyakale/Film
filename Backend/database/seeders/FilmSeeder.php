@@ -17,7 +17,6 @@ class FilmSeeder extends Seeder
         if (($handle = fopen($filePath, "r")) !== FALSE) {
             while (($row = fgetcsv($handle, 1000, ";")) !== FALSE) {
                 $presentation = $row[4];  // Assuming 'presentation' is at index 4
-                // Handle potential formatting issues with date (e.g., '2025.02.03' -> '2025-02-03')
                 try {
                     // Ensure correct format (if needed, you can adjust this to match your CSV date format)
                     $presentation = Carbon::createFromFormat('Y.m.d', $presentation)->toDateString();
@@ -35,10 +34,7 @@ class FilmSeeder extends Seeder
             }
             fclose($handle);
         }
-        // $filmData = [
-        //     ['id' => 1, 'title' => 'Tree-5004','production' => 1992,'length' => 330,'presentation'=>'1994.09.11', 'imdbLink' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'],
-        // ];
-    
+
         if (Film::count() === 0) {
             Film::factory()->createMany($data);
         }

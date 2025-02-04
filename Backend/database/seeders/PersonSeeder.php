@@ -17,17 +17,14 @@ class PersonSeeder extends Seeder
             while (($row = fgetcsv($handle, 1000, ";")) !== FALSE) {
                 $data[] = [
                     'name' => $row[1],
-                    'gender' => strtolower($row[2]) === 'male' ? true : false,
+                    'gender' => (int) $row[2],
                     'photo' => $row[3],
                     'imdbLink' => $row[4],
                 ];
             }
             fclose($handle);
         }
-        // $personData = [
-        //     ['id' => 1, 'name' => 'A. H.','gender' => 1,'photo' => 'AH.jpg', 'imdbLink'=>'https://www.youtube.com/watch?v=dQw4w9WgXcQ'],
-        // ];
-    
+
         if (Person::count() === 0) {
             Person::factory()->createMany($data);
         }
