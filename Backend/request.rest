@@ -151,7 +151,12 @@ get {{host}}/api/users
 ### get positions
 get {{host}}/api/positions
 
-# Favourite
+# FAVOURITE
 
 ### get favourite
 get {{host}}/api/favourites
+
+# ROLE
+
+### get role
+get {{host}}/api/roles
