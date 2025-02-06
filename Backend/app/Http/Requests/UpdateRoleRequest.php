@@ -22,7 +22,8 @@ class UpdateRoleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'id' => 'int|min:1',
+            'role' => 'string',
         ];
     }
 }

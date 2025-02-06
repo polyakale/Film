@@ -22,7 +22,10 @@ class UpdateFavouriteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'id' => 'nullable|int|min:1',
+            'userId' => 'nullable|int|min:1',
+            'filmId' => 'nullable|int|min:1',
+            'evaluation' => 'nullable|double',
         ];
     }
 }
