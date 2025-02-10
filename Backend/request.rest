@@ -224,6 +224,34 @@ Authorization: Bearer {{token}}
 ### get positions
 get {{host}}/api/positions
 
+### get people by id
+get {{host}}/api/positions/1
+### post people
+POST {{host}}/api/positions
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+   "id": 7,
+   "name": "admin",
+}
+### patch people
+PATCH {{host}}/api/positions/1
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+   "id": 8,
+   "name": "guest",
+}
+### delete people by id
+DELETE {{host}}/api/positions/1
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
 # FAVOURITE
 
 ### get favourite
