@@ -11,7 +11,7 @@ class UpdatePositionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,8 +22,8 @@ class UpdatePositionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'int|min:1',
-            'name' => 'string|min:5|max:5',
+            'id' => 'nullable|int|min:1',
+            'name' => 'nullable|string|min:5',
         ];
     }
 }

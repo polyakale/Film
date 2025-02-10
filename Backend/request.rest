@@ -234,32 +234,32 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-   "id": 7,
-   "name": "admin",
+    "id": 4,
+    "name": "guars"
 }
-### patch positions
+### patch positions (not work)
 PATCH {{host}}/api/positions/2
 Accept: application/json
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-   "name": "guest",
+    "name": "EQikfj02",
 }
 ### delete positions by id
-DELETE {{host}}/api/positions/2
+DELETE {{host}}/api/positions/3
 Accept: application/json
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 # FAVOURITE
 
-### get favourite
+### get favourites
 get {{host}}/api/favourites
 
-### get people by id
+### get favourites by id
 get {{host}}/api/favourites/1
-### post people
+### post favourites
 POST {{host}}/api/favourites
 Accept: application/json
 Content-Type: application/json
@@ -267,19 +267,23 @@ Authorization: Bearer {{token}}
 
 {
    "id": 3,
+   "userId": 2,
    "filmId": 2,
+   "evaluation": 2.0,
 }
-### patch people
+### patch favourites
 PATCH {{host}}/api/favourites/1
 Accept: application/json
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-   "id": 8,
-   "name": "guest",
+   "id": 3,
+   "userId": 1,
+   "filmId": 11,
+   "evaluation": 3.90,
 }
-### delete people by id
+### delete favourites by id
 DELETE {{host}}/api/favourites/1
 Accept: application/json
 Content-Type: application/json
