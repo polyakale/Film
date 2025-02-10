@@ -233,7 +233,7 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-   "id": 7,
+   "positionId": 7,
    "name": "admin",
 }
 ### patch people
@@ -256,6 +256,34 @@ Authorization: Bearer {{token}}
 
 ### get favourite
 get {{host}}/api/favourites
+
+### get people by id
+get {{host}}/api/favourites/1
+### post people
+POST {{host}}/api/favourites
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+   "id": 3,
+   "filmId": 2,
+}
+### patch people
+PATCH {{host}}/api/favourites/1
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+   "id": 8,
+   "name": "guest",
+}
+### delete people by id
+DELETE {{host}}/api/favourites/1
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
 
 # ROLE
 
