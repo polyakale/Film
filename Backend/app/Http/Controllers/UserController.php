@@ -14,179 +14,122 @@ class UserController extends Controller
 {
     public function login(LoginUserRequest $request)
     {
-        //Eltároljuk az adatokat változókba
-        $email = $request->input(('email'));
-        $password = $request->input(('password'));
-        $positionId = $request->input(('positionId'));
+        $email = $request->input('email');
+        $password = $request->input('password');
 
-        //Az email alapján megkeressük a usert
         $user = User::where('email', $email)->first();
 
-        //Stimmel-e az email és a jelszó?
-        if (!$user || !Hash::check($password, $password ? $user->password : '')) {
+        if (!$user || !Hash::check($password, $user->password)) {
             return response()->json([
-                'message' => 'invalid email or password',
+                'message' => 'Invalid email or password',
                 'data' => []
-            ], 401);
+            ], JSON_UNESCAPED_UNICODE);
         }
 
-        //Jó az email és a jelszó
-        //Kitöröljük az esetleges tokenjeit
-        // $user->tokens()->delete();
+        // Clear previous tokens if needed
+        $user->tokens()->delete();
 
-        //itt adjuk az új tokent
         $token = $user->createToken('access')->plainTextToken;
         $user->token = $token;
 
-        //visszaadjuk a usert, ami a tokent is tartalmazni fogja
-        //A fejlécben elküldjük a httpOnly sütit
-        $data = [
+        return response()->json([
             'message' => 'ok',
             'data' => $user
-        ];
-        return response()
-            ->json($data, options: JSON_UNESCAPED_UNICODE);
+        ], JSON_UNESCAPED_UNICODE);
     }
 
     public function logout(Request $request)
     {
-        // Minden tokent töröl (en nem jó, mert egy másik bejelntkezést is kivégez)
-        //---------------------
-        // // Az $request->user() segítségével hozzáférünk a bejelentkezett felhasználóhoz
-        // $user = $request->user();
-
-        // // Töröljük a felhasználó összes tokenjét
-        // $user->tokens()->delete();
-
-        // return response()->json(['message' => 'Successfully logged out']);
-
-
-        //Egy mási módszer
-        // Megkeresi a tokent és törli ---------------------
-        $token = $request->bearerToken(); // Kivonjuk a bearer tokent a kérésből
-
-        // Megkeressük a token modellt
+        $token = $request->bearerToken();
         $personalAccessToken = PersonalAccessToken::findToken($token);
 
         if ($personalAccessToken) {
             $personalAccessToken->delete();
-            $data = [
+            return response()->json([
                 'message' => 'ok',
                 'data' => []
-            ];
+            ], JSON_UNESCAPED_UNICODE);
         } else {
-            $data = [
+            return response()->json([
                 'message' => 'Token not found',
                 'data' => []
-            ];
+            ], JSON_UNESCAPED_UNICODE);
         }
-        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
-
-
-        // Egy másik módszer ---------------------
-        // $request->user()->currentAccessToken()->delete();
-        // return response()->json(['message' => 'Successfully logged out']);
     }
 
-    //Visszaadja a usereket
     public function index()
     {
         $rows = User::all();
-        $data = [
+        return response()->json([
             'message' => 'ok',
             'data' => $rows
-        ];
-        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
+        ], JSON_UNESCAPED_UNICODE);
     }
-
 
     public function store(StoreUserRequest $request)
     {
-        // Ensure that the 'positionId' is in the request and valid (either 1 or 2)
         $data = $request->all();
 
-        // Check if positionId is provided and valid, otherwise assign a default value or return an error
+        // Validate positionId
         if (!$request->has('positionId') || !in_array($request->positionId, [1, 2])) {
-            // Optionally, you can handle invalid positionId here, for example by returning an error message
-            $data = [
+            return response()->json([
                 'message' => 'Invalid positionId. It must be either 1 (administrator) or 2 (guest).',
-            ];
-            return response()->json($data,JSON_UNESCAPED_UNICODE);
+            ], JSON_UNESCAPED_UNICODE);
         }
 
         // Check if email already exists
-        $rows = User::where('email', $request['email'])->get();
-        if (count($rows) != 0) {
-            // Email already exists
-            $data = [
+        if (User::where('email', $request['email'])->exists()) {
+            return response()->json([
                 'message' => 'This email already exists',
-                'data' => [
-                    'email' => $request['email']
-                ]
-            ];
-        } else {
-            // Create new user with the positionId
-            $rows = User::create($data);
-            $data = [
-                'message' => 'ok',
-                'data' => $rows
-            ];
+                'data' => ['email' => $request['email']]
+            ], JSON_UNESCAPED_UNICODE);
         }
 
-        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
+        $user = User::create($data);
+        return response()->json([
+            'message' => 'ok',
+            'data' => $user
+        ], JSON_UNESCAPED_UNICODE);
     }
 
     public function show(int $id)
     {
         $row = User::find($id);
-
         if ($row) {
-            $data = [
+            return response()->json([
                 'message' => 'ok',
                 'data' => $row
-            ];
+            ], JSON_UNESCAPED_UNICODE);
         } else {
-            $data = [
+            return response()->json([
                 'message' => 'Not found',
-                'data' => [
-                    'id' => $id
-                ]
-            ];
+                'data' => ['id' => $id]
+            ], JSON_UNESCAPED_UNICODE);
         }
-        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
 
-    public function update(UpdateUserRequest $request,  $id)
+    public function update(UpdateUserRequest $request, $id)
     {
         $row = User::find($id);
         if ($row) {
-            $rows = User::where('email', $request['email'])
-                ->get();
-            if (count($rows) != 0) {
-                # már van ilyen email
-                $data = [
-                    'message' => 'This email alredy exists',
-                    'data' => [
-                        'email' => $request['email']
-                    ]
-                ];
-            } else {
-                //nincs még ilyen email
-                $row->update($request->all());
-                $data = [
-                    'message' => 'ok',
-                    'data' => $row
-                ];
+            if (User::where('email', $request['email'])->exists()) {
+                return response()->json([
+                    'message' => 'This email already exists',
+                    'data' => ['email' => $request['email']]
+                ], JSON_UNESCAPED_UNICODE);
             }
+
+            $row->update($request->all());
+            return response()->json([
+                'message' => 'ok',
+                'data' => $row
+            ], JSON_UNESCAPED_UNICODE);
         } else {
-            $data = [
+            return response()->json([
                 'message' => 'Not found',
-                'data' => [
-                    'id' => $id
-                ]
-            ];
+                'data' => ['id' => $id]
+            ], JSON_UNESCAPED_UNICODE);
         }
-        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
 
     public function destroy(int $id)
@@ -194,20 +137,15 @@ class UserController extends Controller
         $row = User::find($id);
         if ($row) {
             $row->delete();
-            $data = [
+            return response()->json([
                 'message' => 'ok',
-                'data' => [
-                    'id' => $id
-                ]
-            ];
+                'data' => ['id' => $id]
+            ], JSON_UNESCAPED_UNICODE);
         } else {
-            $data = [
+            return response()->json([
                 'message' => 'Not found',
-                'data' => [
-                    'id' => $id
-                ]
-            ];
+                'data' => ['id' => $id]
+            ], JSON_UNESCAPED_UNICODE);
         }
-        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
 }

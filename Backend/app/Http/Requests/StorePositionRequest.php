@@ -23,7 +23,7 @@ class StorePositionRequest extends FormRequest
     {
         return [
             'id' => 'required|int|min:1',
-            'name' => 'required|string|min:5|max:5',
+            'name' => 'required|string|min:5',
         ];
     }
 }

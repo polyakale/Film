@@ -22,7 +22,7 @@ class StoreUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'position' => 'required|int',
+            'positionId' => 'required|int',
             'name' => 'required|string|min:2',
             'email' => 'required|string',
             'password' => 'required|string|min:7',
