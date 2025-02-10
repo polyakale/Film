@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\FilmController;
@@ -13,56 +14,81 @@ use Illuminate\Support\Facades\Route;
 // users
 Route::post('users/login', [UserController::class, 'login']);
 Route::post('users/logout', [UserController::class, 'logout']);
-Route::get('users', [UserController::class, 'index']);
+Route::get('users', [UserController::class, 'index'])
+    ->middleware('auth:sanctum');
 
-Route::get('users/{id}', [UserController::class, 'show']);
+Route::get('users/{id}', [UserController::class, 'show'])
+    ->middleware('auth:sanctum');
 Route::post('users', [UserController::class, 'store']);
-       
-Route::patch('users/{id}', [UserController::class, 'update']);    
-Route::delete('users/{id}', [UserController::class, 'destroy']);  
+
+Route::patch('users/{id}', [UserController::class, 'update'])
+    ->middleware('auth:sanctum');
+Route::delete('users/{id}', [UserController::class, 'destroy'])
+    ->middleware('auth:sanctum');
 
 // positions
 Route::get('positions', [PositionController::class, 'index']);
 Route::get('positions/{id}', [PositionController::class, 'show']);
-Route::post('positions', [PositionController::class, 'store']);
-Route::patch('positions/{id}', [PositionController::class, 'update']);
-Route::delete('positions/{id}', [PositionController::class, 'destroy']);
+Route::post('positions', [PositionController::class, 'store'])
+    ->middleware('auth:sanctum');
+Route::patch('positions/{id}', [PositionController::class, 'update'])
+    ->middleware('auth:sanctum');
+Route::delete('positions/{id}', [PositionController::class, 'destroy'])
+    ->middleware('auth:sanctum');
 // films
 Route::get('films', [FilmController::class, 'index']);
 Route::get('films/{id}', [FilmController::class, 'show']);
-Route::post('films', [FilmController::class, 'store']);
-Route::patch('films/{id}', [FilmController::class, 'update']);
-Route::delete('films/{id}', [FilmController::class, 'destroy']);
+Route::post('films', [FilmController::class, 'store'])
+    ->middleware('auth:sanctum');
+Route::patch('films/{id}', [FilmController::class, 'update'])
+    ->middleware('auth:sanctum');
+Route::delete('films/{id}', [FilmController::class, 'destroy'])
+    ->middleware('auth:sanctum');
 // videos
 Route::get('videos', [VideoController::class, 'index']);
 Route::get('videos/{id}', [VideoController::class, 'show']);
-Route::post('videos', [VideoController::class, 'store']);
-Route::patch('videos/{id}', [VideoController::class, 'update']);
-Route::delete('videos/{id}', [VideoController::class, 'destroy']);
+Route::post('videos', [VideoController::class, 'store'])
+    ->middleware('auth:sanctum');
+Route::patch('videos/{id}', [VideoController::class, 'update'])
+    ->middleware('auth:sanctum');
+Route::delete('videos/{id}', [VideoController::class, 'destroy'])
+    ->middleware('auth:sanctum');
 // favourites
 Route::get('favourites', [FavouriteController::class, 'index']);
 Route::get('favourites/{id}', [FavouriteController::class, 'show']);
-Route::post('favourites', [FavouriteController::class, 'store']);
-Route::patch('favourites/{id}', [FavouriteController::class, 'update']);
-Route::delete('favourites/{id}', [FavouriteController::class, 'destroy']);
+Route::post('favourites', [FavouriteController::class, 'store'])
+    ->middleware('auth:sanctum');
+Route::patch('favourites/{id}', [FavouriteController::class, 'update'])
+    ->middleware('auth:sanctum');
+Route::delete('favourites/{id}', [FavouriteController::class, 'destroy'])
+    ->middleware('auth:sanctum');
 // roles
 Route::get('roles', [RoleController::class, 'index']);
 Route::get('roles/{id}', [RoleController::class, 'show']);
-Route::post('roles', [RoleController::class, 'store']);
-Route::patch('roles/{id}', [RoleController::class, 'update']);
-Route::delete('roles/{id}', [RoleController::class, 'destroy']);
+Route::post('roles', [RoleController::class, 'store'])
+    ->middleware('auth:sanctum');
+Route::patch('roles/{id}', [RoleController::class, 'update'])
+    ->middleware('auth:sanctum');
+Route::delete('roles/{id}', [RoleController::class, 'destroy'])
+    ->middleware('auth:sanctum');
 // people
 Route::get('people', [PersonController::class, 'index']);
 Route::get('people/{id}', [PersonController::class, 'show']);
-Route::post('people', [PersonController::class, 'store']);
-Route::patch('people/{id}', [PersonController::class, 'update']);
-Route::delete('people/{id}', [PersonController::class, 'destroy']);
+Route::post('people', [PersonController::class, 'store'])
+    ->middleware('auth:sanctum');
+Route::patch('people/{id}', [PersonController::class, 'update'])
+    ->middleware('auth:sanctum');
+Route::delete('people/{id}', [PersonController::class, 'destroy'])
+    ->middleware('auth:sanctum');
 // tasks
 Route::get('tasks', [TaskController::class, 'index']);
 Route::get('tasks/{id}', [TaskController::class, 'show']);
-Route::post('tasks', [TaskController::class, 'store']);
-Route::patch('tasks/{id}', [TaskController::class, 'update']);
-Route::delete('tasks/{id}', [TaskController::class, 'destroy']);
+Route::post('tasks', [TaskController::class, 'store'])
+    ->middleware('auth:sanctum');
+Route::patch('tasks/{id}', [TaskController::class, 'update'])
+    ->middleware('auth:sanctum');
+Route::delete('tasks/{id}', [TaskController::class, 'destroy'])
+    ->middleware('auth:sanctum');
 
 // 
 Route::get('/', function () {
