@@ -11,7 +11,7 @@ class UpdateFavouriteRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -25,7 +25,7 @@ class UpdateFavouriteRequest extends FormRequest
             'id' => 'nullable|int|min:1',
             'userId' => 'nullable|int|min:1',
             'filmId' => 'nullable|int|min:1',
-            'evaluation' => 'nullable|double',
+            'evaluation' => 'nullable|numeric',
         ];
     }
 }

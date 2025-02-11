@@ -11,7 +11,7 @@ class StoreFavouriteRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -25,7 +25,7 @@ class StoreFavouriteRequest extends FormRequest
             'id' => 'required|int|min:1',
             'userId' => 'required|int|min:1',
             'filmId' => 'required|int|min:1',
-            'evaluation' => 'required|double',
+            'evaluation' => 'required|numeric',
         ];
     }
 }

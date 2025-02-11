@@ -269,7 +269,7 @@ Authorization: Bearer {{token}}
    "id": 3,
    "userId": 2,
    "filmId": 2,
-   "evaluation": 2.0,
+   "evaluation": 2.0
 }
 ### patch favourites
 PATCH {{host}}/api/favourites/1
@@ -281,7 +281,7 @@ Authorization: Bearer {{token}}
    "id": 3,
    "userId": 1,
    "filmId": 11,
-   "evaluation": 3.90,
+   "evaluation": 3
 }
 ### delete favourites by id
 DELETE {{host}}/api/favourites/1
