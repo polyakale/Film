@@ -17,10 +17,16 @@ class FavouriteSeeder extends Seeder
                 'evaluation' => 4.80, // example evaluation
             ],
         ];
-        // Only seed if there are no entries yet
-        if (Favourite::count() === 0) {
-            foreach ($favouriteData as $item) {
-                Favourite::create($item);
+        if (env('APP_ENV')=='test') {
+            //teszt adatbázisban: 300 véletlen diák
+            if (Favourite::count() === 0) {
+                Favourite::factory(300)->create();
+            }
+        } else {
+            if (Favourite::count() === 0) {
+                foreach ($favouriteData as $item) {
+                    Favourite::create($item);
+                }
             }
         }
     }
