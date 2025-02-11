@@ -23,7 +23,6 @@ class FavouriteController extends Controller
 
     public function store(StoreFavouriteRequest $request)
     {
-        // dd($request->all());
         $row = Favourite::create($request->all());
         $data = [
             'message' => 'ok',

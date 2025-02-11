@@ -56,8 +56,8 @@ Route::delete('videos/{id}', [VideoController::class, 'destroy'])
 // favourites
 Route::get('favourites', [FavouriteController::class, 'index']);
 Route::get('favourites/{id}', [FavouriteController::class, 'show']);
-Route::post('favourites', [FavouriteController::class, 'store']);
-    // ->middleware('auth:sanctum');
+Route::post('favourites', [FavouriteController::class, 'store'])
+    ->middleware('auth:sanctum');
 Route::patch('favourites/{id}', [FavouriteController::class, 'update'])
     ->middleware('auth:sanctum');
 Route::delete('favourites/{id}', [FavouriteController::class, 'destroy'])

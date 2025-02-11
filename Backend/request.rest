@@ -293,3 +293,33 @@ Authorization: Bearer {{token}}
 
 ### get role
 get {{host}}/api/roles
+
+### get favourites by id
+get {{host}}/api/roles/1
+
+### post favourites
+POST {{host}}/api/roles
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "id": 5,
+    "role": "szereplő" 
+}
+
+### patch favourites
+PATCH {{host}}/api/roles/2
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "id": 5,
+    "role": "Kaszkadőr" 
+}
+### delete favourites by id
+DELETE {{host}}/api/roles/5
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
