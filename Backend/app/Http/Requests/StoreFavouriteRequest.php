@@ -22,9 +22,9 @@ class StoreFavouriteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'userId' => 'required|int|min:1',
-            'filmId' => 'required|int|min:1',
-            'evaluation' => 'required|numeric',
+            'userId' => 'required|int',
+            'filmId' => 'required|int',
+            'evaluation' => 'required',
         ];
     }
 }

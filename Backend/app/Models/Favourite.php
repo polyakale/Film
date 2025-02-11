@@ -10,6 +10,7 @@ class Favourite extends Model
 {
     /** @use HasFactory<\Database\Factories\FavouriteFactory> */
     use HasFactory, Notifiable;
+    public $timestamps = true;
     //protected $guarded = [];
-    protected $fillable = ['id', 'userId', 'filmId'];
+    protected $fillable = ['id', 'userId', 'filmId', 'evaluation'];
 }

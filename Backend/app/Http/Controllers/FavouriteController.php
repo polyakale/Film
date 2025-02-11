@@ -20,8 +20,10 @@ class FavouriteController extends Controller
         ];
         return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
+
     public function store(StoreFavouriteRequest $request)
     {
+        // dd($request->all());
         $row = Favourite::create($request->all());
         $data = [
             'message' => 'ok',
@@ -29,6 +31,7 @@ class FavouriteController extends Controller
         ];
         return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
+
     public function show(int $id)
     {
         $row = Favourite::find($id);
@@ -48,6 +51,7 @@ class FavouriteController extends Controller
         }
         return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
+
     public function update(UpdateFavouriteRequest $request,  $id)
     {
         //Keresd meg az adott product-ot

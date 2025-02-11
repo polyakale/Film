@@ -259,6 +259,7 @@ get {{host}}/api/favourites
 
 ### get favourites by id
 get {{host}}/api/favourites/1
+
 ### post favourites
 POST {{host}}/api/favourites
 Accept: application/json
@@ -268,12 +269,11 @@ Authorization: Bearer {{token}}
 {
    "userId": 2,
    "filmId": 11,
-   "evaluation": 2.10,
-   "created_at": "2025-02-11 08:36:00",
-   "updated_at": "2025-02-11 08:36:00"
+   "evaluation": 2.1
 }
+
 ### patch favourites
-PATCH {{host}}/api/favourites/1
+PATCH {{host}}/api/favourites/2
 Accept: application/json
 Content-Type: application/json
 Authorization: Bearer {{token}}
@@ -281,7 +281,7 @@ Authorization: Bearer {{token}}
 {
     "userId": 2,
     "filmId": 11,
-    "evaluation": 2.10
+    "evaluation": 3.4
 }
 ### delete favourites by id
 DELETE {{host}}/api/favourites/1
