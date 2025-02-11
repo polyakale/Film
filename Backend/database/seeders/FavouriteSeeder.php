@@ -14,7 +14,7 @@ class FavouriteSeeder extends Seeder
             [
                 'userId' => 1, // replace with a valid user ID
                 'filmId' => 1, // replace with a valid film ID
-                'evaluation' => 5, // example evaluation
+                'evaluation' => 4.80, // example evaluation
             ],
         ];
         // Only seed if there are no entries yet

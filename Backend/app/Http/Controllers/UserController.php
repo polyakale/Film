@@ -16,12 +16,21 @@ class UserController extends Controller
     {
         $email = $request->input('email');
         $password = $request->input('password');
+        $positionId = $request->input('positionId');  // Retrieve positionId
 
         $user = User::where('email', $email)->first();
 
         if (!$user || !Hash::check($password, $user->password)) {
             return response()->json([
                 'message' => 'Invalid email or password',
+                'data' => []
+            ], JSON_UNESCAPED_UNICODE);
+        }
+
+        // Check if the positionId matches the user's positionId
+        if ($user->positionId !== $positionId) {
+            return response()->json([
+                'message' => 'Position mismatch',
                 'data' => []
             ], JSON_UNESCAPED_UNICODE);
         }
