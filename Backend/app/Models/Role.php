@@ -9,10 +9,12 @@ class Role extends Model
 {
     /** @use HasFactory<\Database\Factories\RoleFactory> */
     use HasFactory;
-
-    protected $table = 'roles'; 
-    protected $fillable = ['role']; 
+    protected $table = 'roles';
+    protected $fillable = ['id', 'role'];
     public $timestamps = true;
 
+    public function tasks()
+    {
+        return $this->hasMany(Task::class, 'roleId');
+    }
 }
-

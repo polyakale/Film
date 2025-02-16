@@ -10,13 +10,11 @@ class Video extends Model
 {
     /** @use HasFactory<\Database\Factories\VideoFactory> */
     use HasFactory, Notifiable;
-
     public $timestamps = false;
+    protected $fillable = ['id', 'filmId', 'link', 'embedLink'];
 
-    protected $fillable = [
-        'id',
-        'filmId',
-        'link',
-        'embedLink',
-    ];
+    public function film()
+    {
+        return $this->belongsTo(Film::class, 'filmId');
+    }
 }

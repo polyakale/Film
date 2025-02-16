@@ -9,12 +9,12 @@ class Position extends Model
 {
     /** @use HasFactory<\Database\Factories\PositionFactory> */
     use HasFactory;
-
     protected $table = 'positions';
-
     protected $fillable = ['id', 'name'];
-
     public $timestamps = false;
-    
-}
 
+    public function users()
+    {
+        return $this->hasMany(User::class, 'positionId');
+    }
+}

@@ -10,19 +10,15 @@ class Person extends Model
     /** @use HasFactory<\Database\Factories\PersonFactory> */
     use HasFactory;
     public $timestamps = false;
-
-    protected $fillable = [
-        'id',
-        'name',
-        'gender',
-        'photo',
-        'imdbLink',
-    ];
+    protected $fillable = ['id', 'name', 'gender', 'photo', 'imdbLink'];
 
     protected function casts(): array
     {
-        return [
-            'gender' => 'boolean',
-        ];
+        return ['gender' => 'boolean'];
+    }
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class, 'personId');
     }
 }
