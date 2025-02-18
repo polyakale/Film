@@ -18,18 +18,15 @@ use Tests\TestCase;
 class DatabaseTest extends TestCase
 {
     use DatabaseTransactions;
-
     // Helper methods
     protected function assertColumnType(string $table, string $column, string $type)
     {
         $actualType = Schema::getColumnType($table, $column);
         $expectedType = ($type === 'string') ? 'varchar' : $type; // Map 'string' to 'varchar'
-
         // Handle MySQL's 'tinyint' for boolean columns
         if ($type === 'boolean' && $actualType === 'tinyint') {
             $actualType = 'boolean';
         }
-
         $this->assertEquals(
             $expectedType,
             $actualType,
@@ -63,7 +60,6 @@ class DatabaseTest extends TestCase
             "Foreign key $table.$column -> $foreignTable.$foreignColumn missing"
         );
     }
-
     // Tests
     public function test_database_creation_and_tables_exist()
     {
@@ -74,7 +70,6 @@ class DatabaseTest extends TestCase
             $databaseName,
             'Database name mismatch'
         );
-
         $tables = [
             'positions',
             'users',
@@ -85,7 +80,6 @@ class DatabaseTest extends TestCase
             'people',
             'tasks'
         ];
-
         foreach ($tables as $table) {
             $this->assertTrue(
                 Schema::hasTable($table),
@@ -102,7 +96,6 @@ class DatabaseTest extends TestCase
             'id' => 'int',
             'name' => 'string',
         ];
-
         foreach ($columns as $column => $type) {
             $this->assertTrue(
                 Schema::hasColumn('positions', $column),
@@ -110,7 +103,6 @@ class DatabaseTest extends TestCase
             );
             $this->assertColumnType('positions', $column, $type);
         }
-
         $this->assertTrue(
             Schema::hasIndex('positions', ['id']),
             'Primary key index missing on positions'
@@ -128,7 +120,6 @@ class DatabaseTest extends TestCase
             'email' => 'string',
             'password' => 'string',
         ];
-
         foreach ($columns as $column => $type) {
             $this->assertTrue(
                 Schema::hasColumn('users', $column),
@@ -136,7 +127,6 @@ class DatabaseTest extends TestCase
             );
             $this->assertColumnType('users', $column, $type);
         }
-
         $this->assertForeignKeyExists('users', 'positionId', 'positions', 'id');
     }
 
@@ -152,7 +142,6 @@ class DatabaseTest extends TestCase
             'presentation' => 'date',
             'imdbLink' => 'string',
         ];
-
         foreach ($columns as $column => $type) {
             $this->assertTrue(
                 Schema::hasColumn('films', $column),
@@ -160,7 +149,6 @@ class DatabaseTest extends TestCase
             );
             $this->assertColumnType('films', $column, $type);
         }
-
         $this->assertTrue(
             Schema::hasIndex('films', ['id']),
             'Primary key index missing on films'
@@ -177,7 +165,6 @@ class DatabaseTest extends TestCase
             'link' => 'string',
             'embedLink' => 'string',
         ];
-
         foreach ($columns as $column => $type) {
             $this->assertTrue(
                 Schema::hasColumn('videos', $column),
@@ -185,7 +172,6 @@ class DatabaseTest extends TestCase
             );
             $this->assertColumnType('videos', $column, $type);
         }
-
         $this->assertForeignKeyExists('videos', 'filmId', 'films', 'id');
     }
 
@@ -199,7 +185,6 @@ class DatabaseTest extends TestCase
             'filmId' => 'int',
             'evaluation' => 'decimal',
         ];
-
         foreach ($columns as $column => $type) {
             $this->assertTrue(
                 Schema::hasColumn('favourites', $column),
@@ -207,7 +192,6 @@ class DatabaseTest extends TestCase
             );
             $this->assertColumnType('favourites', $column, $type);
         }
-
         $this->assertForeignKeyExists('favourites', 'userId', 'users', 'id');
         $this->assertForeignKeyExists('favourites', 'filmId', 'films', 'id');
     }
@@ -220,7 +204,6 @@ class DatabaseTest extends TestCase
             'id' => 'int',
             'role' => 'string',
         ];
-
         foreach ($columns as $column => $type) {
             $this->assertTrue(
                 Schema::hasColumn('roles', $column),
@@ -228,7 +211,6 @@ class DatabaseTest extends TestCase
             );
             $this->assertColumnType('roles', $column, $type);
         }
-
         $this->assertTrue(
             Schema::hasIndex('roles', ['id']),
             'Primary key index missing on roles'
@@ -246,7 +228,6 @@ class DatabaseTest extends TestCase
             'photo' => 'string',
             'imdbLink' => 'string',
         ];
-
         foreach ($columns as $column => $type) {
             $this->assertTrue(
                 Schema::hasColumn('people', $column),
@@ -254,7 +235,6 @@ class DatabaseTest extends TestCase
             );
             $this->assertColumnType('people', $column, $type);
         }
-
         $this->assertTrue(
             Schema::hasIndex('people', ['id']),
             'Primary key index missing on people'
@@ -271,7 +251,6 @@ class DatabaseTest extends TestCase
             'personId' => 'int',
             'roleId' => 'int',
         ];
-
         foreach ($columns as $column => $type) {
             $this->assertTrue(
                 Schema::hasColumn('tasks', $column),
@@ -279,7 +258,6 @@ class DatabaseTest extends TestCase
             );
             $this->assertColumnType('tasks', $column, $type);
         }
-
         $this->assertForeignKeyExists('tasks', 'filmId', 'films', 'id');
         $this->assertForeignKeyExists('tasks', 'personId', 'people', 'id');
         $this->assertForeignKeyExists('tasks', 'roleId', 'roles', 'id');
@@ -289,7 +267,6 @@ class DatabaseTest extends TestCase
     {
         $position = Position::factory()->create(['name' => 'vendeg']);
         $user = User::factory()->create(['positionId' => $position->id]);
-
         // Test using Eloquent relationship
         $freshUser = User::with('position')->find($user->id);
         $this->assertInstanceOf(Position::class, $freshUser->position);
@@ -300,7 +277,6 @@ class DatabaseTest extends TestCase
     {
         $user = User::factory()->create();
         $favourite = Favourite::factory()->create(['userId' => $user->id]);
-
         // Test using Eloquent relationship
         $freshFavourite = Favourite::with('user')->find($favourite->id);
         $this->assertInstanceOf(User::class, $freshFavourite->user);
