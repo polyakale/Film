@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -14,10 +15,12 @@ class RoleFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
+    protected $model = Role::class;
+
+    public function definition()
     {
         return [
-            //
+            'role' => $this->faker->word(), // Ensure role is always set
         ];
     }
 }

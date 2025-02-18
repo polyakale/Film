@@ -33,7 +33,6 @@ class DatabaseTest extends TestCase
             "Column $table.$column should be type $expectedType (got $actualType)"
         );
     }
-
     protected function assertForeignKeyExists(
         string $table,
         string $column,
@@ -60,7 +59,8 @@ class DatabaseTest extends TestCase
             "Foreign key $table.$column -> $foreignTable.$foreignColumn missing"
         );
     }
-    // Tests
+    
+    // Testing database creation and if all tables exist
     public function test_database_creation_and_tables_exist()
     {
         $databaseName = config('database.connections.' . config('database.default') . '.database');
@@ -88,6 +88,7 @@ class DatabaseTest extends TestCase
         }
     }
 
+    // Positions table structure testing
     public function test_positions_table_structure()
     {
         $this->assertTrue(Schema::hasTable('positions'));
@@ -109,6 +110,7 @@ class DatabaseTest extends TestCase
         );
     }
 
+    // Users table structure testing
     public function test_users_table_structure()
     {
         $this->assertTrue(Schema::hasTable('users'));
@@ -130,6 +132,7 @@ class DatabaseTest extends TestCase
         $this->assertForeignKeyExists('users', 'positionId', 'positions', 'id');
     }
 
+    // Films table structure testing
     public function test_films_table_structure()
     {
         $this->assertTrue(Schema::hasTable('films'));
@@ -155,6 +158,7 @@ class DatabaseTest extends TestCase
         );
     }
 
+    // Videos table structure testing
     public function test_videos_table_structure()
     {
         $this->assertTrue(Schema::hasTable('videos'));
@@ -175,6 +179,7 @@ class DatabaseTest extends TestCase
         $this->assertForeignKeyExists('videos', 'filmId', 'films', 'id');
     }
 
+    // Favourites table structure testing
     public function test_favourites_table_structure()
     {
         $this->assertTrue(Schema::hasTable('favourites'));
@@ -196,6 +201,7 @@ class DatabaseTest extends TestCase
         $this->assertForeignKeyExists('favourites', 'filmId', 'films', 'id');
     }
 
+    // Roles table structure testing
     public function test_roles_table_structure()
     {
         $this->assertTrue(Schema::hasTable('roles'));
@@ -217,6 +223,7 @@ class DatabaseTest extends TestCase
         );
     }
 
+    // People table structure testing
     public function test_people_table_structure()
     {
         $this->assertTrue(Schema::hasTable('people'));
@@ -241,6 +248,7 @@ class DatabaseTest extends TestCase
         );
     }
 
+    // Tasks table structure testing
     public function test_tasks_table_structure()
     {
         $this->assertTrue(Schema::hasTable('tasks'));
@@ -263,6 +271,7 @@ class DatabaseTest extends TestCase
         $this->assertForeignKeyExists('tasks', 'roleId', 'roles', 'id');
     }
 
+    // Users ↔ Positions relationship
     public function test_users_positions_relationships()
     {
         $position = Position::factory()->create(['name' => 'vendeg']);
@@ -273,6 +282,7 @@ class DatabaseTest extends TestCase
         $this->assertEquals($position->id, $freshUser->position->id);
     }
 
+    // Favourites ↔ Users relationship
     public function test_favourites_users_relationships()
     {
         $user = User::factory()->create();
@@ -281,5 +291,65 @@ class DatabaseTest extends TestCase
         $freshFavourite = Favourite::with('user')->find($favourite->id);
         $this->assertInstanceOf(User::class, $freshFavourite->user);
         $this->assertEquals($user->id, $freshFavourite->user->id);
+    }
+
+    // Films ↔ Videos relationship
+    public function test_films_videos_relationships()
+    {
+        $film = Film::factory()->create();
+        $video = Video::factory()->create(['filmId' => $film->id]);
+        // Test film has videos
+        $this->assertCount(1, $film->videos);
+        $this->assertEquals($video->id, $film->videos->first()->id);
+        // Test video belongs to film
+        $this->assertEquals($film->id, $video->film->id);
+    }
+
+    // Films ↔ Tasks relationship
+    public function test_films_tasks_relationships()
+    {
+        $film = Film::factory()->create();
+        $task = Task::factory()->create(['filmId' => $film->id]);
+        // Test film has tasks
+        $this->assertCount(1, $film->tasks);
+        $this->assertEquals($task->id, $film->tasks->first()->id);
+        // Test task belongs to film
+        $this->assertEquals($film->id, $task->film->id);
+    }
+
+    // Films ↔ Favourites relationship
+    public function test_films_favourites_relationships()
+    {
+        $film = Film::factory()->create();
+        $favourite = Favourite::factory()->create(['filmId' => $film->id]);
+        // Test film has favourites
+        $this->assertCount(1, $film->favourites);
+        $this->assertEquals($favourite->id, $film->favourites->first()->id);
+        // Test favourite belongs to film
+        $this->assertEquals($film->id, $favourite->film->id);
+    }
+
+    // Tasks ↔ People relationship
+    public function test_tasks_people_relationships()
+    {
+        $person = Person::factory()->create();
+        $task = Task::factory()->create(['personId' => $person->id]);
+        // Test person has tasks
+        $this->assertCount(1, $person->tasks);
+        $this->assertEquals($task->id, $person->tasks->first()->id);
+        // Test task belongs to person
+        $this->assertEquals($person->id, $task->person->id);
+    }
+
+    // Tasks ↔ Roles relationship
+    public function test_tasks_roles_relationships()
+    {
+        $role = Role::factory()->create();
+        $task = Task::factory()->create(['roleId' => $role->id]);
+        // Test role has tasks
+        $this->assertCount(1, $role->tasks);
+        $this->assertEquals($task->id, $role->tasks->first()->id);
+        // Test task belongs to role
+        $this->assertEquals($role->id, $task->role->id);
     }
 }
