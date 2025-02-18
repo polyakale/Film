@@ -59,7 +59,7 @@ class DatabaseTest extends TestCase
             "Foreign key $table.$column -> $foreignTable.$foreignColumn missing"
         );
     }
-    
+
     // Testing database creation and if all tables exist
     public function test_database_creation_and_tables_exist()
     {
@@ -272,7 +272,7 @@ class DatabaseTest extends TestCase
     }
 
     // Users ↔ Positions relationship
-    public function test_users_positions_relationships()
+    public function test_users_positions_relationship()
     {
         $position = Position::factory()->create(['name' => 'vendeg']);
         $user = User::factory()->create(['positionId' => $position->id]);
@@ -283,7 +283,7 @@ class DatabaseTest extends TestCase
     }
 
     // Favourites ↔ Users relationship
-    public function test_favourites_users_relationships()
+    public function test_favourites_users_relationship()
     {
         $user = User::factory()->create();
         $favourite = Favourite::factory()->create(['userId' => $user->id]);
@@ -294,7 +294,7 @@ class DatabaseTest extends TestCase
     }
 
     // Films ↔ Videos relationship
-    public function test_films_videos_relationships()
+    public function test_films_videos_relationship()
     {
         $film = Film::factory()->create();
         $video = Video::factory()->create(['filmId' => $film->id]);
@@ -306,7 +306,7 @@ class DatabaseTest extends TestCase
     }
 
     // Films ↔ Tasks relationship
-    public function test_films_tasks_relationships()
+    public function test_films_tasks_relationship()
     {
         $film = Film::factory()->create();
         $task = Task::factory()->create(['filmId' => $film->id]);
@@ -318,7 +318,7 @@ class DatabaseTest extends TestCase
     }
 
     // Films ↔ Favourites relationship
-    public function test_films_favourites_relationships()
+    public function test_films_favourites_relationship()
     {
         $film = Film::factory()->create();
         $favourite = Favourite::factory()->create(['filmId' => $film->id]);
@@ -330,7 +330,7 @@ class DatabaseTest extends TestCase
     }
 
     // Tasks ↔ People relationship
-    public function test_tasks_people_relationships()
+    public function test_tasks_people_relationship()
     {
         $person = Person::factory()->create();
         $task = Task::factory()->create(['personId' => $person->id]);
@@ -342,7 +342,7 @@ class DatabaseTest extends TestCase
     }
 
     // Tasks ↔ Roles relationship
-    public function test_tasks_roles_relationships()
+    public function test_tasks_roles_relationship()
     {
         $role = Role::factory()->create();
         $task = Task::factory()->create(['roleId' => $role->id]);
