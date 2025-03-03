@@ -15,6 +15,7 @@ class FilmSeeder extends Seeder
         $filePath = database_path('sources/films.csv');
         $data = [];
         if (($handle = fopen($filePath, "r")) !== FALSE) {
+            fgetcsv($handle, 1000, ";");
             while (($row = fgetcsv($handle, 1000, ";")) !== FALSE) {
                 $presentation = $row[4];  // Assuming 'presentation' is at index 4
                 try {
@@ -25,12 +26,18 @@ class FilmSeeder extends Seeder
                     $presentation = null;
                 }
                 $data[] = [
+                    'id' => $row[0],
                     'title' => $row[1],
                     'production' => (int) $row[2],
                     'length' => (int) $row[3],
                     'presentation' => $presentation,
                     'imdbLink' => $row[5],
                 ];
+                // echo '<pre>';
+                // print_r($data);
+                // echo '</pre>';
+                // die;
+
             }
             fclose($handle);
         }

@@ -12,8 +12,8 @@ class FavouriteSeeder extends Seeder
     {
         $favouriteData = [
             [
-                'userId' => 1, // replace with a valid user ID
-                'filmId' => 1, // replace with a valid film ID
+                'userId' => 2, // replace with a valid user ID
+                'filmId' => 3, // replace with a valid film ID
                 'evaluation' => 4.80, // example evaluation
             ],
         ];
@@ -24,9 +24,10 @@ class FavouriteSeeder extends Seeder
             }
         } else {
             if (Favourite::count() === 0) {
-                foreach ($favouriteData as $item) {
-                    Favourite::create($item);
-                }
+                // foreach ($favouriteData as $item) {
+                //     Favourite::create($item);
+                // }
+                Favourite::factory(100)->create();
             }
         }
     }

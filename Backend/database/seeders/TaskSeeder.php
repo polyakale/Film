@@ -17,13 +17,15 @@ class TaskSeeder extends Seeder
         $films = Film::pluck('id')->toArray();  // Get all valid filmIds
 
         if (($handle = fopen($filePath, "r")) !== FALSE) {
-            while (($row = fgetcsv($handle, 1000, ";")) !== FALSE) {
+            fgetcsv($handle, 10000, ";");
+            while (($row = fgetcsv($handle, 10000, ";")) !== FALSE) {
                 if (count($row) >= 4) {
                     $filmId = (int) $row[1];
                     $personId = (int) $row[2];
                     // Ensure that the filmId exists in the films table
                     if (in_array($filmId, $films) && in_array($personId, $people)) {
                         $data[] = [
+                            'id' => $row[0],
                             'filmId' => $filmId,
                             'personId' => $personId,
                             'roleId' => (int) $row[3],

@@ -14,8 +14,10 @@ class PersonSeeder extends Seeder
         $filePath = database_path('sources/people.csv');
         $data = [];
         if (($handle = fopen($filePath, "r")) !== FALSE) {
+            fgetcsv($handle, 1000, ";");
             while (($row = fgetcsv($handle, 1000, ";")) !== FALSE) {
                 $data[] = [
+                    'id' => $row[0],
                     'name' => $row[1],
                     'gender' => (int) $row[2],
                     'photo' => $row[3],

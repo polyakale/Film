@@ -24,20 +24,24 @@ class DatabaseSeeder extends Seeder
         //     ['email' => 'test@example.com'],
         //     ['name' => 'Test User']
         // );
-        DB::statement('DELETE FROM tasks');
-        DB::statement('DELETE FROM people');
         DB::statement('DELETE FROM videos');
+        DB::statement('DELETE FROM favourites');
+        DB::statement('DELETE FROM tasks');
         DB::statement('DELETE FROM films');
+        DB::statement('DELETE FROM roles');
+        DB::statement('DELETE FROM people');
+        DB::statement('DELETE FROM users');
+        DB::statement('DELETE FROM positions');
 
         $this->call([
+            RolesSeeder::class,
+            FilmSeeder::class,
+            PersonSeeder::class,
             PositionSeeder::class,
             UserSeeder::class,
-            FilmSeeder::class,
+            TaskSeeder::class,
             VideoSeeder::class,
             FavouriteSeeder::class,
-            RolesSeeder::class,
-            PersonSeeder::class,
-            TaskSeeder::class,
             // ... (más seederek)
         ]);
     }

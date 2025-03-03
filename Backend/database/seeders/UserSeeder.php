@@ -16,18 +16,21 @@ class UserSeeder extends Seeder
         if (User::count() === 0) {
             User::factory()->createMany([
                 [
+                    'id' => 1,
                     'name' => 'test',
                     'positionId' => '1',
                     'email' => 'test@example.com',
                     'password' => '1234567',
                 ],
                 [
+                    'id' => 2,
                     'name' => 'testGuest1',
                     'positionId' => '2',
                     'email' => 'user1@example.com',
                     'password' => '1234567',
                 ],
                 [
+                    'id' => 3,
                     'name' => 'testGuest2',
                     'positionId' => '2',
                     'email' => 'user2@example.com',
