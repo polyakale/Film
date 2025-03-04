@@ -1,4 +1,4 @@
-# film
+# films
 
 This template should help get you started developing with Vue 3 in Vite.
 
@@ -27,21 +27,9 @@ npm run dev
 ```sh
 npm run build
 ```
-# Környezet telepítése
-branch: 01_adatkotes_data
 
-vite: `npm create vue@latest`
-bootstrap: `npm i bootstrap@5.3.3`
-icons: `npm i bootstrap-icons`
-node_moduls: `npm install`
-`main.js`-ben (import bootstrap, icons):
-```js
-//main.js
-//Bootstrap: css, js
-import "bootstrap/dist/css/bootstrap.min.css"
-import "bootstrap"
-//Icons: css
-import "bootstrap-icons/font/bootstrap-icons.min.css"
-``
+### Run Unit Tests with [Vitest](https://vitest.dev/)
 
-
+```sh
+npm run test:unit
+```
