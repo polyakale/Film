@@ -12,12 +12,15 @@ export default {
 <template>
   <div class="container-fluid">
     <Menu />
-    
-    <div class="p-2">
+
+    <img src="./assets/filmReel.png" class="imageDec" alt="...">
+
+    <div>
       <RouterView />
     </div>
   </div>
 </template>
 
 <style scoped>
+
 </style>

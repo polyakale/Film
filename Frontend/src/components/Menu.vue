@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary" style="padding: 0">
     <div class="container-fluid">
       <!-- Toggler button -->
       <button
@@ -139,15 +139,58 @@ export default {
 };
 </script>
 
-<style>
-.navbar-nav .nav-link {
-  padding: 0.5rem 1rem;
+<style scoped>
+.navbar {
+  background: rgba(0, 0, 0, 0.7) !important;
 }
-.navbar-brand {
-  font-size: 1.5rem;
-  font-weight: 500;
+
+/* Force white text for all elements */
+.nav-link,
+.navbar-brand,
+.dropdown-item,
+.navbar-toggler-icon {
+  color: white !important;
 }
+
+/* Specific hover states */
+.nav-link:hover,
+.dropdown-item:hover {
+  color: white !important;
+  opacity: 0.8;
+}
+
+/* Dropdown menu styling */
 .dropdown-menu {
-  margin-top: 0.5rem;
+  background: rgba(0, 0, 0, 0.7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-item {
+  color: white !important;
+}
+
+.dropdown-item:hover {
+  color: rgb(0, 0, 0) !important;
+}
+
+/* Toggler icon color */
+.navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Active link styling */
+.nav-link.active {
+  color: white !important;
+  font-weight: bold;
+}
+
+/* User name styling */
+.navbar-nav span {
+  color: white !important;
+  margin-left: 0.5rem;
 }
 </style>
