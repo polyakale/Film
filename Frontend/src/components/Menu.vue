@@ -1,32 +1,26 @@
 <template>
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
+      <!-- Toggler button -->
       <button
         class="navbar-toggler"
         type="button"
         data-bs-toggle="collapse"
         data-bs-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
       >
         <span class="navbar-toggler-icon"></span>
       </button>
+
+      <!-- Main navigation content -->
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <RouterLink class="nav-link active" aria-current="page" to="/"
-              >Old Hungarian Films</RouterLink
-            >
-          </li>
-          <li class="nav-item"></li>
+        <!-- Left side: Menu icon -->
+        <ul class="navbar-nav me-auto">
           <li class="nav-item dropdown">
             <a
               class="nav-link dropdown-toggle"
               href="#"
               role="button"
               data-bs-toggle="dropdown"
-              aria-expanded="false"
             >
               <i class="bi bi-list"></i>
             </a>
@@ -44,96 +38,76 @@
                   >Reviews</RouterLink
                 >
               </li>
-              <!-- <li><hr class="dropdown-divider" /></li>
-              <li>
-                <RouterLink
-                  class="dropdown-item"
-                  to="/sportok"
-                  v-if="stateAuth.user"
-                  >Sportok</RouterLink
-                >
-              </li>
-              <li>
-                <RouterLink
-                  class="dropdown-item"
-                  to="/osztalyok"
-                  v-if="stateAuth.user"
-                  >Osztályok</RouterLink
-                >
-              </li>
-              <li>
-                <RouterLink
-                  class="dropdown-item"
-                  to="/diakok"
-                  v-if="stateAuth.user"
-                  >Diákok</RouterLink
-                >
-              </li> -->
             </ul>
           </li>
+        </ul>
+
+        <!-- Center: Title -->
+        <div class="navbar-nav mx-auto">
+          <RouterLink class="nav-link active fw-bold fs-4" to="/">
+            Old Hungarian Films
+          </RouterLink>
+        </div>
+
+        <!-- Right side: Profile -->
+        <ul class="navbar-nav ms-auto">
           <li class="nav-item dropdown">
             <a
               class="nav-link dropdown-toggle"
               href="#"
               role="button"
               data-bs-toggle="dropdown"
-              aria-expanded="false"
             >
               <i class="bi bi-person"></i>
-              <span v-if="stateAuth.user"> {{ stateAuth.user }}</span>
+              <span v-if="stateAuth.user">{{ stateAuth.user }}</span>
             </a>
-            <ul class="dropdown-menu">
+            <ul class="dropdown-menu dropdown-menu-end">
               <li>
                 <RouterLink
                   class="dropdown-item"
                   to="/login"
                   v-if="!stateAuth.user"
-                  >Login</RouterLink
                 >
-              </li>
-              <li>
-                <a
-                  class="dropdown-item"
-                  href="#"
-                  v-if="stateAuth.user"
-                  @click.prevent="logout()"
-                  >Logout</a
-                >
+                  Login
+                </RouterLink>
               </li>
               <li>
                 <RouterLink
                   class="dropdown-item"
                   to="/registration"
                   v-if="!stateAuth.user"
-                  >Registration</RouterLink
                 >
+                  Registration
+                </RouterLink>
               </li>
               <li>
                 <RouterLink
                   class="dropdown-item"
                   to="/profile"
                   v-if="stateAuth.user"
-                  >Profile</RouterLink
                 >
+                  Profile
+                </RouterLink>
+              </li>
+              <li>
+                <a
+                  class="dropdown-item text-danger"
+                  href="#"
+                  v-if="stateAuth.user"
+                  @click.prevent="logout()"
+                >
+                  Logout
+                </a>
               </li>
             </ul>
           </li>
         </ul>
-        <!-- <form class="d-flex" role="search">
-          <input
-            class="form-control me-2"
-            type="search"
-            placeholder="Search"
-            aria-label="Search"
-          />
-          <button class="btn btn-outline-success" type="submit">Search</button>
-        </form> -->
       </div>
     </div>
   </nav>
 </template>
-  
-  <script>
+
+<script>
 import { RouterLink } from "vue-router";
 import { useAuthStore } from "@/stores/useAuthStore";
 import axios from "axios";
@@ -154,7 +128,7 @@ export default {
       };
 
       try {
-        const response = await axios.post(url, null, headers);
+        await axios.post(url, null, { headers });
       } catch (error) {
         console.log(error);
       }
@@ -164,6 +138,16 @@ export default {
   },
 };
 </script>
-  
-  <style>
+
+<style>
+.navbar-nav .nav-link {
+  padding: 0.5rem 1rem;
+}
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+.dropdown-menu {
+  margin-top: 0.5rem;
+}
 </style>
