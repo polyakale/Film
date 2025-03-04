@@ -10,10 +10,10 @@ export default {
 </script>
 
 <template>
-  <div class="container-fluid my-border my-container">
+  <div class="container-fluid">
     <Menu />
     
-    <div class="my-border p-2">
+    <div class="p-2">
       <RouterView />
     </div>
   </div>
