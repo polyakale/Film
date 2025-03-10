@@ -1,4 +1,16 @@
+div.container-fluid {
+  padding: 0px;
+}
 
 .my-cursor-pointer {
   cursor: pointer;
+}
+
+body {
+  background: url('bg.png') fixed;
+}
+
+.imageDec {
+  position: fixed;
+  background: url('filmReel.png') repeat-x center!important;
 }
