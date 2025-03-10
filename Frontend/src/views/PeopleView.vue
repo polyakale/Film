@@ -2,9 +2,8 @@
   <div>
     <h1>People</h1>
     <div v-if="people.length">
-      <div v-for="person in people" :key="person.peopleName" class="person-container">
-        
-        <img :src="`@/./Images/${person.img}`" alt="Person image" class="person-image" />
+      <div v-for="person in people" :key="person.peopleName" class="person-container">        
+        <img :src="`/assets/Images/${person.photo}`" alt="Image" class="person-image" />
         <h2>{{ person.peopleName }}</h2>
         <ul>
           <li v-for="(name, index) in person.names" :key="index">
