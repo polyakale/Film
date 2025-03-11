@@ -40,8 +40,8 @@ export default {
   left: 0;
   width: 20vw;
   height: 100%; /* Ensures it spans the entire height of the page */
-  background: url('@/assets/filmReel.png') repeat-y;
-  background-size: auto 150%; /* Adjust vertical scaling of the image */
+  background: url('@/assets/filmReel2.png') repeat-y;
+  background-size: 60%; /* Adjust vertical scaling of the image */
   z-index: -1;
 }
 
@@ -52,7 +52,7 @@ export default {
   right: 0;
   width: 23.4vh;
   height: 100%; /* Ensures it spans the entire height of the page */
-  background: url('@/assets/filmReel.png') repeat-y;
+  background: url('@/assets/filmReel2.png') repeat-y;
   background-size: 100%; /* Use the natural size for tiling vertically */
   z-index: -1;
 }

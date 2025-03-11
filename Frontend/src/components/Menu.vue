@@ -140,57 +140,88 @@ export default {
 </script>
 
 <style scoped>
+/* Improved spacing system */
+:root {
+  --nav-padding: 2.5rem;
+  --nav-item-spacing: 1rem;
+}
+
+/* Navbar container */
 .navbar {
   background: rgba(0, 0, 0, 0.7) !important;
+  padding: 0 var(--nav-padding) !important;
 }
 
-/* Force white text for all elements */
-.nav-link,
-.navbar-brand,
-.dropdown-item,
-.navbar-toggler-icon {
-  color: white !important;
+/* Left side menu */
+.navbar-nav.me-auto {
+  margin-left: var(--nav-item-spacing) !important;
 }
 
-/* Specific hover states */
-.nav-link:hover,
-.dropdown-item:hover {
+/* Right side profile */
+.navbar-nav.ms-auto {
+  margin-right: var(--nav-item-spacing) !important;
+}
+
+/* Dropdown menus */
+.dropdown-menu {
+  background: rgba(0, 0, 0, 0.7) !important;
+  border-radius: 0 !important; /* Removes rounded edges */
+  box-shadow: none !important; /* Removes shadow */
+  border: none !important;
+  margin-top: 0.4rem !important;
+  margin-left: 0.6rem;
+  margin-right: 0.6rem;
+  text-decoration: none;
+}
+
+/* Navigation links */
+.nav-link {
+  padding: 0.75rem 1rem !important;
   color: white !important;
+  transition: opacity 0.2s ease;
+}
+
+.nav-link:hover {
   opacity: 0.8;
 }
 
-/* Dropdown menu styling */
-.dropdown-menu {
-  background: rgba(0, 0, 0, 0.7) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
+/* Dropdown items */
 .dropdown-item {
+  padding: 0.5rem 1rem !important;
   color: white !important;
+  transition: all 0.2s ease;
 }
 
 .dropdown-item:hover {
-  color: rgb(0, 0, 0) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
 }
 
-/* Toggler icon color */
+/* Active state */
+.nav-link.active {
+  font-weight: bold;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+/* User name */
+.navbar-nav span {
+  margin-left: 0.75rem !important;
+  font-weight: 500;
+}
+
+/* Toggler button */
 .navbar-toggler {
   border-color: rgba(255, 255, 255, 0.5);
+  margin-right: var(--nav-item-spacing);
 }
 
 .navbar-toggler-icon {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  transition: opacity 0.2s ease;
+
 }
 
-/* Active link styling */
-.nav-link.active {
-  color: white !important;
-  font-weight: bold;
-}
-
-/* User name styling */
-.navbar-nav span {
-  color: white !important;
-  margin-left: 0.5rem;
+.navbar-toggler:hover .navbar-toggler-icon {
+  opacity: 0.8;
 }
 </style>
