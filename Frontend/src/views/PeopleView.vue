@@ -2,14 +2,22 @@
   <div>
     <h1>People</h1>
     <div v-if="people.length">
-      <div v-for="person in people" :key="person.peopleName" class="person-container">        
-        <img :src="`/assets/Images/${person.photo}`" alt="Image" class="person-image" />
+      <div v-for="person in people" :key="person.peopleName" class="person-container">
+        <img :src="getImageUrl(person.photo)" alt="Image" class="person-image" />
+        
         <h2>{{ person.peopleName }}</h2>
+        
         <ul>
           <li v-for="(name, index) in person.names" :key="index">
             {{ name }}
           </li>
         </ul>
+
+        <div v-if="person.imdbLink">
+          <a :href="person.imdbLink" target="_blank" rel="noopener noreferrer">
+            {{ person.name }}
+          </a>
+        </div>
       </div>
     </div>
     <p v-else>Loading...</p>
@@ -41,6 +49,9 @@ export default {
       } catch (error) {
         console.error("Error:", error);
       }
+    },
+    getImageUrl(photo) {
+      return photo ? `/Images/${photo}` : "/Images/default.jpg"; 
     },
   },
 };
