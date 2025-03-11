@@ -98,11 +98,13 @@ h2 {
 }
 
 
+/* Modal Styles */
 .modal {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); 
+  transform: translate(-50%, -50%); /* Középre igazítjuk a modal ablakot */
+  width: 500px;
   height: 250px;
   background: rgba(0, 0, 0, 0.7);
   display: flex;
