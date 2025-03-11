@@ -11,14 +11,13 @@
     </div>
     <p v-else>Loading...</p>
 
-    <!-- Modal to show details when a card is clicked -->
     <div v-if="selectedPerson" class="modal">
       <div class="modal-content">
         <span class="close" @click="closeModal">&times;</span>
-        <img :src="getImageUrl(selectedPerson.photo)" alt="Image" class="modal-image" />
         
-        <!-- Display selected person's name correctly -->
-        <h2>{{ selectedPerson.Name }}</h2> <!-- Nem hivatkozunk a linkre, ha nem szükséges -->
+        <img :src="getImageUrl(selectedPerson.photo)" alt="Image" class="modal-image" />
+
+        <h2>{{ selectedPerson.Name || "No Name Available" }}</h2>
       </div>
     </div>
   </div>
@@ -45,16 +44,17 @@ export default {
         const url = `${this.urlApi}/people`;
         const response = await axios.get(url);
         this.people = response.data?.data || [];
-        console.log(this.people); // Ellenőrizd a lekérdezett adatokat
+        console.log(this.people); 
       } catch (error) {
         console.error("Error:", error);
       }
     },
     getImageUrl(photo) {
+
       return photo ? `/Images/${photo}` : "/Images/default.jpg";
     },
     showDetails(person) {
-      console.log(person); // Debug: Mi kerül ide, hogy tényleg a helyes személy jön-e?
+      console.log(person); 
       this.selectedPerson = person; 
     },
     closeModal() {
@@ -99,12 +99,12 @@ h2 {
 }
 
 
-/* Modal Styles */
+
 .modal {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* Középre igazítjuk a modal ablakot */
+  transform: translate(-50%, -50%);
   width: 500px;
   height: 250px;
   background: rgba(0, 0, 0, 0.7);
