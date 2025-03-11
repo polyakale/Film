@@ -1,20 +1,3 @@
-<template>
-  <div class="page-wrapper">
-    <Menu />
-
-    <!-- Left column with repeating filmReel image -->
-    <div class="filmReel-left"></div>
-
-    <!-- Right column with repeating filmReel image -->
-    <div class="filmReel-right"></div>
-
-    <!-- Your main content -->
-    <div class="content">
-      <RouterView />
-    </div>
-  </div>
-</template>
-
 <script>
 import { RouterLink, RouterView } from "vue-router";
 import Menu from "@/components/Menu.vue";
@@ -26,11 +9,28 @@ export default {
 };
 </script>
 
+<template>
+  <div class="page-wrapper">
+    <Menu />
+
+    <!-- Background elements -->
+    <div class="filmReel-left"></div>
+
+    <div class="filmReel-right"></div>
+
+    <!-- Main content -->
+    <div class="content">
+      <RouterView />
+    </div>
+  </div>
+</template>
+
 <style scoped>
 /* This container will grow with the content height */
 .page-wrapper {
   position: relative;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* Left background extends with the page and repeats vertically */
