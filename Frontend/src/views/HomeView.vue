@@ -17,6 +17,7 @@
   height: 100%;
   background: url("@/assets/filmBgImage.png") center/cover no-repeat;
   background-size: auto 70%;
+  opacity: 0.9;
   z-index: -2;
   pointer-events: none;
 }
