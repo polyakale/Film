@@ -9,8 +9,3 @@ div.container-fluid {
 body {
   background: url('bg.png') fixed;
 }
-
-.imageDec {
-  position: fixed;
-  background: url('filmReel.png') repeat-x center!important;
-}
