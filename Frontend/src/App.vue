@@ -41,7 +41,8 @@ export default {
   width: 20vw;
   height: 100%; /* Ensures it spans the entire height of the page */
   background: url('@/assets/filmReel.png') repeat-y;
-  background-size: 60%; /* Adjust vertical scaling of the image */
+  background-size: 70%; /* Adjust vertical scaling of the image */
+  background-position: left center; /* Align image to right edge */
   z-index: -1;
 }
 
@@ -52,7 +53,7 @@ export default {
   width: 20vw;
   height: 100%;
   background: url('@/assets/filmReel.png') repeat-y;
-  background-size: contain; /* Better for consistent scaling */
+  background-size: 70%; /* Better for consistent scaling */
   background-position: right center; /* Align image to right edge */
   z-index: -1;
 }
