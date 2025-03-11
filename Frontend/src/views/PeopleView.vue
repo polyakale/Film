@@ -11,14 +11,14 @@
     </div>
     <p v-else>Loading...</p>
 
+    <!-- Modal to show details when a card is clicked -->
     <div v-if="selectedPerson" class="modal">
       <div class="modal-content">
         <span class="close" @click="closeModal">&times;</span>
         <img :src="getImageUrl(selectedPerson.photo)" alt="Image" class="modal-image" />
-
-        <a :href="selectedPerson.imdbLink || '#'" target="_blank" rel="noopener noreferrer">
-          <h2>{{ selectedPerson.Name }}</h2>
-        </a>
+        
+        <!-- Display selected person's name correctly -->
+        <h2>{{ selectedPerson.Name }}</h2> <!-- Nem hivatkozunk a linkre, ha nem szükséges -->
       </div>
     </div>
   </div>
@@ -45,7 +45,7 @@ export default {
         const url = `${this.urlApi}/people`;
         const response = await axios.get(url);
         this.people = response.data?.data || [];
-        console.log(this.people); 
+        console.log(this.people); // Ellenőrizd a lekérdezett adatokat
       } catch (error) {
         console.error("Error:", error);
       }
@@ -54,6 +54,7 @@ export default {
       return photo ? `/Images/${photo}` : "/Images/default.jpg";
     },
     showDetails(person) {
+      console.log(person); // Debug: Mi kerül ide, hogy tényleg a helyes személy jön-e?
       this.selectedPerson = person; 
     },
     closeModal() {
