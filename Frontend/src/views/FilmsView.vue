@@ -18,7 +18,7 @@
         <p class="film-info"><strong>Presentation:</strong> {{ formatDate(film.presentation) }}</p>
 
         <!-- IMDb link -->
-        <a v-if="film.imdbLink && film.imdbLink !== '2'" :href="getImdbUrl(film.imdbLink)" target="_blank" rel="noopener noreferrer" class="imdb-link">
+        <a v-if="film.imdbLink" :href="getImdbUrl(film.imdbLink)" target="_blank" rel="noopener noreferrer" class="imdb-link">
           View on IMDb
         </a>
       </div>
@@ -63,11 +63,21 @@ export default {
       return date.toISOString().split("T")[0]; // Csak YYYY-MM-DD formátum
     },
 
-    // IMDb URL generálása
+    // IMDb URL ellenőrzése és generálása
     getImdbUrl(imdbLink) {
-      if (!imdbLink || imdbLink === '2') return '#'; // Ha nincs link vagy érvénytelen, akkor nem adunk vissza URL-t
-      // Ha a link csak IMDb azonosító (pl. tt1234567), akkor azt összefűzzük a teljes URL-lel
-      return `https://www.imdb.com/title/${imdbLink}/`; // A filmek IMDb oldala
+      // Ha az IMDb link üres, vagy hibás, adjunk vissza valami mást, pl. helyettesítő linket
+      if (!imdbLink || imdbLink === '2' || imdbLink === '1') {
+        return '#'; // Ha nincs érvényes link, akkor ne mutassunk semmit
+      }
+      
+      // Ellenőrizzük, hogy a backend biztosan egy érvényes IMDb azonosítót ad-e vissza
+      // Pl. tt1234567 formátumú azonosítót várunk, ezért ellenőrizzük a kezdést
+      if (imdbLink.startsWith('tt')) {
+        return `https://www.imdb.com/title/${imdbLink}/`;
+      } else {
+        // Ha nem kezdődik 'tt'-vel, akkor nem próbálkozunk generálni linket
+        return '#'; // Visszatérünk egy helyettesítő URL-t
+      }
     }
   }
 };
