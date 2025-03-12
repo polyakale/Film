@@ -18,7 +18,7 @@
         <p class="film-info"><strong>Presentation:</strong> {{ formatDate(film.presentation) }}</p>
 
         <!-- IMDb link -->
-        <a v-if="film.imdbLink && film.imdbLink !== '1'" :href="film.imdbLink" target="_blank" rel="noopener noreferrer" class="imdb-link">
+        <a v-if="film.imdbLink && film.imdbLink !== '2'" :href="getImdbUrl(film.imdbLink)" target="_blank" rel="noopener noreferrer" class="imdb-link">
           View on IMDb
         </a>
       </div>
@@ -48,7 +48,7 @@ export default {
         const response = await axios.get(`${BASE_URL}/films`);
 
         // Ellenőrizd, hogy van-e adat, ha nincs, akkor üres tömb marad
-        this.films = Array.isArray(response.data) ? response.data : [];
+        this.films = Array.isArray(response.data.data) ? response.data.data : [];
 
       } catch (error) {
         console.error("Error fetching films from backend:", error);
@@ -61,6 +61,13 @@ export default {
       if (!dateString) return "Unknown";
       const date = new Date(dateString);
       return date.toISOString().split("T")[0]; // Csak YYYY-MM-DD formátum
+    },
+
+    // IMDb URL generálása
+    getImdbUrl(imdbLink) {
+      if (!imdbLink || imdbLink === '2') return '#'; // Ha nincs link vagy érvénytelen, akkor nem adunk vissza URL-t
+      // Ha a link csak IMDb azonosító (pl. tt1234567), akkor azt összefűzzük a teljes URL-lel
+      return `https://www.imdb.com/title/${imdbLink}/`; // A filmek IMDb oldala
     }
   }
 };
