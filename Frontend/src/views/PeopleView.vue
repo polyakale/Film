@@ -81,17 +81,19 @@ export default {
 
 /* Kártya stílus */
 .person-card {
-  background: #1e1e1e;
+  background: rgba(10, 10, 10, 0.2); /* Áttetsző fekete háttér */
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
   padding: 15px;
   text-align: center;
   transition: transform 0.2s ease-in-out;
+  backdrop-filter: blur(10px); /* Enyhén elmosódott hatás */
 }
 
 .person-card:hover {
   transform: scale(1.05);
 }
+
 
 /* Kép stílus */
 .person-image {
