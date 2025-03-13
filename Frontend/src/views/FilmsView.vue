@@ -5,19 +5,14 @@
     <div v-if="films.length" class="films-grid">
       <div v-for="film in films" :key="film.id" class="film-card">
         
-        <!-- Film címe -->
         <h2 class="film-title">{{ film.title }}</h2>
 
-        <!-- Gyártási év -->
         <p class="film-info"><strong>Production Year:</strong> {{ film.production }}</p>
 
-        <!-- Hossz (percben) -->
         <p class="film-info"><strong>Length:</strong> {{ film.length }} min</p>
 
-        <!-- Bemutató dátuma -->
         <p class="film-info"><strong>Presentation:</strong> {{ formatDate(film.presentation) }}</p>
 
-        <!-- IMDb link -->
         <a v-if="film.imdbLink" :href="formatImdbUrl(film.imdbLink)" target="_blank" rel="noopener noreferrer" class="imdb-link">
           View on IMDb
         </a>
@@ -35,54 +30,47 @@ import { BASE_URL } from "../helpers/baseUrls";
 export default {
   data() {
     return {
-      films: [] // Ide kerülnek a backendről kapott filmek
+      films: [] 
     };
   },
   async mounted() {
     await this.fetchFilmsFromBackend();
   },
   methods: {
-    // Filmek lekérése a saját backendből
     async fetchFilmsFromBackend() {
       try {
         const response = await axios.get(`${BASE_URL}/films`);
 
-        // Debug: Ellenőrizzük, milyen IMDb linkeket küld a backend
         console.log("Backend response:", response.data);
 
-        // Ellenőrizzük, hogy van-e adat
         this.films = Array.isArray(response.data.data) ? response.data.data : [];
+        console.log("filmek:", this.films)
 
       } catch (error) {
         console.error("Error fetching films from backend:", error);
-        this.films = []; // Ha hiba van, akkor biztosan üres tömb legyen
+        this.films = []; 
       }
     },
 
-    // Dátum formázása (év-hónap-nap)
     formatDate(dateString) {
       if (!dateString) return "Unknown";
       const date = new Date(dateString);
-      return date.toISOString().split("T")[0]; // Csak YYYY-MM-DD formátum
+      return date.toISOString().split("T")[0]; 
     },
 
-    // IMDb URL javítása
     formatImdbUrl(imdbLink) {
-      if (!imdbLink || imdbLink.trim() === "") return "#"; // Ha üres, ne legyen link
+      if (!imdbLink || imdbLink.trim() === "") return "#";
 
-      // Ha az URL nem tartalmazza a "http" szót, egészítsük ki
       if (!imdbLink.startsWith("http")) {
         return `https://www.imdb.com/title/${imdbLink}/`;
       }
-
-      return imdbLink; // Ha már teljes URL, akkor hagyjuk úgy
+      return imdbLink; 
     }
   }
 };
 </script>
 
 <style scoped>
-/* Általános konténer */
 .container {
   max-width: 900px;
   margin: auto;
@@ -90,7 +78,6 @@ export default {
   text-align: center;
 }
 
-/* Grid rendszer */
 .films-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -98,7 +85,6 @@ export default {
   justify-content: center;
 }
 
-/* Kártyák */
 .film-card {
   background: #1e1e1e;
   border-radius: 10px;
@@ -113,20 +99,17 @@ export default {
   transform: scale(1.05);
 }
 
-/* Film cím */
 .film-title {
   font-size: 1.4em;
   margin-bottom: 10px;
   color: #f5c518;
 }
 
-/* Film infók */
 .film-info {
   font-size: 1em;
   margin: 5px 0;
 }
 
-/* IMDb link */
 .imdb-link {
   display: inline-block;
   margin-top: 10px;
