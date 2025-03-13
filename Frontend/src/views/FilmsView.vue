@@ -18,7 +18,7 @@
         <p class="film-info"><strong>Presentation:</strong> {{ formatDate(film.presentation) }}</p>
 
         <!-- IMDb link -->
-        <a v-if="film.imdbLink" :href="getImdbUrl(film.imdbLink)" target="_blank" rel="noopener noreferrer" class="imdb-link">
+        <a v-if="film.imdbLink" :href="formatImdbUrl(film.imdbLink)" target="_blank" rel="noopener noreferrer" class="imdb-link">
           View on IMDb
         </a>
       </div>
@@ -47,7 +47,10 @@ export default {
       try {
         const response = await axios.get(`${BASE_URL}/films`);
 
-        // Ellenőrizd, hogy van-e adat, ha nincs, akkor üres tömb marad
+        // Debug: Ellenőrizzük, milyen IMDb linkeket küld a backend
+        console.log("Backend response:", response.data);
+
+        // Ellenőrizzük, hogy van-e adat
         this.films = Array.isArray(response.data.data) ? response.data.data : [];
 
       } catch (error) {
@@ -63,21 +66,16 @@ export default {
       return date.toISOString().split("T")[0]; // Csak YYYY-MM-DD formátum
     },
 
-    // IMDb URL ellenőrzése és generálása
-    getImdbUrl(imdbLink) {
-      // Ha az IMDb link üres, vagy hibás, adjunk vissza valami mást, pl. helyettesítő linket
-      if (!imdbLink || imdbLink === '2' || imdbLink === '1') {
-        return '#'; // Ha nincs érvényes link, akkor ne mutassunk semmit
-      }
-      
-      // Ellenőrizzük, hogy a backend biztosan egy érvényes IMDb azonosítót ad-e vissza
-      // Pl. tt1234567 formátumú azonosítót várunk, ezért ellenőrizzük a kezdést
-      if (imdbLink.startsWith('tt')) {
+    // IMDb URL javítása
+    formatImdbUrl(imdbLink) {
+      if (!imdbLink || imdbLink.trim() === "") return "#"; // Ha üres, ne legyen link
+
+      // Ha az URL nem tartalmazza a "http" szót, egészítsük ki
+      if (!imdbLink.startsWith("http")) {
         return `https://www.imdb.com/title/${imdbLink}/`;
-      } else {
-        // Ha nem kezdődik 'tt'-vel, akkor nem próbálkozunk generálni linket
-        return '#'; // Visszatérünk egy helyettesítő URL-t
       }
+
+      return imdbLink; // Ha már teljes URL, akkor hagyjuk úgy
     }
   }
 };
