@@ -1,25 +1,32 @@
 <template>
-  <div>
+  <div class="container">
     <h1>People</h1>
-    <div v-if="people.length">
-      <div v-for="person in people" :key="person.Name" class="person-card" @click="showDetails(person)">
+    
+    <div v-if="people.length" class="people-grid">
+      <div v-for="person in people" :key="person.peopleName" class="person-card">
+        <!-- Kép -->
         <img :src="getImageUrl(person.photo)" alt="Image" class="person-image" />
-        <a :href="person.imdbLink || '#'" target="_blank" rel="noopener noreferrer">
-          <h2>{{ person.Name }}</h2>
-        </a>
-      </div>
-    </div>
-    <p v-else>Loading...</p>
-
-    <div v-if="selectedPerson" class="modal">
-      <div class="modal-content">
-        <span class="close" @click="closeModal">&times;</span>
         
-        <img :src="getImageUrl(selectedPerson.photo)" alt="Image" class="modal-image" />
+        <!-- Név -->
+        <h2 class="person-name">{{ person.peopleName }}</h2>
+        
+        <!-- Alternatív nevek -->
+        <ul class="name-list">
+          <li v-for="(name, index) in person.names" :key="index">
+            {{ name }}
+          </li>
+        </ul>
 
-        <h2>{{ selectedPerson.Name || "No Name Available" }}</h2>
+        <!-- IMDb link -->
+        <div v-if="person.imdbLink">
+          <a :href="person.imdbLink" target="_blank" rel="noopener noreferrer" class="imdb-link">
+            {{ person.name }}
+          </a>
+        </div>
       </div>
     </div>
+
+    <p v-else>Loading...</p>
   </div>
 </template>
 
@@ -32,7 +39,6 @@ export default {
     return {
       urlApi: BASE_URL,
       people: [],
-      selectedPerson: null, 
     };
   },
   async mounted() {
@@ -44,97 +50,87 @@ export default {
         const url = `${this.urlApi}/people`;
         const response = await axios.get(url);
         this.people = response.data?.data || [];
-        console.log(this.people); 
+        console.log(this.people);
       } catch (error) {
         console.error("Error:", error);
       }
     },
     getImageUrl(photo) {
-
-      return photo ? `/Images/${photo}` : "/Images/default.jpg";
-    },
-    showDetails(person) {
-      console.log(person); 
-      this.selectedPerson = person; 
-    },
-    closeModal() {
-      this.selectedPerson = null; 
+      return photo ? `/Images/${photo}` : "/Images/default.jpg"; // Ha nincs kép, akkor alapértelmezett
     },
   },
 };
 </script>
 
 <style scoped>
-.person-card {
-  display: inline-block;
-  width: 200px;
-  margin: 10px;
-  padding: 10px;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.1); 
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  cursor: pointer; 
-}
-
-.person-image {
-  width: 150px;   
-  height: 150px; 
-  border-radius: 8px;
-  object-fit: cover; 
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-a:hover h2 {
-  text-decoration: underline;
-}
-
-h2 {
-  margin-top: 10px;
-  font-size: 1.2em;
-}
-
-
-
-.modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 500px;
-  height: 250px;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: white;
+/* Általános konténer */
+.container {
+  max-width: 1200px;
+  margin: auto;
   padding: 20px;
   text-align: center;
-  border-radius: 10px;
-  position: relative;
 }
 
-.modal-image {
-  width: 200px;  
-  height: 200px; 
+/* Kártyás grid */
+.people-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  justify-content: center;
+}
+
+/* Kártya stílus */
+.person-card {
+  background: rgba(10, 10, 10, 0.2); /* Áttetsző fekete háttér */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  padding: 15px;
+  text-align: center;
+  transition: transform 0.2s ease-in-out;
+  backdrop-filter: blur(10px); /* Enyhén elmosódott hatás */
+}
+
+.person-card:hover {
+  transform: scale(1.05);
+}
+
+
+/* Kép stílus */
+.person-image {
+  width: 100%;
+  height: 250px;
   object-fit: cover;
   border-radius: 8px;
 }
 
-.close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 24px;
+/* Név */
+.person-name {
+  font-size: 1.4em;
+  margin-top: 10px;
+  color: #fff;
+}
+
+/* Alternatív nevek lista */
+.name-list {
+  list-style: none;
+  padding: 0;
+  font-size: 0.9em;
+  color: #bbb;
+}
+
+/* IMDb link */
+.imdb-link {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 5px 10px;
+  background: #f5c518;
   color: black;
-  cursor: pointer;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.imdb-link:hover {
+  background: #e0b211;
 }
 </style>
