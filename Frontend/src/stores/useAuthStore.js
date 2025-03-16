@@ -1,15 +1,12 @@
 import { defineStore } from "pinia";
 
 export const useAuthStore = defineStore("auth", {
-  //Ezek a változók
   state: () => ({
     id: Number(localStorage.getItem("id")) || null,
     user: localStorage.getItem("user") || null,
+    positionId: Number(localStorage.getItem("positionId")) || null,
     token: localStorage.getItem("currentToken") || null,
   }),
-  //valamilyen formában visszaadja
-  getters: {},
-  //csinál vele valamit
   actions: {
     setId(id) {
       localStorage.setItem("id", id);
@@ -19,6 +16,10 @@ export const useAuthStore = defineStore("auth", {
       localStorage.setItem("user", user);
       this.user = user;
     },
+    setPositionId(positionId) {
+      localStorage.setItem("positionId", positionId);
+      this.positionId = positionId;
+    },
     setToken(token) {
       localStorage.setItem("currentToken", token);
       this.token = token;
@@ -27,9 +28,11 @@ export const useAuthStore = defineStore("auth", {
       localStorage.removeItem("currentToken");
       localStorage.removeItem("user");
       localStorage.removeItem("id");
+      localStorage.removeItem("positionId");
       this.id = null;
-      this.token = null;
       this.user = null;
+      this.positionId = null;
+      this.token = null;
     },
   },
 });
