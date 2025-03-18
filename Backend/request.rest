@@ -90,7 +90,7 @@ Authorization: Bearer {{token}}
     "imdbLink": "https://oiiaoiia.org/"
 }
 ### patch films
-PATCH {{host}}/api/films/1
+PATCH {{host}}/api/films/610
 Accept: application/json
 Content-Type: application/json
 Authorization: Bearer {{token}}
@@ -105,7 +105,7 @@ Authorization: Bearer {{token}}
 
 
 ### delete films by id
-DELETE {{host}}/api/films/3
+DELETE {{host}}/api/films/611
 
 Accept: application/json
 Content-Type: application/json
