@@ -24,43 +24,21 @@
               <form @submit.prevent="changePassword">
                 <div class="mb-3">
                   <label class="form-label">Current Password</label>
-                  <input
-                    type="password"
-                    v-model="password.current"
-                    class="form-control"
-                    required
-                  />
+                  <input type="password" v-model="password.current" class="form-control" required />
                 </div>
-
                 <div class="mb-3">
                   <label class="form-label">New Password</label>
-                  <input
-                    type="password"
-                    v-model="password.new"
-                    class="form-control"
-                    required
-                  />
+                  <input type="password" v-model="password.new" class="form-control" required />
                 </div>
-
                 <div class="mb-3">
                   <label class="form-label">Confirm New Password</label>
-                  <input
-                    type="password"
-                    v-model="password.confirm"
-                    class="form-control"
-                    required
-                  />
+                  <input type="password" v-model="password.confirm" class="form-control" required />
                 </div>
-
                 <div class="d-flex align-items-center">
                   <button type="submit" class="btn btn-primary me-3">
                     Change Password
                   </button>
-                  <div
-                    v-if="loading"
-                    class="spinner-border text-primary"
-                    role="status"
-                  >
+                  <div v-if="loading" class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                   </div>
                   <div v-if="message" :class="['ms-2', messageClass]">
@@ -98,12 +76,21 @@ const messageClass = ref("");
 // Computed properties for user data and role name
 const user = computed(() => store.user);
 const email = computed(() => store.email || 'N/A');
-const roleName = computed(() =>
-  store.positionId === 1 ? "Administrator" : "Guest"
-);
+const roleName = computed(() => store.positionId === 1 ? "Administrator" : "Guest");
 
-// Method to change the password
+// Utility method to show a temporary message
+const showMessage = (text, style) => {
+  message.value = text;
+  messageClass.value = style;
+  setTimeout(() => {
+    message.value = "";
+    messageClass.value = "";
+  }, 5000);
+};
+
+// Method to change the password using a PATCH request
 const changePassword = async () => {
+  // Validate that new passwords match
   if (password.value.new !== password.value.confirm) {
     showMessage("New passwords do not match", "text-danger");
     return;
@@ -111,7 +98,8 @@ const changePassword = async () => {
 
   loading.value = true;
   try {
-    await axios.post(
+    // Use PATCH to update the password
+    await axios.patch(
       `${BASE_URL}/users/change-password`,
       {
         current_password: password.value.current,
@@ -125,9 +113,9 @@ const changePassword = async () => {
         },
       }
     );
+
     showMessage("Password changed successfully!", "text-success");
-    // Clear the form inputs
-    password.value = { current: "", new: "", confirm: "" };
+    password.value = { current: "", new: "", confirm: "" }; // Clear form
   } catch (error) {
     console.error("Password change error:", error);
     const errorMsg = error.response?.data?.message || "Password change failed";
@@ -135,16 +123,6 @@ const changePassword = async () => {
   } finally {
     loading.value = false;
   }
-};
-
-// Utility method to show a temporary message
-const showMessage = (text, style) => {
-  message.value = text;
-  messageClass.value = style;
-  setTimeout(() => {
-    message.value = "";
-    messageClass.value = "";
-  }, 5000);
 };
 </script>
 

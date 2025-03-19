@@ -7,7 +7,6 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\PersonalAccessToken;
 
@@ -15,209 +14,138 @@ class UserController extends Controller
 {
     public function login(LoginUserRequest $request)
     {
-        $email = $request->input('email');
-        $password = $request->input('password');
-        $positionId = $request->input('positionId');  // Retrieve positionId
+        $user = User::where('email', $request->email)->first();
 
-        $user = User::where('email', $email)->first();
-
-        if (!$user || !Hash::check($password, $user->password)) {
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
-                'message' => 'Invalid email or password',
+                'message' => 'Invalid credentials',
                 'data' => []
-            ], JSON_UNESCAPED_UNICODE);
+            ], 401, [], JSON_UNESCAPED_UNICODE);
         }
 
-        // Check if the positionId matches the user's positionId
-        if ($user->positionId !== $positionId) {
-            return response()->json([
-                'message' => 'Position mismatch',
-                'data' => []
-            ], JSON_UNESCAPED_UNICODE);
-        }
-
-        // Clear previous tokens if needed
         $user->tokens()->delete();
-
         $token = $user->createToken('access')->plainTextToken;
-        $user->token = $token;
 
         return response()->json([
             'message' => 'ok',
-            'data' => $user
-        ], JSON_UNESCAPED_UNICODE);
+            'data' => [
+                'user' => $user,
+                'token' => $token
+            ]
+        ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-    public function getProfile(Request $request)
-    {
-        $user = $request->user();
-
-        return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'positionId' => $user->positionId,
-        ], 200);
-    }
     public function changePassword(Request $request)
     {
-        // Validate the request
+        // Validate the input
         $request->validate([
             'current_password' => 'required',
-            'new_password' => 'required|min:6|confirmed', // expects new_password_confirmation field
+            'new_password' => 'required|min:6|confirmed',
         ]);
 
-        $user = Auth::user();
+        $user = $request->user(); // Get the authenticated user
 
         // Check if the current password is correct
         if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json([
-                'message' => 'Current password is incorrect'
-            ], 422);
+            return response()->json(['message' => 'Current password is incorrect'], 422);
         }
 
-        // Update the user's password
+        // Update the password
         $user->password = Hash::make($request->new_password);
         $user->save();
 
-        return response()->json([
-            'message' => 'Password changed successfully!'
-        ]);
-    }
-    public function updateProfile(Request $request)
-    {
-        // Validate the request
-        $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $request->user()->id,
-        ]);
-
-        // Get the authenticated user
-        $user = $request->user();
-
-        // Update the user's profile
-        if ($request->has('name')) {
-            $user->name = $request->name;
-        }
-        if ($request->has('email')) {
-            $user->email = $request->email;
-        }
-        $user->save();
-
-        return response()->json([
-            'message' => 'Profile updated successfully!',
-            'user' => $user,
-        ], 200);
+        return response()->json(['message' => 'Password changed successfully'], 200);
     }
 
     public function logout(Request $request)
     {
         $token = $request->bearerToken();
-        $personalAccessToken = PersonalAccessToken::findToken($token);
+        $accessToken = PersonalAccessToken::findToken($token);
 
-        if ($personalAccessToken) {
-            $personalAccessToken->delete();
+        if ($accessToken) {
+            $accessToken->delete();
             return response()->json([
                 'message' => 'ok',
                 'data' => []
-            ], JSON_UNESCAPED_UNICODE);
-        } else {
-            return response()->json([
-                'message' => 'Token not found',
-                'data' => []
-            ], JSON_UNESCAPED_UNICODE);
+            ], 200, [], JSON_UNESCAPED_UNICODE);
         }
+
+        return response()->json([
+            'message' => 'Token not found',
+            'data' => []
+        ], 404, [], JSON_UNESCAPED_UNICODE);
     }
 
     public function index()
     {
-        $rows = User::all();
+        $users = User::orderBy('id', 'asc')->get();
         return response()->json([
             'message' => 'ok',
-            'data' => $rows
-        ], JSON_UNESCAPED_UNICODE);
+            'data' => $users
+        ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
     public function store(StoreUserRequest $request)
     {
-        $data = $request->all();
-
-        // Validate positionId
-        if (!$request->has('positionId') || !in_array($request->positionId, [1, 2])) {
-            return response()->json([
-                'message' => 'Invalid positionId. It must be either 1 (administrator) or 2 (guest).',
-            ], JSON_UNESCAPED_UNICODE);
-        }
-
-        // Check if email already exists
-        if (User::where('email', $request['email'])->exists()) {
-            return response()->json([
-                'message' => 'This email already exists',
-                'data' => ['email' => $request['email']]
-            ], JSON_UNESCAPED_UNICODE);
-        }
-
-        $user = User::create($data);
+        $user = User::create($request->validated());
         return response()->json([
-            'message' => 'ok',
+            'message' => 'User created',
             'data' => $user
-        ], JSON_UNESCAPED_UNICODE);
+        ], 201, [], JSON_UNESCAPED_UNICODE);
     }
 
     public function show(int $id)
     {
-        $row = User::find($id);
-        if ($row) {
-            return response()->json([
-                'message' => 'ok',
-                'data' => $row
-            ], JSON_UNESCAPED_UNICODE);
-        } else {
+        $user = User::find($id);
+
+        if (!$user) {
             return response()->json([
                 'message' => 'Not found',
                 'data' => ['id' => $id]
-            ], JSON_UNESCAPED_UNICODE);
+            ], 404, [], JSON_UNESCAPED_UNICODE);
         }
+
+        return response()->json([
+            'message' => 'ok',
+            'data' => $user
+        ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-    public function update(UpdateUserRequest $request, $id)
+
+    public function update(UpdateUserRequest $request, int $id)
     {
-        $row = User::find($id);
-        if ($row) {
-            if (User::where('email', $request['email'])->exists()) {
-                return response()->json([
-                    'message' => 'This email already exists',
-                    'data' => ['email' => $request['email']]
-                ], JSON_UNESCAPED_UNICODE);
-            }
+        $user = User::find($id);
 
-            $row->update($request->all());
-            return response()->json([
-                'message' => 'ok',
-                'data' => $row
-            ], JSON_UNESCAPED_UNICODE);
-        } else {
+        if (!$user) {
             return response()->json([
                 'message' => 'Not found',
                 'data' => ['id' => $id]
-            ], JSON_UNESCAPED_UNICODE);
+            ], 404, [], JSON_UNESCAPED_UNICODE);
         }
+
+        $user->update($request->validated());
+        return response()->json([
+            'message' => 'User updated',
+            'data' => $user
+        ], 200, [], JSON_UNESCAPED_UNICODE);
     }
+
 
     public function destroy(int $id)
     {
-        $row = User::find($id);
-        if ($row) {
-            $row->delete();
-            return response()->json([
-                'message' => 'ok',
-                'data' => ['id' => $id]
-            ], JSON_UNESCAPED_UNICODE);
-        } else {
+        $user = User::find($id);
+
+        if (!$user) {
             return response()->json([
                 'message' => 'Not found',
                 'data' => ['id' => $id]
-            ], JSON_UNESCAPED_UNICODE);
+            ], 404, [], JSON_UNESCAPED_UNICODE);
         }
+
+        $user->delete();
+        return response()->json([
+            'message' => 'User deleted',
+            'data' => ['id' => $id]
+        ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 }

@@ -9,23 +9,26 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
+
     protected $fillable = ['positionId', 'name', 'email', 'password'];
+
     protected $hidden = ['password', 'remember_token', 'email_verified_at', 'created_at', 'updated_at'];
 
     protected function casts(): array
     {
         return [
+            'positionId' => 'integer',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
 
-    public function position()
-    {
-        return $this->belongsTo(Position::class, 'positionId');
-    }
+    // Remove the position relationship (no Position model needed)
+    // public function position()
+    // {
+    //     return $this->belongsTo(Position::class, 'positionId');
+    // }
 
     public function favourites()
     {

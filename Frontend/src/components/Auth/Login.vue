@@ -11,23 +11,6 @@
                 <input type="text" v-model="user.email" placeholder="Email*" class="form-control" />
               </div>
 
-              <!-- Role Selection (Radio Buttons) -->
-              <div class="form-group mb-3">
-                <label class="d-block mb-2">Login as*</label>
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" v-model="user.positionId" id="loginAdmin" :value="1" />
-                  <label class="form-check-label" for="loginAdmin">
-                    Admin
-                  </label>
-                </div>
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" v-model="user.positionId" id="loginGuest" :value="2" />
-                  <label class="form-check-label" for="loginGuest">
-                    Guest
-                  </label>
-                </div>
-              </div>
-
               <!-- Password Field -->
               <div class="form-group mb-3">
                 <input type="password" v-model="user.password" placeholder="Password*" class="form-control" />
@@ -39,10 +22,14 @@
                   <button type="submit" class="btn btn-primary me-4">
                     Login
                   </button>
+                  <!-- Loading Spinner -->
                   <div class="spinner-border m-0 p-0" role="status" v-if="errorMessage === '...'">
                     <span class="visually-hidden m-0">Loading...</span>
                   </div>
-                  <span v-if="errorMessage !== '...'">{{ errorMessage }}</span>
+                  <!-- Error Message -->
+                  <span v-if="errorMessage !== '...'" class="text-danger">
+                    {{ errorMessage }}
+                  </span>
                 </div>
               </div>
             </form>
@@ -54,17 +41,16 @@
 </template>
 
 <script>
-import { useAuthStore } from "@/stores/useAuthStore";
 import axios from "axios";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { BASE_URL } from "@/helpers/baseUrls";
 
 export default {
   data() {
     return {
       user: {
-        email: "test@example.com",
-        password: "1234567",
-        positionId: 2, // Default to Guest (id:2)
+        email: "admin@example.com",
+        password: "admin123",
       },
       store: useAuthStore(),
       errorMessage: null,
@@ -72,14 +58,14 @@ export default {
   },
   methods: {
     async userAuth() {
-      this.errorMessage = "...";
+      this.errorMessage = "..."; // Show loading state
       try {
+        // Send login request
         const response = await axios.post(
           `${BASE_URL}/users/login`,
           {
             email: this.user.email,
             password: this.user.password,
-            positionId: this.user.positionId, // Include positionId in the request
           },
           {
             headers: {
@@ -89,28 +75,37 @@ export default {
           }
         );
 
-        // Save user data to store
-        this.store.setId(response.data.data.id);
-        this.store.setUser(response.data.data.name);
-        this.store.setPositionId(response.data.data.positionId);
-        this.store.setToken(response.data.data.token);
+        console.log("Login response:", response.data);
 
-        // Redirect based on positionId
-        switch (response.data.data.positionId) {
-          case 1: // Admin
-            this.$router.push("/admin-dashboard");
-            break;
-          case 2: // Guest
-            this.$router.push("/guest-dashboard");
-            break;
-          default:
-            this.$router.push("/");
-        }
+        // Destructure the nested 'data' property from the API response
+        const { user, token } = response.data.data;
 
+        // Set authentication data in the store
+        this.store.setAuthData({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          positionId: user.positionId,
+          token: token,
+        });
+
+        // Redirect based on user role (positionId)
+        const redirectRoute =
+          user.positionId === 1 ? "/admin-dashboard" : "/guest-dashboard";
+        this.$router.push(redirectRoute);
+
+        // Show success message
         this.errorMessage = "Login successful!";
       } catch (error) {
         console.error("Login error:", error);
-        this.errorMessage = error.response?.data?.message || "Login failed";
+
+        // Handle error messages
+        this.errorMessage =
+          error.response?.data?.message || // Backend error message
+          error.message || // Axios error message
+          "Login failed. Please try again."; // Fallback message
+
+        // Clear stored data on error
         this.store.clearStoredData();
       }
     },
@@ -119,5 +114,8 @@ export default {
 </script>
 
 <style scoped>
-/* Add any additional styles if needed */
+.text-danger {
+  color: #dc3545;
+  font-size: 0.9rem;
+}
 </style>

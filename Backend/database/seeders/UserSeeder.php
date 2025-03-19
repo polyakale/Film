@@ -11,32 +11,21 @@ class UserSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    // database/seeders/UserSeeder.php
+    public function run()
     {
-        if (User::count() === 0) {
-            User::factory()->createMany([
-                [
-                    'id' => 1,
-                    'name' => 'test',
-                    'positionId' => '1',
-                    'email' => 'test@example.com',
-                    'password' => '1234567',
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'testGuest1',
-                    'positionId' => '2',
-                    'email' => 'user1@example.com',
-                    'password' => '1234567',
-                ],
-                [
-                    'id' => 3,
-                    'name' => 'testGuest2',
-                    'positionId' => '2',
-                    'email' => 'user2@example.com',
-                    'password' => '1234567',
-                ],
-            ]);
-        }
+        User::factory()->create([
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
+            'password' => bcrypt('admin123'),
+            'positionId' => 1, // 1 = Admin
+        ]);
+
+        User::factory()->create([
+            'name' => 'Guest User',
+            'email' => 'guest@example.com',
+            'password' => bcrypt('guest123'),
+            'positionId' => 2, // 2 = Guest
+        ]);
     }
 }

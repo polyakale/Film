@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 
 // users
 Route::post('users/login', [UserController::class, 'login']);
+Route::patch('users/change-password', [UserController::class, 'changePassword'])
+    ->middleware('auth:sanctum');
 Route::post('users/logout', [UserController::class, 'logout']);
 Route::get('users', [UserController::class, 'index'])
     ->middleware('auth:sanctum');

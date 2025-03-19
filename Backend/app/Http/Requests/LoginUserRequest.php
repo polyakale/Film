@@ -15,12 +15,13 @@ class LoginUserRequest extends FormRequest
         return true;
     }
 
-    public function rules(): array
+    // app/Http/Requests/LoginUserRequest.php
+    public function rules()
     {
         return [
-            'positionId' => 'required|int',
             'email' => 'required|email',
-            'password' => 'required',
+            'password' => 'required|string',
+            // Remove positionId from validation
         ];
     }
 }

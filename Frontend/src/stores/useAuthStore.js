@@ -4,35 +4,36 @@ export const useAuthStore = defineStore("auth", {
   state: () => ({
     id: Number(localStorage.getItem("id")) || null,
     user: localStorage.getItem("user") || null,
+    email: localStorage.getItem("email") || null,
     positionId: Number(localStorage.getItem("positionId")) || null,
-    token: localStorage.getItem("currentToken") || null,
+    token: localStorage.getItem("token") || null,
   }),
   actions: {
-    setId(id) {
-      localStorage.setItem("id", id);
-      this.id = id;
-    },
-    setUser(user) {
-      localStorage.setItem("user", user);
-      this.user = user;
-    },
-    setPositionId(positionId) {
-      localStorage.setItem("positionId", positionId);
-      this.positionId = positionId;
-    },
-    setToken(token) {
-      localStorage.setItem("currentToken", token);
-      this.token = token;
+    setAuthData(payload) {
+      // Update all fields
+      this.id = payload.id;
+      this.user = payload.name;
+      this.email = payload.email;
+      this.positionId = payload.positionId;
+      this.token = payload.token;
+
+      // Persist to localStorage
+      localStorage.setItem("id", payload.id);
+      localStorage.setItem("user", payload.name);
+      localStorage.setItem("email", payload.email);
+      localStorage.setItem("positionId", payload.positionId);
+      localStorage.setItem("token", payload.token);
     },
     clearStoredData() {
-      localStorage.removeItem("currentToken");
-      localStorage.removeItem("user");
+      // Remove all stored data
       localStorage.removeItem("id");
+      localStorage.removeItem("user");
+      localStorage.removeItem("email");
       localStorage.removeItem("positionId");
-      this.id = null;
-      this.user = null;
-      this.positionId = null;
-      this.token = null;
-    },
+      localStorage.removeItem("token");
+
+      // Reset state
+      this.$reset();
+    }
   },
 });

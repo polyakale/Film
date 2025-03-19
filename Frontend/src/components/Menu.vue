@@ -2,12 +2,7 @@
   <nav class="navbar navbar-expand-lg bg-body-tertiary" style="padding: 0">
     <div class="container-fluid">
       <!-- Toggler button -->
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarSupportedContent"
-      >
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
         <span class="navbar-toggler-icon"></span>
       </button>
 
@@ -16,27 +11,27 @@
         <!-- Left side: Menu icon -->
         <ul class="navbar-nav me-auto">
           <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle"
-              href="#"
-              role="button"
-              data-bs-toggle="dropdown"
-            >
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
               <i class="bi bi-list"></i>
             </a>
             <ul class="dropdown-menu">
               <li>
-                <RouterLink class="dropdown-item" to="/films">Films</RouterLink>
+                <RouterLink class="dropdown-item" to="/films">
+                  <i class="bi bi-film"></i>
+                  Films
+                </RouterLink>
               </li>
               <li>
-                <RouterLink class="dropdown-item" to="/people"
-                  >People</RouterLink
-                >
+                <RouterLink class="dropdown-item" to="/people">
+                  <i class="bi bi-people-fill"></i>
+                  People
+                </RouterLink>
               </li>
               <li>
-                <RouterLink class="dropdown-item" to="/reviews"
-                  >Reviews</RouterLink
-                >
+                <RouterLink class="dropdown-item" to="/reviews">
+                  <i class="bi bi-pencil-square"></i>
+                  Reviews
+                </RouterLink>
               </li>
             </ul>
           </li>
@@ -52,50 +47,32 @@
         <!-- Right side: Profile -->
         <ul class="navbar-nav ms-auto">
           <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle"
-              href="#"
-              role="button"
-              data-bs-toggle="dropdown"
-            >
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
               <i class="bi bi-person"></i>
               <span v-if="stateAuth.user">{{ stateAuth.user }}</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
               <li>
-                <RouterLink
-                  class="dropdown-item"
-                  to="/login"
-                  v-if="!stateAuth.user"
-                >
+                <RouterLink class="dropdown-item" to="/login" v-if="!stateAuth.user">
+                  <i class="bi bi-box-arrow-in-right"></i>
                   Login
                 </RouterLink>
               </li>
               <li>
-                <RouterLink
-                  class="dropdown-item"
-                  to="/registration"
-                  v-if="!stateAuth.user"
-                >
+                <RouterLink class="dropdown-item" to="/registration" v-if="!stateAuth.user">
+                  <i class="bi bi-person-plus"></i>
                   Registration
                 </RouterLink>
               </li>
               <li>
-                <RouterLink
-                  class="dropdown-item"
-                  to="/profile"
-                  v-if="stateAuth.user"
-                >
+                <RouterLink class="dropdown-item" to="/profile" v-if="stateAuth.user">
+                  <i class="bi bi-person-circle"></i>
                   Profile
                 </RouterLink>
               </li>
               <li>
-                <a
-                  class="dropdown-item text-danger"
-                  href="#"
-                  v-if="stateAuth.user"
-                  @click.prevent="logout()"
-                >
+                <a class="dropdown-item logout-item" href="#" v-if="stateAuth.user" @click.prevent="logout()">
+                  <i class="bi bi-box-arrow-right"></i>
                   Logout
                 </a>
               </li>
@@ -164,13 +141,13 @@ export default {
 
 /* Dropdown menus */
 .dropdown-menu {
-  background: rgba(0, 0, 0, 0.7) !important;
-  border-radius: 0 !important; /* Removes rounded edges */
-  box-shadow: none !important; /* Removes shadow */
+  background: rgba(32, 6, 6, 0.7) !important;
+  border-radius: 0 !important;
+  /* Removes rounded edges */
+  box-shadow: none !important;
+  /* Removes shadow */
   border: none !important;
   margin-top: 0.4rem !important;
-  margin-left: 0.6rem;
-  margin-right: 0.6rem;
   text-decoration: none;
 }
 
