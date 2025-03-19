@@ -1,53 +1,48 @@
 <template>
-  <div class="container mt-5">
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="mb-0">User Profile</h3>
-          </div>
-          <div class="card-body">
-            <!-- User Information -->
-            <div class="mb-4">
-              <h4>Account Details</h4>
-              <div class="row">
-                <div class="col-md-6">
-                  <p><strong>Name:</strong> {{ user }}</p>
-                  <p><strong>Email:</strong> {{ email }}</p>
-                  <p><strong>Role:</strong> {{ roleName }}</p>
-                </div>
-              </div>
+  <div class="profile-container">
+    <div class="profile-card">
+      <div class="profile-header">
+        <h2>Profile</h2>
+      </div>
+      <div class="profile-body">
+        <!-- User Information -->
+        <div class="profile-info">
+          <h3 class="section-title">👤 Account Details</h3>
+          <p><strong>Name:</strong> {{ user }}</p>
+          <p><strong>Email:</strong> {{ email }}</p>
+          <p><strong>Role:</strong> {{ roleName }}</p>
+        </div>
+
+        <!-- Password Change Form -->
+        <div class="password-section">
+          <h3 class="section-title">🔒 Change Password</h3>
+          <form @submit.prevent="changePassword" class="password-form">
+            <div class="form-group">
+              <label>Current Password</label>
+              <input type="password" v-model="password.current" class="form-control" required />
             </div>
-            <!-- Password Change Form -->
-            <div>
-              <h4>Change Password</h4>
-              <form @submit.prevent="changePassword">
-                <div class="mb-3">
-                  <label class="form-label">Current Password</label>
-                  <input type="password" v-model="password.current" class="form-control" required />
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">New Password</label>
-                  <input type="password" v-model="password.new" class="form-control" required />
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Confirm New Password</label>
-                  <input type="password" v-model="password.confirm" class="form-control" required />
-                </div>
-                <div class="d-flex align-items-center">
-                  <button type="submit" class="btn btn-primary me-3">
-                    Change Password
-                  </button>
-                  <div v-if="loading" class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                  </div>
-                  <div v-if="message" :class="['ms-2', messageClass]">
-                    {{ message }}
-                  </div>
-                </div>
-              </form>
+
+            <div class="form-group">
+              <label>New Password</label>
+              <input type="password" v-model="password.new" class="form-control" required />
             </div>
-          </div>
+
+            <div class="form-group">
+              <label>Confirm New Password</label>
+              <input type="password" v-model="password.confirm" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+              <button type="submit" class="btn-submit" :disabled="loading">
+                Change Password
+              </button>
+              <div v-if="loading" class="spinner"></div>
+            </div>
+
+            <p v-if="message" :class="['status-message', messageClass]">
+              {{ message }}
+            </p>
+          </form>
         </div>
       </div>
     </div>
@@ -75,10 +70,10 @@ const messageClass = ref("");
 
 // Computed properties for user data and role name
 const user = computed(() => store.user);
-const email = computed(() => store.email || 'N/A');
-const roleName = computed(() => store.positionId === 1 ? "Administrator" : "Guest");
+const email = computed(() => store.email || "N/A");
+const roleName = computed(() => (store.positionId === 1 ? "Administrator" : "Guest"));
 
-// Utility method to show a temporary message
+// Show message temporarily
 const showMessage = (text, style) => {
   message.value = text;
   messageClass.value = style;
@@ -88,17 +83,15 @@ const showMessage = (text, style) => {
   }, 5000);
 };
 
-// Method to change the password using a PATCH request
+// Handle password change
 const changePassword = async () => {
-  // Validate that new passwords match
   if (password.value.new !== password.value.confirm) {
-    showMessage("New passwords do not match", "text-danger");
+    showMessage("New passwords do not match", "error-message");
     return;
   }
 
   loading.value = true;
   try {
-    // Use PATCH to update the password
     await axios.patch(
       `${BASE_URL}/users/change-password`,
       {
@@ -114,12 +107,12 @@ const changePassword = async () => {
       }
     );
 
-    showMessage("Password changed successfully!", "text-success");
-    password.value = { current: "", new: "", confirm: "" }; // Clear form
+    showMessage("Password changed successfully!", "success-message");
+    password.value = { current: "", new: "", confirm: "" };
   } catch (error) {
     console.error("Password change error:", error);
     const errorMsg = error.response?.data?.message || "Password change failed";
-    showMessage(errorMsg, "text-danger");
+    showMessage(errorMsg, "error-message");
   } finally {
     loading.value = false;
   }
@@ -127,29 +120,152 @@ const changePassword = async () => {
 </script>
 
 <style scoped>
-.card {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* === Background & Container === */
+.profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 85vh;
+  background: url("https://source.unsplash.com/1600x900/?cinema,retro") center/cover no-repeat;
+  backdrop-filter: blur(8px);
 }
 
-.card-header {
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #e3e6f0;
+/* === Profile Card === */
+.profile-card {
+  background: rgba(0, 0, 0, 0.85);
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  padding: 2.5rem;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+  color: white;
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
+  /* Removed border-radius for sharp edges */
 }
 
-h3,
-h4 {
-  color: #2c3e50;
+/* === Header === */
+.profile-header {
+  font-family: "Cinzel Decorative", serif;
+  font-size: 1.8rem;
+  color: #ffd700;
+  text-shadow: 1px 1px 3px rgba(255, 215, 0, 0.6);
+  margin-bottom: 1rem;
 }
 
-.form-label {
-  font-weight: 500;
+/* === Profile Info === */
+.profile-info {
+  text-align: left;
+  font-size: 1.1rem;
 }
 
-.text-success {
-  color: #28a745 !important;
+.profile-info p {
+  margin-bottom: 0.5rem;
 }
 
-.text-danger {
-  color: #dc3545 !important;
+.profile-info strong {
+  color: #ffd700;
+}
+
+/* === Section Titles === */
+.section-title {
+  font-family: "Poppins", sans-serif;
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-align: left;
+  color: #ffd700;
+  margin-top: 1.5rem;
+  border-bottom: 2px solid rgba(255, 215, 0, 0.4);
+  padding-bottom: 0.3rem;
+}
+
+/* === Password Form === */
+.password-form {
+  text-align: left;
+  padding-top: 1rem;
+}
+
+/* === Inputs === */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+label {
+  display: block;
+  font-size: 0.9rem;
+  color: #f5f5f5;
+  font-weight: bold;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  /* Removed border-radius for sharp edges */
+  transition: all 0.3s ease-in-out;
+}
+
+/* === Input Focus Effect === */
+.form-control:focus {
+  outline: none;
+  border-color: #ffd700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* === Buttons === */
+.btn-submit {
+  width: 100%;
+  padding: 12px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: black;
+  background: #ffd700;
+  border: none;
+  /* Removed border-radius for sharp edges */
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+.btn-submit:hover {
+  background: #ffc107;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+/* === Loading Spinner === */
+.spinner {
+  margin: 10px auto;
+  width: 30px;
+  height: 30px;
+  border: 4px solid rgba(255, 215, 0, 0.3);
+  border-radius: 50%;
+  border-top: 4px solid #ffd700;
+  animation: spin 1s linear infinite;
+}
+
+/* === Status Messages === */
+.status-message {
+  margin-top: 10px;
+}
+
+.error-message {
+  color: #ff6666;
+  font-weight: bold;
+}
+
+.success-message {
+  color: #28a745;
+}
+
+/* === Spinner Animation === */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

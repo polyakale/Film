@@ -125,8 +125,12 @@ export default {
 
 /* Navbar container */
 .navbar {
-  background: rgba(0, 0, 0, 0.7) !important;
+  background: rgba(0, 0, 0, 0.9) !important;
+  /* Darker background for better contrast */
   padding: 0 var(--nav-padding) !important;
+  border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+  opacity: 80%;
+  /* Golden border for cinematic feel */
 }
 
 /* Left side menu */
@@ -141,14 +145,150 @@ export default {
 
 /* Dropdown menus */
 .dropdown-menu {
-  background: rgba(32, 6, 6, 0.7) !important;
-  border-radius: 0 !important;
-  /* Removes rounded edges */
-  box-shadow: none !important;
-  /* Removes shadow */
-  border: none !important;
-  margin-top: 0.4rem !important;
-  text-decoration: none;
+  background: rgba(20, 20, 20, 0.98) !important;
+  /* Darker background for dropdown */
+  border: 1px solid rgba(255, 215, 0, 0.3) !important;
+  /* Golden border */
+  border-radius: 4px !important;
+  /* Slightly rounded corners */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  /* Subtle shadow for depth */
+  margin-top: 0.8rem !important;
+  min-width: 220px;
+  /* Ensure consistent width */
+  animation: dropdownEntrance 0.3s ease;
+  /* Smooth dropdown animation */
+}
+
+@keyframes dropdownEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dropdown items */
+.dropdown-item {
+  color: #e0e0e0 !important;
+  /* Light gray text for better readability */
+  padding: 0.75rem 1.5rem !important;
+  /* Increased padding for better spacing */
+  font-family: 'Alegreya Sans', sans-serif;
+  /* Elegant font */
+  font-size: 1.1rem;
+  /* Slightly larger font size */
+  transition: all 0.3s ease;
+  /* Smooth hover transition */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* Space between icon and text */
+  position: relative;
+  /* For hover effect */
+}
+
+/* Golden hover indicator */
+.dropdown-item::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60%;
+  width: 3px;
+  background: #ffd700;
+  /* Golden accent */
+  opacity: 0;
+  /* Hidden by default */
+  transition: opacity 0.3s ease;
+}
+
+.dropdown-item:hover {
+  background: rgba(255, 215, 0, 0.08) !important;
+  /* Subtle golden hover */
+  padding-left: 2rem !important;
+  /* Animated padding on hover */
+  color: #ffd700 !important;
+  /* Golden text on hover */
+}
+
+.dropdown-item:hover::before {
+  opacity: 1;
+  /* Show golden indicator on hover */
+}
+
+/* Icons */
+.dropdown-item i {
+  font-size: 1.2rem;
+  /* Slightly larger icons */
+  width: 24px;
+  /* Consistent icon width */
+  text-align: center;
+  /* Center icons */
+}
+
+/* Separator */
+.dropdown-divider {
+  border-color: rgba(255, 215, 0, 0.15);
+  /* Golden divider */
+  margin: 0.5rem 0;
+  /* Spacing around divider */
+}
+
+/* Special logout item */
+.dropdown-item.logout-item {
+  color: #ff6666 !important;
+  /* Red for logout */
+}
+
+.dropdown-item.logout-item:hover {
+  background: rgba(255, 102, 102, 0.1) !important;
+  /* Red hover background */
+}
+
+/* Profile section */
+.navbar-nav span {
+  font-family: 'Cinzel Decorative', cursive;
+  /* Vintage font for username */
+  letter-spacing: 0.05em;
+  /* Slightly spaced letters */
+  color: #ffd700;
+  /* Golden username */
+}
+
+/* Active title */
+.nav-link.active {
+  font-size: 1.8rem;
+  /* Larger title */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  /* Subtle text shadow */
+  letter-spacing: 0.05em;
+  /* Spaced letters for vintage feel */
+  color: #ffd700 !important;
+  /* Golden title */
+}
+
+/* Toggler button */
+.navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.5);
+  /* Light border */
+  margin-right: var(--nav-item-spacing);
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 215, 0, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  /* Golden toggler icon */
+  transition: opacity 0.2s ease;
+}
+
+.navbar-toggler:hover .navbar-toggler-icon {
+  opacity: 0.8;
+  /* Slightly transparent on hover */
 }
 
 /* Navigation links */
@@ -160,45 +300,6 @@ export default {
 
 .nav-link:hover {
   opacity: 0.8;
-}
-
-/* Dropdown items */
-.dropdown-item {
-  padding: 0.5rem 1rem !important;
-  color: white !important;
-  transition: all 0.2s ease;
-}
-
-.dropdown-item:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-  color: white !important;
-}
-
-/* Active state */
-.nav-link.active {
-  font-weight: bold;
-  font-family: 'Times New Roman', Times, serif;
-}
-
-/* User name */
-.navbar-nav span {
-  margin-left: 0.75rem !important;
-  font-weight: 500;
-}
-
-/* Toggler button */
-.navbar-toggler {
-  border-color: rgba(255, 255, 255, 0.5);
-  margin-right: var(--nav-item-spacing);
-}
-
-.navbar-toggler-icon {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-  transition: opacity 0.2s ease;
-
-}
-
-.navbar-toggler:hover .navbar-toggler-icon {
-  opacity: 0.8;
+  /* Slightly transparent on hover */
 }
 </style>
