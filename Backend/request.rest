@@ -14,8 +14,8 @@ Content-Type: application/json
 
 {
     "positionId": 1,
-    "email": "test@example.com",
-    "password": "1234567"
+    "email": "admin@example.com",
+    "password": "admin123"
 }
 ###
 @token = {{login.response.body.data.token}}

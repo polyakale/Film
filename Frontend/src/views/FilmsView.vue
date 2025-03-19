@@ -182,24 +182,30 @@ export default {
       this.newFilm = { title: "", production: "", length: "", presentation: "", imdbLink: "" };
     },
     async submitNewFilm() {
-      try {
-        const token = this.stateAuth.token;
-        const url = this.urlApi;
-        const headers = {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        }
-        const data = {
-          title: this.newFilm.film,
-        };
-        this.films.push(response.data.data);
-        this.filteredFilms = this.films;
-        this.closeAddFilmModal();
-      } catch (error) {
-        console.error("Error adding new film:", error);
-      }
-    },
+  try {
+    const token = this.stateAuth.token;
+    const headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+    const data = {
+      title: this.newFilm.title,
+      production: this.newFilm.production,
+      length: this.newFilm.length,
+      presentation: this.newFilm.presentation,
+      imdbLink: this.newFilm.imdbLink,
+    };
+    // Küldés a backend felé
+    const response = await axios.post(this.urlApi, data, { headers });
+    // Új film hozzáadása a listához
+    this.films.push(response.data.data);
+    this.filteredFilms = this.films;
+    this.closeAddFilmModal(); // Modal bezárása
+  } catch (error) {
+    console.error("Error adding new film:", error);
+  }
+},
     openEditFilmModal(film) {
       this.editingFilm = { ...film };
       this.showEditFilmModal = true;
