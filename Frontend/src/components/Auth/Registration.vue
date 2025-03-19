@@ -9,27 +9,46 @@
           <!-- Name Field -->
           <div class="form-group">
             <label for="name">Name*</label>
-            <input id="name" type="text" v-model="user.name" placeholder="Enter your name" class="form-control"
-              required />
+            <input
+              id="name"
+              type="text"
+              v-model="user.name"
+              placeholder="Enter your name"
+              class="form-control"
+              required
+            />
             <small v-if="nameError" class="text-danger">{{ nameError }}</small>
           </div>
-
           <!-- Email Field -->
           <div class="form-group">
             <label for="email">Email*</label>
-            <input id="email" type="email" v-model="user.email" placeholder="Enter your email" class="form-control"
-              required />
-            <small v-if="emailError" class="text-danger">{{ emailError }}</small>
+            <input
+              id="email"
+              type="email"
+              v-model="user.email"
+              placeholder="Enter your email"
+              class="form-control"
+              required
+            />
+            <small v-if="emailError" class="text-danger">{{
+              emailError
+            }}</small>
           </div>
-
           <!-- Password Field -->
           <div class="form-group">
             <label for="password">Password*</label>
-            <input id="password" type="password" v-model="user.password" placeholder="Enter your password"
-              class="form-control" required />
-            <small v-if="passwordError" class="text-danger">{{ passwordError }}</small>
+            <input
+              id="password"
+              type="password"
+              v-model="user.password"
+              placeholder="Enter your password"
+              class="form-control"
+              required
+            />
+            <small v-if="passwordError" class="text-danger">{{
+              passwordError
+            }}</small>
           </div>
-
           <!-- Submit Button & Loading Spinner -->
           <div class="form-group">
             <button type="submit" class="btn-submit" :disabled="isLoading">
@@ -37,7 +56,6 @@
             </button>
             <div v-if="isLoading" class="spinner"></div>
           </div>
-
           <!-- Status Message -->
           <p v-if="statusMessage" :class="['status-message', messageClass]">
             {{ statusMessage }}
@@ -49,18 +67,20 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useAuthStore } from "@/stores/useAuthStore";
 import axios from "axios";
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 import { BASE_URL } from "@/helpers/baseUrls";
+import { useAuthStore } from "@/stores/useAuthStore";
 
+const router = useRouter();
 const store = useAuthStore();
 
 const user = ref({
   name: "",
-  email: "",
-  password: "",
-  positionId: 2, // Default role: set to Guest (positionId 2)
+  email: "guest@example.com",
+  password: "guest123",
+  positionId: 2, // Default role: Guest
 });
 
 const isLoading = ref(false);
@@ -81,22 +101,18 @@ const validateForm = () => {
     nameError.value = "Name is required.";
     valid = false;
   }
-
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!user.value.email || !emailRegex.test(user.value.email)) {
     emailError.value = "Please enter a valid email.";
     valid = false;
   }
-
   if (!user.value.password || user.value.password.length < 6) {
     passwordError.value = "Password must be at least 6 characters.";
     valid = false;
   }
-
   return valid;
 };
 
-// Registration logic
 const userRegister = async () => {
   if (!validateForm()) return;
 
@@ -104,37 +120,34 @@ const userRegister = async () => {
   isLoading.value = true;
 
   try {
-    const response = await axios.post(
-      `${BASE_URL}/users`,
-      user.value,
-      {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await axios.post(`${BASE_URL}/users`, user.value, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
 
     const data = response.data.data;
 
+    // ✅ Store the token immediately
     store.setAuthData({
       id: data.id,
       name: data.name,
       email: data.email,
       positionId: data.positionId,
-      token: data.token,
+      token: data.token, // 🔥 Ensure token is stored
     });
 
     messageClass.value = "text-success";
     statusMessage.value = "Registration successful!";
-    user.value = { name: "", email: "", password: "", positionId: 2 };
-    // Redirect user after successful registration
-    this.$router.push("/");
 
+    // ✅ Redirect user immediately
+    router.push("/profile");
   } catch (error) {
     console.error("Registration error:", error);
     messageClass.value = "text-danger";
-    statusMessage.value = error.response?.data?.message || "Registration failed";
+    statusMessage.value =
+      error.response?.data?.message || "Registration failed";
     store.clearStoredData();
   } finally {
     isLoading.value = false;
@@ -149,7 +162,8 @@ const userRegister = async () => {
   justify-content: center;
   align-items: center;
   height: 85vh;
-  background: url("https://source.unsplash.com/1600x900/?cinema,retro") center/cover no-repeat;
+  background: url("https://source.unsplash.com/1600x900/?cinema,retro")
+    center/cover no-repeat;
   backdrop-filter: blur(8px);
 }
 
@@ -198,14 +212,13 @@ label {
   transition: all 0.3s ease-in-out;
 }
 
-/* === Input Focus Effect === */
 .form-control:focus {
   outline: none;
   border-color: #ffd700;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
-/* === Buttons === */
+/* === Button === */
 .btn-submit {
   width: 100%;
   padding: 12px;
@@ -254,7 +267,6 @@ label {
   0% {
     transform: rotate(0deg);
   }
-
   100% {
     transform: rotate(360deg);
   }

@@ -10,14 +10,12 @@ export const useAuthStore = defineStore("auth", {
   }),
   actions: {
     setAuthData(payload) {
-      // Update all fields
       this.id = payload.id;
       this.user = payload.name;
       this.email = payload.email;
       this.positionId = payload.positionId;
       this.token = payload.token;
 
-      // Persist to localStorage
       localStorage.setItem("id", payload.id);
       localStorage.setItem("user", payload.name);
       localStorage.setItem("email", payload.email);
@@ -25,15 +23,15 @@ export const useAuthStore = defineStore("auth", {
       localStorage.setItem("token", payload.token);
     },
     clearStoredData() {
-      // Remove all stored data
       localStorage.removeItem("id");
       localStorage.removeItem("user");
       localStorage.removeItem("email");
       localStorage.removeItem("positionId");
       localStorage.removeItem("token");
-
-      // Reset state
       this.$reset();
+    },
+    logout() {
+      this.clearStoredData();
     }
   },
 });

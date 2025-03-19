@@ -27,6 +27,10 @@ Route::patch('users/{id}', [UserController::class, 'update'])
     ->middleware('auth:sanctum');
 Route::delete('users/{id}', [UserController::class, 'destroy'])
     ->middleware('auth:sanctum');
+Route::middleware('auth:sanctum')->group(function () {
+    Route::delete('users/{id}', [UserController::class, 'destroy']);
+});
+
 
 // positions
 Route::get('positions', [PositionController::class, 'index']);

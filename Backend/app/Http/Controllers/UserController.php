@@ -88,9 +88,16 @@ class UserController extends Controller
     public function store(StoreUserRequest $request)
     {
         $user = User::create($request->validated());
+
+        // Generate token immediately after registration
+        $token = $user->createToken('registration-token')->plainTextToken;
+
         return response()->json([
             'message' => 'User created',
-            'data' => $user
+            'data' => [
+                'user' => $user,
+                'token' => $token
+            ]
         ], 201, [], JSON_UNESCAPED_UNICODE);
     }
 
@@ -130,22 +137,17 @@ class UserController extends Controller
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-
-    public function destroy(int $id)
+    public function destroy(Request $request, $id)
     {
-        $user = User::find($id);
+        $user = User::findOrFail($id);
 
-        if (!$user) {
-            return response()->json([
-                'message' => 'Not found',
-                'data' => ['id' => $id]
-            ], 404, [], JSON_UNESCAPED_UNICODE);
+        // Allow deletion only if the authenticated user is deleting their own account
+        if ($request->user()->id !== $user->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $user->delete();
-        return response()->json([
-            'message' => 'User deleted',
-            'data' => ['id' => $id]
-        ], 200, [], JSON_UNESCAPED_UNICODE);
+
+        return response()->json(['message' => 'User deleted successfully'], 200);
     }
 }

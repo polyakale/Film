@@ -2,7 +2,7 @@
   <div class="profile-container">
     <div class="profile-card">
       <div class="profile-header">
-        <h2>Profile</h2>
+        <h2>🎭 User Profile</h2>
       </div>
       <div class="profile-body">
         <!-- User Information -->
@@ -19,30 +19,48 @@
           <form @submit.prevent="changePassword" class="password-form">
             <div class="form-group">
               <label>Current Password</label>
-              <input type="password" v-model="password.current" class="form-control" required />
+              <input
+                type="password"
+                v-model="password.current"
+                class="form-control"
+                required
+              />
             </div>
-
             <div class="form-group">
               <label>New Password</label>
-              <input type="password" v-model="password.new" class="form-control" required />
+              <input
+                type="password"
+                v-model="password.new"
+                class="form-control"
+                required
+              />
             </div>
-
             <div class="form-group">
               <label>Confirm New Password</label>
-              <input type="password" v-model="password.confirm" class="form-control" required />
+              <input
+                type="password"
+                v-model="password.confirm"
+                class="form-control"
+                required
+              />
             </div>
-
             <div class="form-group">
               <button type="submit" class="btn-submit" :disabled="loading">
                 Change Password
               </button>
               <div v-if="loading" class="spinner"></div>
             </div>
-
             <p v-if="message" :class="['status-message', messageClass]">
               {{ message }}
             </p>
           </form>
+        </div>
+
+        <!-- Delete Account Button -->
+        <div class="delete-account-section">
+          <button class="btn-delete" @click="deleteAccount">
+            Delete Account
+          </button>
         </div>
       </div>
     </div>
@@ -51,46 +69,39 @@
 
 <script setup>
 import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/useAuthStore";
 import axios from "axios";
 import { BASE_URL } from "@/helpers/baseUrls";
 
-// Access the store using Pinia
 const store = useAuthStore();
+const router = useRouter();
 
-// Reactive state for the password form
+const user = computed(() => store.user);
+const email = computed(() => store.email || "N/A");
+const roleName = computed(() =>
+  store.positionId === 1 ? "Administrator" : "Guest"
+);
+
+// **🔹 Add Password Object (initialization)**
 const password = ref({
   current: "",
   new: "",
   confirm: "",
 });
-const loading = ref(false);
-const message = ref("");
-const messageClass = ref("");
 
-// Computed properties for user data and role name
-const user = computed(() => store.user);
-const email = computed(() => store.email || "N/A");
-const roleName = computed(() => (store.positionId === 1 ? "Administrator" : "Guest"));
+// **🔹 Define loading and message properties**
+const loading = ref(false); // Define loading state
+const message = ref(""); // Define message state
+const messageClass = ref(""); // Define class for message styling
 
-// Show message temporarily
-const showMessage = (text, style) => {
-  message.value = text;
-  messageClass.value = style;
-  setTimeout(() => {
-    message.value = "";
-    messageClass.value = "";
-  }, 5000);
-};
-
-// Handle password change
+// **🔹 Handle Password Change**
 const changePassword = async () => {
   if (password.value.new !== password.value.confirm) {
-    showMessage("New passwords do not match", "error-message");
+    console.log("New passwords do not match.");
     return;
   }
-
-  loading.value = true;
+  loading.value = true; // Set loading to true when the password change is in progress
   try {
     await axios.patch(
       `${BASE_URL}/users/change-password`,
@@ -106,15 +117,39 @@ const changePassword = async () => {
         },
       }
     );
-
-    showMessage("Password changed successfully!", "success-message");
+    console.log("Password changed successfully!");
     password.value = { current: "", new: "", confirm: "" };
+    message.value = "Password updated successfully!";
+    messageClass.value = "success-message";
   } catch (error) {
     console.error("Password change error:", error);
-    const errorMsg = error.response?.data?.message || "Password change failed";
-    showMessage(errorMsg, "error-message");
+    message.value = "Password change failed.";
+    messageClass.value = "error-message";
   } finally {
-    loading.value = false;
+    loading.value = false; // Set loading to false after the password change process ends
+  }
+};
+
+// **🔹 Handle Account Deletion**
+const deleteAccount = async () => {
+  if (
+    window.confirm(
+      "Are you sure you want to delete your account? This action cannot be undone."
+    )
+  ) {
+    try {
+      await axios.delete(`${BASE_URL}/users/${store.id}`, {
+        headers: {
+          Authorization: `Bearer ${store.token}`,
+        },
+      });
+      store.clearStoredData();
+      router.push("/registration");
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      message.value = "Failed to delete account.";
+      messageClass.value = "error-message";
+    }
   }
 };
 </script>
@@ -126,7 +161,8 @@ const changePassword = async () => {
   justify-content: center;
   align-items: center;
   height: 85vh;
-  background: url("https://source.unsplash.com/1600x900/?cinema,retro") center/cover no-repeat;
+  background: url("https://source.unsplash.com/1600x900/?cinema,retro")
+    center/cover no-repeat;
   backdrop-filter: blur(8px);
 }
 
@@ -140,7 +176,6 @@ const changePassword = async () => {
   width: 100%;
   max-width: 450px;
   text-align: center;
-  /* Removed border-radius for sharp edges */
 }
 
 /* === Header === */
@@ -166,25 +201,16 @@ const changePassword = async () => {
   color: #ffd700;
 }
 
-/* === Section Titles === */
-.section-title {
-  font-family: "Poppins", sans-serif;
-  font-size: 1.3rem;
-  font-weight: bold;
+/* === Password Form === */
+.password-section {
   text-align: left;
-  color: #ffd700;
-  margin-top: 1.5rem;
-  border-bottom: 2px solid rgba(255, 215, 0, 0.4);
-  padding-bottom: 0.3rem;
 }
 
-/* === Password Form === */
 .password-form {
   text-align: left;
   padding-top: 1rem;
 }
 
-/* === Inputs === */
 .form-group {
   margin-bottom: 1rem;
 }
@@ -203,11 +229,9 @@ label {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
-  /* Removed border-radius for sharp edges */
   transition: all 0.3s ease-in-out;
 }
 
-/* === Input Focus Effect === */
 .form-control:focus {
   outline: none;
   border-color: #ffd700;
@@ -223,7 +247,6 @@ label {
   color: black;
   background: #ffd700;
   border: none;
-  /* Removed border-radius for sharp edges */
   transition: all 0.3s ease-in-out;
   cursor: pointer;
 }
@@ -231,6 +254,29 @@ label {
 .btn-submit:hover {
   background: #ffc107;
   box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+/* === Delete Account Button === */
+.delete-account-section {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.btn-delete {
+  width: 100%;
+  padding: 12px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: white;
+  background: #ff4d4d;
+  border: none;
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+.btn-delete:hover {
+  background: #e60000;
+  box-shadow: 0 0 15px rgba(255, 77, 77, 0.6);
 }
 
 /* === Loading Spinner === */
@@ -263,7 +309,6 @@ label {
   0% {
     transform: rotate(0deg);
   }
-
   100% {
     transform: rotate(360deg);
   }
