@@ -18,22 +18,38 @@
     </div>
 
     <div v-if="isAdmin" class="admin-actions">
-      <button @click="openAddFilmModal" class="add-film-button">Add New Film</button>
+      <button @click="openAddFilmModal" class="add-film-button">
+        Add New Film
+      </button>
     </div>
 
     <div v-if="films.length" class="films-grid">
       <div v-for="film in filteredFilms" :key="film.id" class="film-card">
         <h2 class="film-title">{{ film.title }}</h2>
-        <p class="film-info"><strong>Production Year:</strong> {{ film.production }}</p>
+        <p class="film-info">
+          <strong>Production Year:</strong> {{ film.production }}
+        </p>
         <p class="film-info"><strong>Length:</strong> {{ film.length }} min</p>
-        <p class="film-info"><strong>Presentation:</strong> {{ formatDate(film.presentation) }}</p>
-        <a v-if="film.imdbLink" :href="formatImdbUrl(film.imdbLink)" target="_blank" rel="noopener noreferrer" class="imdb-link">
+        <p class="film-info">
+          <strong>Presentation:</strong> {{ formatDate(film.presentation) }}
+        </p>
+        <a
+          v-if="film.imdbLink"
+          :href="formatImdbUrl(film.imdbLink)"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="imdb-link"
+        >
           View on IMDb
         </a>
 
         <div v-if="isAdmin" class="film-actions">
-          <button @click="openEditFilmModal(film)" class="edit-button">Edit</button>
-          <button @click="deleteFilm(film.id)" class="delete-button">Delete</button>
+          <button @click="openEditFilmModal(film)" class="edit-button">
+            Edit
+          </button>
+          <button @click="deleteFilm(film.id)" class="delete-button">
+            Delete
+          </button>
         </div>
       </div>
     </div>
@@ -102,7 +118,7 @@ export default {
   data() {
     return {
       urlApi: `${BASE_URL}/films`,
-      stateAuth: useAuthStore,
+      stateAuth: useAuthStore(),
       films: [],
       isAdmin: true,
       searchQuery: "",
@@ -115,14 +131,15 @@ export default {
         production: "",
         length: "",
         presentation: "",
-        imdbLink: ""
+        imdbLink: "",
       },
-      editingFilm: null
+      editingFilm: null,
     };
   },
   async mounted() {
     await this.fetchFilmsFromBackend();
     this.filteredFilms = this.films;
+    this.isAdmin = this.stateAuth.positionId == 1 ? true : false;
   },
   watch: {
     searchQuery() {
@@ -130,14 +147,17 @@ export default {
     },
     sortOption() {
       this.sortFilms();
-    }
+    },
   },
   methods: {
     async fetchFilmsFromBackend() {
       try {
         const response = await axios.get(`${BASE_URL}/films`);
-        this.films = Array.isArray(response.data.data) ? response.data.data : [];
+        this.films = Array.isArray(response.data.data)
+          ? response.data.data
+          : [];
         this.filteredFilms = this.films;
+        // console.log("useAuthStore.positionId", this.stateAuth.positionId);
       } catch (error) {
         console.error("Error fetching films from backend:", error);
         this.films = [];
@@ -158,10 +178,11 @@ export default {
     },
     searchFilms() {
       const query = this.searchQuery.toLowerCase();
-      this.filteredFilms = this.films.filter(film => 
-        film.title.toLowerCase().includes(query) || 
-        film.production.toString().includes(query) || 
-        film.length.toString().includes(query)
+      this.filteredFilms = this.films.filter(
+        (film) =>
+          film.title.toLowerCase().includes(query) ||
+          film.production.toString().includes(query) ||
+          film.length.toString().includes(query)
       );
       this.sortFilms();
     },
@@ -179,33 +200,39 @@ export default {
     },
     closeAddFilmModal() {
       this.showAddFilmModal = false;
-      this.newFilm = { title: "", production: "", length: "", presentation: "", imdbLink: "" };
+      this.newFilm = {
+        title: "",
+        production: "",
+        length: "",
+        presentation: "",
+        imdbLink: "",
+      };
     },
     async submitNewFilm() {
-  try {
-    const token = this.stateAuth.token;
-    const headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    };
-    const data = {
-      title: this.newFilm.title,
-      production: this.newFilm.production,
-      length: this.newFilm.length,
-      presentation: this.newFilm.presentation,
-      imdbLink: this.newFilm.imdbLink,
-    };
-    // Küldés a backend felé
-    const response = await axios.post(this.urlApi, data, { headers });
-    // Új film hozzáadása a listához
-    this.films.push(response.data.data);
-    this.filteredFilms = this.films;
-    this.closeAddFilmModal(); // Modal bezárása
-  } catch (error) {
-    console.error("Error adding new film:", error);
-  }
-},
+      try {
+        const token = this.stateAuth.token;
+        const headers = {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+        const data = {
+          title: this.newFilm.title,
+          production: this.newFilm.production,
+          length: this.newFilm.length,
+          presentation: this.newFilm.presentation,
+          imdbLink: this.newFilm.imdbLink,
+        };
+        // Küldés a backend felé
+        const response = await axios.post(this.urlApi, data, { headers });
+        // Új film hozzáadása a listához
+        this.films.push(response.data.data);
+        this.filteredFilms = this.films;
+        this.closeAddFilmModal(); // Modal bezárása
+      } catch (error) {
+        console.error("Error adding new film:", error);
+      }
+    },
     openEditFilmModal(film) {
       this.editingFilm = { ...film };
       this.showEditFilmModal = true;
@@ -215,28 +242,46 @@ export default {
       this.editingFilm = null;
     },
     async submitEditedFilm() {
-      try {
-        const response = await axios.put(`${BASE_URL}/films/${this.editingFilm.id}`, this.editingFilm);
-        const index = this.films.findIndex(film => film.id === this.editingFilm.id);
-        this.films.splice(index, 1, response.data.data);
-        this.filteredFilms = this.films;
-        this.closeEditFilmModal();
-      } catch (error) {
-        console.error("Error editing film:", error);
-      }
-    },
-    async deleteFilm(filmId) {
-      if (confirm("Are you sure you want to delete this film?")) {
-        try {
-          await axios.delete(`${BASE_URL}/films/${filmId}`);
-          this.films = this.films.filter(film => film.id !== filmId);
-          this.filteredFilms = this.films;
-        } catch (error) {
-          console.error("Error deleting film:", error);
-        }
-      }
+  try {
+    const token = this.stateAuth.token;
+    const headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+    const response = await axios.put(
+      `${this.urlApi}/${this.editingFilm.id}`,
+      this.editingFilm,
+      { headers }
+    );
+    const index = this.films.findIndex(
+      (film) => film.id === this.editingFilm.id
+    );
+    this.films.splice(index, 1, response.data.data);
+    this.filteredFilms = this.films;
+    this.closeEditFilmModal();
+  } catch (error) {
+    console.error("Error editing film:", error);
+  }
+},
+async deleteFilm(filmId) {
+  if (confirm("Are you sure you want to delete this film?")) {
+    try {
+      const token = this.stateAuth.token;
+      const headers = {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+      await axios.delete(`${this.urlApi}/${filmId}`, { headers });
+      this.films = this.films.filter((film) => film.id !== filmId);
+      this.filteredFilms = this.films;
+    } catch (error) {
+      console.error("Error deleting film:", error);
     }
   }
+},
+  },
 };
 </script>
 
@@ -320,7 +365,7 @@ export default {
 
 .add-film-button {
   padding: 10px 20px;
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   border: none;
   border-radius: 5px;
@@ -336,7 +381,8 @@ export default {
   margin-top: 15px;
 }
 
-.edit-button, .delete-button {
+.edit-button,
+.delete-button {
   padding: 5px 10px;
   margin: 0 5px;
   border: none;
@@ -346,7 +392,7 @@ export default {
 }
 
 .edit-button {
-  background: #2196F3;
+  background: #2196f3;
   color: white;
 }
 
