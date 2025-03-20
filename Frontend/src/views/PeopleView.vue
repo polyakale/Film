@@ -24,13 +24,10 @@
       <div v-for="person in filteredPeople" :key="person.peopleName" class="person-card">
         <!-- Kép -->
         <img :src="getImageUrl(person.photo)" alt="Image" class="person-image" />
-        
         <!-- Név -->
         <h2 class="person-name">{{ person.peopleName }}</h2>
-        
         <!-- Nem -->
-        <p class="person-gender"><strong>Gender:</strong> {{ person.gender }}</p>
-        
+        <!-- <p class="person-gender"><strong>Gender:</strong> {{ person.gender }}</p> -->
         <!-- Alternatív nevek -->
         <ul class="name-list">
           <li v-for="(name, index) in person.names" :key="index">
@@ -77,9 +74,8 @@
           <label>Gender:</label>
           <select v-model="newPerson.gender" required>
             <option value="">Select gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
+            <option value="true">Male</option>
+            <option value="false">Female</option>
           </select>
 
           <button type="submit">Save</button>
@@ -106,8 +102,8 @@
           <label>Gender:</label>
           <select v-model="editingPerson.gender" required>
             <option value="">Select gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
+            <option value="true">Male</option>
+            <option value="false">Female</option>
           </select>
 
           <button type="submit">Save</button>
@@ -144,7 +140,7 @@ export default {
     };
   },
   async mounted() {
-    await this.peopleNames();
+    await this.fetchPeopleFromBackend();
     this.filteredPeople = this.people;
     this.isAdmin = this.stateAuth.positionId == 1 ? true : false;
   },
@@ -154,7 +150,7 @@ export default {
     },
   },
   methods: {
-    async peopleNames() {
+    async fetchPeopleFromBackend() {
       try {
         const response = await axios.get(`${BASE_URL}/people`);
         this.people = Array.isArray(response.data.data)
@@ -201,10 +197,13 @@ export default {
           name: this.newPerson.name,
           photo: this.newPerson.photo || null,
           imdbLink: this.newPerson.imdbLink,
-          gender: this.newPerson.gender, // Új mező: nem
+          gender: this.newPerson.gender === "true", // Új mező: nem
         };
+        console.log("Gender:", data);
+        
         const response = await axios.post(this.urlApi, data, { headers });
-        this.people.push(response.data.data);
+        // this.people.push(response.data.data);
+        this.fetchPeopleFromBackend();
         this.filteredPeople = this.people;
         this.closeAddPersonModal();
       } catch (error) {
@@ -257,8 +256,12 @@ export default {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           };
-          await axios.delete(`${this.urlApi}/people/${personId}`, { headers });
-          this.people = this.people.filter((person) => person.id !== personId);
+          const url = `${this.urlApi}/${personId}`;
+         
+          
+          await axios.delete(url, { headers });
+          this.fetchPeopleFromBackend();
+          
           this.filteredPeople = this.people;
         } catch (error) {
           console.error("Error deleting person:", error);
@@ -291,7 +294,7 @@ export default {
 
 .people-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 20px;
   justify-content: center;
 }
@@ -312,7 +315,7 @@ export default {
 
 .person-image {
   width: 100%;
-  height: 250px;
+  height: 150px;
   object-fit: cover;
   border-radius: 8px;
 }
