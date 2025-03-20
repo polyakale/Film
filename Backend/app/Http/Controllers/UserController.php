@@ -24,7 +24,14 @@ class UserController extends Controller
         }
 
         $user->tokens()->delete();
-        $token = $user->createToken('access')->plainTextToken;
+        if ($user->positionId == 1) {
+           //admin küldünk tokent
+
+           $token = $user->createToken('access')->plainTextToken;
+        }else {
+            //user nem küldünk tokent
+            $token = "";
+        }
 
         return response()->json([
             'message' => 'ok',
