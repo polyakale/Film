@@ -42,24 +42,20 @@
                 </td>
                 <td data-label="Evaluation" class="text-center">
                   <div class="star-rating d-inline-flex align-items-center">
-                    <template v-for="index in 5" :key="index">
-                      <!-- Full Star -->
-                      <i
-                        v-if="favourite.evaluation >= index"
-                        class="bi bi-star-fill text-warning mx-1"
-                      ></i>
-
-                      <!-- Half Star -->
-                      <i
-                        v-else-if="favourite.evaluation + 0.5 >= index"
-                        class="bi bi-star-half text-warning mx-1"
-                      ></i>
-
-                      <!-- Empty Star -->
-                      <i v-else class="bi bi-star text-warning mx-1"></i>
-                    </template>
+                    <i
+                      v-for="starIndex in 5"
+                      :key="starIndex"
+                      class="bi mx-1 text-warning"
+                      :class="{
+                        'bi-star-fill': getEvaluation(favourite) >= starIndex,
+                        'bi-star-half':
+                          getEvaluation(favourite) + 0.5 >= starIndex &&
+                          getEvaluation(favourite) < starIndex,
+                        'bi-star': getEvaluation(favourite) + 0.5 < starIndex,
+                      }"
+                    ></i>
                     <small class="text-muted ms-2">
-                      ({{ favourite.evaluation.toFixed(1) }})
+                      ({{ formatEvaluation(favourite.evaluation) }})
                     </small>
                   </div>
                 </td>
@@ -98,7 +94,6 @@
       @yesEvent="yesEventHandler"
     >
       <div v-if="state == 'Delete'">{{ messageYesNo }}</div>
-
       <ReviewForm
         v-if="state == 'Create' || state == 'Update'"
         :itemForm="item"
@@ -116,7 +111,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { BASE_URL } from "../helpers/baseUrls";
 import axios from "axios";
 import ReviewForm from "@/components/forms/ReviewForm.vue";
-import * as bootstrap from "bootstrap"; // Import bootstrap
+import * as bootstrap from "bootstrap";
 
 class Item {
   constructor(id = null, userId = null, filmId = null, evaluation = null) {
@@ -126,11 +121,12 @@ class Item {
     this.evaluation = evaluation;
   }
 }
+
 export default {
-  components: { Paginator, OperationsCrud, Modal, ReviewForm }, // Add Modal and ReviewForm
+  components: { Paginator, OperationsCrud, Modal, ReviewForm },
   data() {
     return {
-      favourites: [], // All favourites
+      favourites: [],
       authStore: useAuthStore(),
       currentPage: 1,
       itemsPerPage: 5,
@@ -140,7 +136,7 @@ export default {
       modal: null,
       item: new Item(),
       messageYesNo: null,
-      state: "Read", //CRUD: Create, Read, Update, Delete
+      state: "Read",
       title: null,
       yes: null,
       no: null,
@@ -150,80 +146,76 @@ export default {
   },
   mounted() {
     this.fetchFavourites();
-    this.modal = new bootstrap.Modal("#modal", {
-      // Initialize modal
-      keyboard: false,
-    });
+    this.modal = new bootstrap.Modal("#modal", { keyboard: false });
   },
   computed: {
     paginatedFavourites() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
-      const end = start + this.itemsPerPage;
-      return this.favourites.slice(start, end);
+      return this.favourites.slice(start, start + this.itemsPerPage);
     },
     totalPages() {
       return Math.ceil(this.favourites.length / this.itemsPerPage);
     },
     pagesArray() {
-      const pages = [];
-      for (let i = 1; i <= this.totalPages; i++) {
-        pages.push(i);
-      }
-      return pages;
+      return Array.from({ length: this.totalPages }, (_, i) => i + 1);
     },
   },
   methods: {
+    yesEventHandler() {
+      if (this.state === "Delete") {
+        this.deleteItemById();
+      }
+    },
+    getEvaluation(favourite) {
+      return Number(favourite.evaluation) || 0;
+    },
+    formatEvaluation(value) {
+      return Number(value) ? Number(value).toFixed(1) : "N/A";
+    },
     async fetchFavourites() {
       try {
         this.loading = true;
-        // Get the token from the auth store
         const token = this.authStore.token;
-
-        // Fetch the favourites with the Authorization token in the header
         const response = await axios.get(`${BASE_URL}/favourites`, {
-          headers: {
-            Authorization: `Bearer ${token}`, // Pass token in the Authorization header
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        console.log("Fetched favourites:", response.data);
+        if (response.data?.data) {
+          // Convert evaluations first
+          this.favourites = response.data.data.map((fav) => ({
+            ...fav,
+            evaluation: Number(fav.evaluation) || 0,
+          }));
 
-        if (response.data && Array.isArray(response.data.data)) {
-          this.favourites = response.data.data;
+          // Fetch user and film data in parallel
+          const enrichedFavourites = await Promise.all(
+            this.favourites.map(async (fav) => {
+              try {
+                const [userResponse, filmResponse] = await Promise.all([
+                  axios.get(`${BASE_URL}/users/${fav.userId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                  }),
+                  axios.get(`${BASE_URL}/films/${fav.filmId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                  }),
+                ]);
 
-          // Fetch all user and film data in parallel using Promise.all
-          const userPromises = this.favourites.map(
-            (favourite) =>
-              axios
-                .get(`${BASE_URL}/users/${favourite.userId}`, {
-                  headers: { Authorization: `Bearer ${token}` }, // Add token for user data request
-                })
-                .then((res) => res.data)
-                .catch(() => ({ name: "Unknown User" })) // Fallback if user fetch fails
+                return {
+                  ...fav,
+                  userName: userResponse.data.name || "Unknown User",
+                  filmName: filmResponse.data.name || "Unknown Film",
+                };
+              } catch (error) {
+                return {
+                  ...fav,
+                  userName: "Unknown User",
+                  filmName: "Unknown Film",
+                };
+              }
+            })
           );
 
-          const filmPromises = this.favourites.map(
-            (favourite) =>
-              axios
-                .get(`${BASE_URL}/films/${favourite.filmId}`, {
-                  headers: { Authorization: `Bearer ${token}` }, // Add token for film data request
-                })
-                .then((res) => res.data)
-                .catch(() => ({ name: "Unknown Film" })) // Fallback if film fetch fails
-          );
-
-          // Wait for all promises to resolve
-          const users = await Promise.all(userPromises);
-          const films = await Promise.all(filmPromises);
-
-          // Update favourites with user and film data
-          this.favourites.forEach((favourite, index) => {
-            favourite.userName = users[index].name || "Unknown User";
-            favourite.filmName = films[index].name || "Unknown Film";
-          });
-        } else {
-          console.error("Invalid data format:", response.data);
-          this.errorMessages = "Invalid data format from server";
+          this.favourites = enrichedFavourites;
         }
       } catch (error) {
         console.error("Error fetching favourites:", error);
@@ -232,19 +224,27 @@ export default {
         this.loading = false;
       }
     },
-
+    async deleteItemById() {
+      const id = this.selectedRowId;
+      try {
+        await axios.delete(`${BASE_URL}/favourites/${id}`, {
+          headers: { Authorization: `Bearer ${this.authStore.token}` },
+        });
+        this.fetchFavourites();
+      } catch (error) {
+        this.errorMessages = "Az értékelés nem törölhető.";
+      }
+    },
     formatDate(date) {
-      if (!date) return "N/A";
-      const d = new Date(date);
-      return isNaN(d) ? "N/A" : d.toLocaleString("hu-HU");
+      try {
+        const d = new Date(date);
+        return isNaN(d) ? "N/A" : d.toLocaleString("hu-HU");
+      } catch {
+        return "N/A";
+      }
     },
     handlePageChange(pageInfo) {
       this.currentPage = pageInfo.pageNumber;
-    },
-    onClickCloseErrorMessage() {
-      this.errorMessages = null;
-      this.loading = false;
-      this.state = "Read";
     },
     onClickDeleteButton(item) {
       this.state = "Delete";
@@ -252,10 +252,8 @@ export default {
       this.messageYesNo = `Valóban törölni akarod a(z) ${item.userName} nevű értékelést?`;
       this.yes = "Igen";
       this.no = "Nem";
-      this.size = null;
       this.selectedRowId = item.id;
     },
-
     onClickUpdate(item) {
       this.state = "Update";
       this.title = "Értékelés módosítása";
@@ -265,95 +263,10 @@ export default {
       this.item = { ...item };
       this.selectedRowId = item.id;
     },
-
-    onClickCreate() {
-      this.title = "Új értékelés";
-      this.yes = null;
-      this.no = "Mégsem";
-      this.size = "lg";
-      this.state = "Create";
-      this.item = new Item();
-    },
-    async deleteItemById() {
-      const id = this.selectedRowId;
-      const token = this.authStore.token;
-
-      const url = `${BASE_URL}/favourites/${id}`;
-      const headers = {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
-
-      try {
-        const response = await axios.delete(url, { headers });
-        this.getCollections();
-      } catch (error) {
-        this.errorMessages = "Az értékelés nem törölhető.";
-      }
-    },
-    async updateItem() {
-      this.loading = true;
-      const id = this.selectedRowId;
-      const url = `${BASE_URL}/favourites/${id}`;
-      const headers = {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.authStore.token}`,
-      };
-
-      const data = {
-        userId: this.item.userId,
-        filmId: this.item.filmId,
-        evaluation: this.item.evaluation,
-      };
-      try {
-        const response = await axios.patch(url, data, { headers });
-        this.getCollections();
-      } catch (error) {
-        this.errorMessages = "A módosítás nem sikerült.";
-      }
-      this.state = "Read";
-    },
-
-    async createItem() {
-      const token = this.authStore.token;
-      const url = `${BASE_URL}/favourites`;
-      const headers = {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
-
-      const data = {
-        userId: this.item.userId,
-        filmId: this.item.filmId,
-        evaluation: this.item.evaluation,
-      };
-      try {
-        const response = await axios.post(url, data, { headers });
-        this.getCollections();
-      } catch (error) {
-        this.errorMessages = "A bővítés nem sikerült.";
-      }
-      this.state = "Read";
-    },
     saveItemHandler() {
-      if (this.state === "Update") {
-        this.updateItem();
-      } else if (this.state === "Create") {
-        this.createItem();
-      } else if (this.state === "Delete") {
-        this.deleteItemById();
-      }
-
+      if (this.state === "Update") this.updateItem();
+      if (this.state === "Delete") this.deleteItemById();
       this.modal.hide();
-    },
-    yesEventHandler() {
-      if (this.state == "Delete") {
-        this.deleteItemById();
-        this.goToPage(1);
-      }
     },
   },
 };
@@ -365,9 +278,7 @@ export default {
   line-height: 1;
 }
 
-.bi-star-fill,
-.bi-star-half,
-.bi-star {
+.bi {
   font-size: 1.25rem;
   vertical-align: middle;
 }
@@ -376,32 +287,15 @@ export default {
   color: #6c757d;
   font-size: 0.9rem;
 }
+
 .review-card {
   border: 1px solid #ddd;
   padding: 1rem;
   margin-bottom: 1rem;
   border-radius: 8px;
 }
-.review-header {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-.stars {
-  color: gold;
-  font-weight: bold;
-}
-.star-rating {
-  display: inline-flex;
-  font-size: 1.25rem;
-  line-height: 1;
-  color: gold;
-}
 
-.star-container {
-  position: relative;
-  display: inline-block;
-  width: 1em;
+.text-warning {
+  color: #ffc107 !important;
 }
 </style>
