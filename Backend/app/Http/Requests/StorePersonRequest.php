@@ -22,7 +22,7 @@ class StorePersonRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|min:8',
+            'name' => 'required|string|min:2',
             'gender' => 'required|boolean',
             'photo' => 'required|string|min:5',
             'imdbLink' => 'string',
