@@ -13,7 +13,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "positionId": 1,
+    
     "email": "admin@example.com",
     "password": "admin123"
 }
