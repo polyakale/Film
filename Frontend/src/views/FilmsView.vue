@@ -249,7 +249,7 @@ export default {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     };
-    const response = await axios.put(
+    const response = await axios.patch(
       `${this.urlApi}/${this.editingFilm.id}`,
       this.editingFilm,
       { headers }
