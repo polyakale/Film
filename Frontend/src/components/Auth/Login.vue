@@ -9,15 +9,27 @@
           <!-- Email Field -->
           <div class="form-group">
             <label for="email">Email</label>
-            <input id="email" type="email" v-model="user.email" placeholder="Enter your email" class="form-control"
-              required />
+            <input
+              id="email"
+              type="email"
+              v-model="user.email"
+              placeholder="Enter your email"
+              class="form-control"
+              required
+            />
           </div>
 
           <!-- Password Field -->
           <div class="form-group">
             <label for="password">Password</label>
-            <input id="password" type="password" v-model="user.password" placeholder="Enter your password"
-              class="form-control" required />
+            <input
+              id="password"
+              type="password"
+              v-model="user.password"
+              placeholder="Enter your password"
+              class="form-control"
+              required
+            />
           </div>
 
           <!-- Submit Button & Loading Spinner -->
@@ -117,7 +129,8 @@ const userAuth = async () => {
   justify-content: center;
   align-items: center;
   height: 80vh;
-  background: url("https://source.unsplash.com/1600x900/?cinema,retro") center/cover no-repeat;
+  background: url("https://source.unsplash.com/1600x900/?cinema,retro")
+    center/cover no-repeat;
   backdrop-filter: blur(8px);
 }
 
