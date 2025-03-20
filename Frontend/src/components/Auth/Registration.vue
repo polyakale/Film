@@ -8,7 +8,7 @@
         <form @submit.prevent="userRegister">
           <!-- Name Field -->
           <div class="form-group">
-            <label for="name">Name*</label>
+            <label for="name" class="form-label">Name*</label>
             <input
               id="name"
               type="text"
@@ -21,7 +21,7 @@
           </div>
           <!-- Email Field -->
           <div class="form-group">
-            <label for="email">Email*</label>
+            <label for="email" class="form-label">Email*</label>
             <input
               id="email"
               type="email"
@@ -36,7 +36,7 @@
           </div>
           <!-- Password Field -->
           <div class="form-group">
-            <label for="password">Password*</label>
+            <label for="password" class="form-label">Password*</label>
             <input
               id="password"
               type="password"
@@ -49,6 +49,7 @@
               passwordError
             }}</small>
           </div>
+
           <!-- Submit Button & Loading Spinner -->
           <div class="form-group">
             <button type="submit" class="btn-submit" :disabled="isLoading">
@@ -129,19 +130,19 @@ const userRegister = async () => {
 
     const data = response.data.data;
 
-    // ✅ Store the token immediately
+    // Store authentication data (including token)
     store.setAuthData({
       id: data.id,
       name: data.name,
       email: data.email,
       positionId: data.positionId,
-      token: data.token, // 🔥 Ensure token is stored
+      token: data.token,
     });
 
     messageClass.value = "text-success";
     statusMessage.value = "Registration successful!";
 
-    // ✅ Redirect user immediately
+    // Redirect user immediately
     router.push("/profile");
   } catch (error) {
     console.error("Registration error:", error);
@@ -165,6 +166,7 @@ const userRegister = async () => {
   background: url("https://source.unsplash.com/1600x900/?cinema,retro")
     center/cover no-repeat;
   backdrop-filter: blur(8px);
+  padding: 1rem;
 }
 
 /* === Registration Card === */
@@ -208,7 +210,6 @@ label {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
-  /* Removed border-radius for sharp edges */
   transition: all 0.3s ease-in-out;
 }
 
@@ -227,7 +228,6 @@ label {
   color: black;
   background: #ffd700;
   border: none;
-  /* Removed border-radius for sharp edges */
   transition: all 0.3s ease-in-out;
   cursor: pointer;
 }
@@ -269,6 +269,25 @@ label {
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+/* === Responsive Design for Smaller Screens === */
+@media (max-width: 768px) {
+  .registration-card {
+    max-width: 90%;
+    padding: 1.5rem;
+  }
+  .registration-header {
+    font-size: 1.5rem;
+  }
+  .form-control {
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+  .btn-submit {
+    padding: 10px;
+    font-size: 1rem;
   }
 }
 </style>

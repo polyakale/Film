@@ -17,63 +17,78 @@
         <div class="password-section">
           <h3 class="section-title">🔒 Change Password</h3>
           <form @submit.prevent="changePassword" class="password-form">
+            <!-- Current Password -->
             <div class="form-group">
               <label>Current Password</label>
               <div class="input-container">
                 <input
-                  :type="passwordVisible ? 'text' : 'password'"
+                  :type="passwordVisible.current ? 'text' : 'password'"
                   v-model="password.current"
                   class="form-control"
                   placeholder="Enter your current password"
                   required
                 />
-                <span @click="togglePasswordVisibility" class="eye-icon">
+                <span @click="toggleVisibility('current')" class="eye-icon">
                   <i
-                    :class="passwordVisible ? 'bi bi-eye-slash' : 'bi bi-eye'"
+                    :class="
+                      passwordVisible.current ? 'bi bi-eye-slash' : 'bi bi-eye'
+                    "
                   ></i>
                 </span>
               </div>
             </div>
+
+            <!-- New Password -->
             <div class="form-group">
               <label>New Password</label>
               <div class="input-container">
                 <input
-                  :type="passwordVisible ? 'text' : 'password'"
+                  :type="passwordVisible.new ? 'text' : 'password'"
                   v-model="password.new"
                   class="form-control"
                   placeholder="Enter your new password"
                   required
                 />
-                <span @click="togglePasswordVisibility" class="eye-icon">
+                <span @click="toggleVisibility('new')" class="eye-icon">
                   <i
-                    :class="passwordVisible ? 'bi bi-eye-slash' : 'bi bi-eye'"
+                    :class="
+                      passwordVisible.new ? 'bi bi-eye-slash' : 'bi bi-eye'
+                    "
                   ></i>
                 </span>
               </div>
             </div>
+
+            <!-- Confirm New Password -->
             <div class="form-group">
               <label>Confirm New Password</label>
               <div class="input-container">
                 <input
-                  :type="passwordVisible ? 'text' : 'password'"
+                  :type="passwordVisible.confirm ? 'text' : 'password'"
                   v-model="password.confirm"
                   class="form-control"
                   placeholder="Confirm your new password"
                   required
                 />
-                <span @click="togglePasswordVisibility" class="eye-icon">
+                <span @click="toggleVisibility('confirm')" class="eye-icon">
                   <i
-                    :class="passwordVisible ? 'bi bi-eye-slash' : 'bi bi-eye'"
+                    :class="
+                      passwordVisible.confirm ? 'bi bi-eye-slash' : 'bi bi-eye'
+                    "
                   ></i>
                 </span>
               </div>
             </div>
+
+            <!-- Submit Button -->
             <div class="form-group">
               <button type="submit" class="btn-submit" :disabled="loading">
                 Change Password
               </button>
               <div v-if="loading" class="spinner"></div>
             </div>
+
+            <!-- Status Message -->
             <p v-if="message" :class="['status-message', messageClass]">
               {{ message }}
             </p>
@@ -101,16 +116,22 @@ import { BASE_URL } from "@/helpers/baseUrls";
 const store = useAuthStore();
 const router = useRouter();
 
-// Reactive state
+// Reactive state for password form
 const password = ref({
-  current: "", // Pre-filled with current password
+  current: "",
   new: "",
   confirm: "",
 });
 const loading = ref(false);
 const message = ref("");
 const messageClass = ref("");
-const passwordVisible = ref(false); // State for toggle password visibility
+
+// Reactive state for toggling password visibility
+const passwordVisible = ref({
+  current: false,
+  new: false,
+  confirm: false,
+});
 
 // Computed properties
 const user = computed(() => store.user);
@@ -119,10 +140,10 @@ const roleName = computed(() =>
   store.positionId === 1 ? "Administrator" : "Guest"
 );
 
-// Pre-fill current password on component mount
-onMounted(() => {
-  password.value.current = "••••••••"; // Placeholder for current password
-});
+// Toggle visibility for a specific field
+const toggleVisibility = (field) => {
+  passwordVisible.value[field] = !passwordVisible.value[field];
+};
 
 // Show message temporarily
 const showMessage = (text, style) => {
@@ -134,7 +155,7 @@ const showMessage = (text, style) => {
   }, 5000);
 };
 
-// Change password
+// Handle password change
 const changePassword = async () => {
   if (password.value.new !== password.value.confirm) {
     showMessage("New passwords do not match", "error-message");
@@ -157,7 +178,7 @@ const changePassword = async () => {
       }
     );
     showMessage("Password changed successfully!", "success-message");
-    password.value = { current: "••••••••", new: "", confirm: "" }; // Reset form
+    password.value = { current: "", new: "", confirm: "" }; // Reset form
   } catch (error) {
     console.error("Password change error:", error);
     const errorMsg = error.response?.data?.message || "Password change failed";
@@ -167,9 +188,13 @@ const changePassword = async () => {
   }
 };
 
-// Delete account
+// Handle account deletion
 const deleteAccount = async () => {
-  if (window.confirm("Are you sure you want to delete your account?")) {
+  if (
+    window.confirm(
+      "Are you sure you want to delete your account? This action cannot be undone."
+    )
+  ) {
     try {
       await axios.delete(`${BASE_URL}/users/${store.id}`, {
         headers: {
@@ -184,11 +209,6 @@ const deleteAccount = async () => {
     }
   }
 };
-
-// Toggle password visibility
-const togglePasswordVisibility = () => {
-  passwordVisible.value = !passwordVisible.value;
-};
 </script>
 
 <style scoped>
@@ -197,10 +217,11 @@ const togglePasswordVisibility = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 85vh;
+  min-height: 85vh;
   background: url("https://source.unsplash.com/1600x900/?cinema,retro")
     center/cover no-repeat;
   backdrop-filter: blur(8px);
+  padding: 1rem;
 }
 
 /* === Profile Card === */
@@ -238,6 +259,18 @@ const togglePasswordVisibility = () => {
   color: #ffd700;
 }
 
+/* === Section Titles === */
+.section-title {
+  font-family: "Poppins", sans-serif;
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-align: left;
+  color: #ffd700;
+  margin-top: 1.5rem;
+  border-bottom: 2px solid rgba(255, 215, 0, 0.4);
+  padding-bottom: 0.3rem;
+}
+
 /* === Password Form === */
 .password-section {
   text-align: left;
@@ -259,9 +292,15 @@ label {
   font-weight: bold;
 }
 
+/* Input styling with relative container for the eye icon */
+.input-container {
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
 .form-control {
   width: 100%;
-  padding: 10px;
+  padding: 10px 45px 10px 10px; /* increased right padding for eye icon */
   font-size: 1rem;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -275,19 +314,16 @@ label {
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
-/* === Eye Icon === */
+/* Eye Icon Positioning */
 .eye-icon {
   position: absolute;
-  right: 15px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   color: #ffd700;
   cursor: pointer;
   font-size: 1.2rem;
-}
-
-.input-container {
-  position: relative;
+  z-index: 2;
 }
 
 /* === Buttons === */
@@ -363,6 +399,29 @@ label {
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+/* === Responsive Design for Smaller Screens === */
+@media (max-width: 768px) {
+  .profile-card {
+    max-width: 90%;
+    padding: 1.5rem;
+  }
+  .profile-header {
+    font-size: 1.5rem;
+  }
+  .section-title {
+    font-size: 1.1rem;
+  }
+  .form-control {
+    padding: 8px 35px 8px 8px; /* adjust padding for smaller screens */
+    font-size: 0.9rem;
+  }
+  .btn-submit,
+  .btn-delete {
+    padding: 10px;
+    font-size: 1rem;
   }
 }
 </style>

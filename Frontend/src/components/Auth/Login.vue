@@ -19,17 +19,21 @@
             />
           </div>
 
-          <!-- Password Field -->
+          <!-- Password Field with Toggle -->
           <div class="form-group">
             <label for="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              v-model="user.password"
-              placeholder="Enter your password"
-              class="form-control"
-              required
-            />
+            <div class="input-container">
+              <input
+                :type="showPassword ? 'text' : 'password'"
+                v-model="user.password"
+                placeholder="Enter your password"
+                class="form-control"
+                required
+              />
+              <span @click="showPassword = !showPassword" class="eye-icon">
+                <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+              </span>
+            </div>
           </div>
 
           <!-- Submit Button & Loading Spinner -->
@@ -51,17 +55,18 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router"; // Import useRouter
-import { useAuthStore } from "@/stores/useAuthStore";
 import axios from "axios";
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
 import { BASE_URL } from "@/helpers/baseUrls";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 // Access the store using Pinia
 const store = useAuthStore();
-
 // Access Vue Router
-const router = useRouter(); // This replaces `this.$router`
+const router = useRouter();
+
+const showPassword = ref(false);
 
 // Reactive state for the login form
 const user = ref({
@@ -123,6 +128,21 @@ const userAuth = async () => {
 </script>
 
 <style scoped>
+.input-container {
+  position: relative;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ffd700;
+  cursor: pointer;
+  font-size: 1.2rem;
+  z-index: 2;
+}
+
 /* === Background & Container === */
 .login-container {
   display: flex;

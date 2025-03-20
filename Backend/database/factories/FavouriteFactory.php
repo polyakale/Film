@@ -7,30 +7,24 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Faker\Factory as Faker;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Favourite>
- */
 class FavouriteFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         $faker = Faker::create('hu_HU');
+
         do {
-            # code...
             $userId = User::inRandomOrder()->first()->id;
-        } while ($userId==1);
+        } while ($userId == 1);
+
         $filmId = Film::inRandomOrder()->first()->id;
-        $evalution = $faker->randomFloat(1,0,5);
+        // Generate ratings in 0.5 increments between 1-5
+        $evaluation = $faker->numberBetween(2, 10) / 2;
 
         return [
             'userId' => $userId,
             'filmId' => $filmId,
-            'evaluation' => $evalution
+            'evaluation' => $evaluation
         ];
     }
 }
