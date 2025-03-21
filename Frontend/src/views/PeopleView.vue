@@ -15,17 +15,25 @@
 
     <!-- Admin gombok -->
     <div v-if="isAdmin" class="admin-actions">
-      <button @click="openAddPersonModal" class="add-film-button">
+      <button @click="openAddPersonModal" class="add-people-button">
         Add New Person
       </button>
     </div>
 
     <div v-if="people.length" class="people-grid">
-      <div v-for="person in filteredPeople" :key="person.peopleName" class="person-card">
+      <div v-for="person in filteredPeople" :key="person.id" class="person-card">
         <!-- Kép -->
         <img :src="getImageUrl(person.photo)" alt="Image" class="person-image" />
         <!-- Név -->
-        <h2 class="person-name">{{ person.peopleName }}</h2>
+        <div v-if="!person.imdbLink" class="name-container no-imdb">
+          {{ person.name }}
+        </div>
+        <!-- IMDb link -->
+        <div v-else>
+          <a :href="person.imdbLink" target="_blank" rel="noopener noreferrer" class="imdb-link">
+            {{ person.name }}
+          </a>
+        </div>
         <!-- Alternatív nevek -->
         <ul class="name-list">
           <li v-for="(name, index) in person.names" :key="index">
@@ -33,15 +41,8 @@
           </li>
         </ul>
 
-        <!-- IMDb link -->
-        <div v-if="person.imdbLink">
-          <a :href="person.imdbLink" target="_blank" rel="noopener noreferrer" class="imdb-link">
-            {{ person.name }}
-          </a>
-        </div>
-
         <!-- Admin műveletek -->
-        <div v-if="isAdmin" class="film-actions">
+        <div v-if="isAdmin" class="people-actions">
           <button @click="openEditPersonModal(person)" class="edit-button">
             Edit
           </button>
@@ -151,6 +152,7 @@ export default {
     async fetchPeopleFromBackend() {
       try {
         const response = await axios.get(`${BASE_URL}/people`);
+        console.log("API response:", response.data); // Ellenőrizd a választ
         this.people = Array.isArray(response.data.data)
           ? response.data.data
           : [];
@@ -166,7 +168,7 @@ export default {
       const query = this.searchQuery.toLowerCase();
       this.filteredPeople = this.people.filter(
         (person) =>
-          person.name.toLowerCase().includes(query) 
+          person.name.toLowerCase().includes(query) // Módosítva: person.name
       );
     },
     openAddPersonModal() {
@@ -309,10 +311,14 @@ export default {
   border-radius: 8px;
 }
 
-.person-name {
-  font-size: 1.4em;
+/* Új stílus a név szövegdobozhoz */
+.name-container {
+  padding: 10px;
   margin-top: 10px;
-  color: #fff;
+  background: #666; /* Szürke háttér */
+  color: white; /* Fehér szöveg */
+  border-radius: 5px;
+  font-size: 1.2em;
 }
 
 .name-list {
@@ -341,7 +347,7 @@ export default {
   margin-bottom: 20px;
 }
 
-.add-film-button {
+.add-people-button {
   padding: 10px 20px;
   background: #4caf50;
   color: white;
@@ -351,11 +357,11 @@ export default {
   font-size: 1em;
 }
 
-.add-film-button:hover {
+.add-people-button:hover {
   background: #45a049;
 }
 
-.film-actions {
+.people-actions {
   margin-top: 15px;
 }
 
