@@ -19,12 +19,21 @@ class StoreFavouriteRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules()
     {
         return [
-            'userId' => 'required|int',
-            'filmId' => 'required|int',
-            'evaluation' => 'required',
+            'filmId' => 'required|exists:films,id',
+            'evaluation' => [
+                'required',
+                'numeric',
+                'min:0.5',
+                'max:5',
+                function ($attribute, $value, $fail) {
+                    if (fmod($value * 2, 1) !== 0.0) {
+                        $fail('The evaluation must be in 0.5 increments (0.5, 1.0, 1.5, etc.)');
+                    }
+                }
+            ]
         ];
     }
 }

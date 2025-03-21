@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreign('userId')->references('id')->on('users')->constrained()->onDelete('cascade');
             $table->Integer('filmId')->nullable();
             $table->foreign('filmId')->references('id')->on('films');
-            $table->decimal('evaluation', 2, 1)->nullable();
+            $table->decimal('evaluation', 2, 1)->comment('0.5 to 5.0')->nullable();
             $table->timestamps();
         });
     }

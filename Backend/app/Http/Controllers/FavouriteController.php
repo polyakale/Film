@@ -25,12 +25,18 @@ class FavouriteController extends Controller
 
     public function store(StoreFavouriteRequest $request)
     {
-        $row = Favourite::create($request->all());
-        $data = [
-            'message' => 'ok',
-            'data' => $row
-        ];
-        return response()->json($data, 201, options: JSON_UNESCAPED_UNICODE);
+        $validated = $request->validated();
+        
+        $favourite = Favourite::create([
+            'filmId' => $validated['filmId'],
+            'userId' => auth()->id(),
+            'evaluation' => $validated['evaluation']
+        ]);
+    
+        return response()->json([
+            'message' => 'Rating submitted successfully',
+            'data' => $favourite
+        ], 201);
     }
 
     public function show(int $id)
