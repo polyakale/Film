@@ -15,19 +15,25 @@
 
     <!-- Admin gombok -->
     <div v-if="isAdmin" class="admin-actions">
-      <button @click="openAddPersonModal" class="add-film-button">
+      <button @click="openAddPersonModal" class="add-people-button">
         Add New Person
       </button>
     </div>
 
     <div v-if="people.length" class="people-grid">
-      <div v-for="person in filteredPeople" :key="person.peopleName" class="person-card">
+      <div v-for="person in filteredPeople" :key="person.id" class="person-card">
         <!-- Kép -->
         <img :src="getImageUrl(person.photo)" alt="Image" class="person-image" />
         <!-- Név -->
-        <h2 class="person-name">{{ person.peopleName }}</h2>
-        <!-- Nem -->
-        <!-- <p class="person-gender"><strong>Gender:</strong> {{ person.gender }}</p> -->
+        <div v-if="!person.imdbLink" class="name-container no-imdb">
+          {{ person.name }}
+        </div>
+        <!-- IMDb link -->
+        <div v-else>
+          <a :href="person.imdbLink" target="_blank" rel="noopener noreferrer" class="imdb-link">
+            {{ person.name }}
+          </a>
+        </div>
         <!-- Alternatív nevek -->
         <ul class="name-list">
           <li v-for="(name, index) in person.names" :key="index">
@@ -35,15 +41,8 @@
           </li>
         </ul>
 
-        <!-- IMDb link -->
-        <div v-if="person.imdbLink">
-          <a :href="person.imdbLink" target="_blank" rel="noopener noreferrer" class="imdb-link">
-            {{ person.name }}
-          </a>
-        </div>
-
         <!-- Admin műveletek -->
-        <div v-if="isAdmin" class="film-actions">
+        <div v-if="isAdmin" class="people-actions">
           <button @click="openEditPersonModal(person)" class="edit-button">
             Edit
           </button>
@@ -134,7 +133,7 @@ export default {
         name: "",
         photo: "",
         imdbLink: "",
-        gender: "", // Új mező: nem
+        gender: "",
       },
       editingPerson: null,
     };
@@ -153,6 +152,7 @@ export default {
     async fetchPeopleFromBackend() {
       try {
         const response = await axios.get(`${BASE_URL}/people`);
+        console.log("API response:", response.data); // Ellenőrizd a választ
         this.people = Array.isArray(response.data.data)
           ? response.data.data
           : [];
@@ -162,15 +162,13 @@ export default {
       }
     },
     getImageUrl(photo) {
-      // Ha nincs kép megadva, akkor az alapértelmezett kép kerül bemutatásra
       return photo ? `/Images/${photo}` : "/Images/default.jpg";
     },
     searchPeople() {
       const query = this.searchQuery.toLowerCase();
       this.filteredPeople = this.people.filter(
         (person) =>
-          person.peopleName.toLowerCase().includes(query) ||
-          person.names.some((name) => name.toLowerCase().includes(query))
+          person.name.toLowerCase().includes(query) // Módosítva: person.name
       );
     },
     openAddPersonModal() {
@@ -182,7 +180,7 @@ export default {
         name: "",
         photo: "",
         imdbLink: "",
-        gender: "", // Új mező: nem
+        gender: "",
       };
     },
     async submitNewPerson() {
@@ -197,12 +195,9 @@ export default {
           name: this.newPerson.name,
           photo: this.newPerson.photo || null,
           imdbLink: this.newPerson.imdbLink,
-          gender: this.newPerson.gender === "true", // Új mező: nem
+          gender: this.newPerson.gender === "true",
         };
-        console.log("Gender:", data);
-        
         const response = await axios.post(this.urlApi, data, { headers });
-        // this.people.push(response.data.data);
         this.fetchPeopleFromBackend();
         this.filteredPeople = this.people;
         this.closeAddPersonModal();
@@ -230,10 +225,10 @@ export default {
           name: this.editingPerson.name,
           photo: this.editingPerson.photo || null,
           imdbLink: this.editingPerson.imdbLink,
-          gender: this.editingPerson.gender, // Új mező: nem
+          gender: this.editingPerson.gender,
         };
         const response = await axios.patch(
-          `${this.urlApi}/people/${this.editingPerson.id}`,
+          `${this.urlApi}/${this.editingPerson.id}`,
           data,
           { headers }
         );
@@ -256,12 +251,8 @@ export default {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           };
-          const url = `${this.urlApi}/${personId}`;
-         
-          
-          await axios.delete(url, { headers });
+          await axios.delete(`${this.urlApi}/${personId}`, { headers });
           this.fetchPeopleFromBackend();
-          
           this.filteredPeople = this.people;
         } catch (error) {
           console.error("Error deleting person:", error);
@@ -320,16 +311,14 @@ export default {
   border-radius: 8px;
 }
 
-.person-name {
-  font-size: 1.4em;
+/* Új stílus a név szövegdobozhoz */
+.name-container {
+  padding: 10px;
   margin-top: 10px;
-  color: #fff;
-}
-
-.person-gender {
-  font-size: 1em;
-  margin: 5px 0;
-  color: #ddd;
+  background: #666; /* Szürke háttér */
+  color: white; /* Fehér szöveg */
+  border-radius: 5px;
+  font-size: 1.2em;
 }
 
 .name-list {
@@ -358,7 +347,7 @@ export default {
   margin-bottom: 20px;
 }
 
-.add-film-button {
+.add-people-button {
   padding: 10px 20px;
   background: #4caf50;
   color: white;
@@ -368,11 +357,11 @@ export default {
   font-size: 1em;
 }
 
-.add-film-button:hover {
+.add-people-button:hover {
   background: #45a049;
 }
 
-.film-actions {
+.people-actions {
   margin-top: 15px;
 }
 
