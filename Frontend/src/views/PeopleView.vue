@@ -26,8 +26,6 @@
         <img :src="getImageUrl(person.photo)" alt="Image" class="person-image" />
         <!-- Név -->
         <h2 class="person-name">{{ person.peopleName }}</h2>
-        <!-- Nem -->
-        <!-- <p class="person-gender"><strong>Gender:</strong> {{ person.gender }}</p> -->
         <!-- Alternatív nevek -->
         <ul class="name-list">
           <li v-for="(name, index) in person.names" :key="index">
@@ -134,7 +132,7 @@ export default {
         name: "",
         photo: "",
         imdbLink: "",
-        gender: "", // Új mező: nem
+        gender: "",
       },
       editingPerson: null,
     };
@@ -162,15 +160,13 @@ export default {
       }
     },
     getImageUrl(photo) {
-      // Ha nincs kép megadva, akkor az alapértelmezett kép kerül bemutatásra
       return photo ? `/Images/${photo}` : "/Images/default.jpg";
     },
     searchPeople() {
       const query = this.searchQuery.toLowerCase();
       this.filteredPeople = this.people.filter(
         (person) =>
-          person.peopleName.toLowerCase().includes(query) ||
-          person.names.some((name) => name.toLowerCase().includes(query))
+          person.name.toLowerCase().includes(query) 
       );
     },
     openAddPersonModal() {
@@ -182,7 +178,7 @@ export default {
         name: "",
         photo: "",
         imdbLink: "",
-        gender: "", // Új mező: nem
+        gender: "",
       };
     },
     async submitNewPerson() {
@@ -197,12 +193,9 @@ export default {
           name: this.newPerson.name,
           photo: this.newPerson.photo || null,
           imdbLink: this.newPerson.imdbLink,
-          gender: this.newPerson.gender === "true", // Új mező: nem
+          gender: this.newPerson.gender === "true",
         };
-        console.log("Gender:", data);
-        
         const response = await axios.post(this.urlApi, data, { headers });
-        // this.people.push(response.data.data);
         this.fetchPeopleFromBackend();
         this.filteredPeople = this.people;
         this.closeAddPersonModal();
@@ -230,10 +223,10 @@ export default {
           name: this.editingPerson.name,
           photo: this.editingPerson.photo || null,
           imdbLink: this.editingPerson.imdbLink,
-          gender: this.editingPerson.gender, // Új mező: nem
+          gender: this.editingPerson.gender,
         };
         const response = await axios.patch(
-          `${this.urlApi}/people/${this.editingPerson.id}`,
+          `${this.urlApi}/${this.editingPerson.id}`,
           data,
           { headers }
         );
@@ -256,12 +249,8 @@ export default {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           };
-          const url = `${this.urlApi}/${personId}`;
-         
-          
-          await axios.delete(url, { headers });
+          await axios.delete(`${this.urlApi}/${personId}`, { headers });
           this.fetchPeopleFromBackend();
-          
           this.filteredPeople = this.people;
         } catch (error) {
           console.error("Error deleting person:", error);
@@ -324,12 +313,6 @@ export default {
   font-size: 1.4em;
   margin-top: 10px;
   color: #fff;
-}
-
-.person-gender {
-  font-size: 1em;
-  margin: 5px 0;
-  color: #ddd;
 }
 
 .name-list {
