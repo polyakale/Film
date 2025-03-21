@@ -1,5 +1,6 @@
 <template>
   <div class="film-reviews">
+    <!-- Full-page Loading Overlay -->
     <div v-if="loading" class="loading-overlay">
       <div class="loading-content">
         <div class="spinner-border" role="status">
@@ -9,6 +10,7 @@
       </div>
     </div>
 
+    <!-- Main Content -->
     <div v-else>
       <h3 class="text-center my-4">Reviews</h3>
       <div class="container">
@@ -32,16 +34,20 @@
                     {{ favourite.userName || "Unknown User" }}
                   </td>
                   <td data-label="Film" class="film">
-                    {{ favourite.filmName || "Unknown Film" }}
+                    {{ favourite.filmTitle || "Unknown Film" }}
                   </td>
                   <td data-label="Evaluation" class="text-center">
                     <div class="star-rating d-inline-flex align-items-center">
-                      <i v-for="starIndex in 5" :key="starIndex" class="bi mx-1 text-warning" :class="{
-                        'bi-star-fill': getEvaluation(favourite) >= starIndex,
-                        'bi-star-half': getEvaluation(favourite) + 0.5 >= starIndex &&
-                          getEvaluation(favourite) < starIndex,
-                        'bi-star': getEvaluation(favourite) + 0.5 < starIndex,
-                      }"></i>
+                      <i
+                        v-for="starIndex in 5"
+                        :key="starIndex"
+                        class="bi mx-1 text-warning"
+                        :class="{
+                          'bi-star-fill': getEvaluation(favourite) >= starIndex,
+                          'bi-star-half': getEvaluation(favourite) + 0.5 >= starIndex && getEvaluation(favourite) < starIndex,
+                          'bi-star': getEvaluation(favourite) + 0.5 < starIndex,
+                        }"
+                      ></i>
                       <small class="text-muted ms-2">
                         ({{ formatEvaluation(favourite.evaluation) }})
                       </small>
@@ -51,22 +57,34 @@
                     {{ formatDate(favourite.created_at) }}
                   </td>
                   <td class="text-nowrap text-center">
-                    <OperationsCrud @onClickDeleteButton="onClickDeleteButton" @onClickUpdate="onClickUpdate"
-                      :data="favourite" />
+                    <OperationsCrud
+                      @onClickDeleteButton="onClickDeleteButton"
+                      @onClickUpdate="onClickUpdate"
+                      :data="favourite"
+                    />
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
+        <!-- Fixed Paginator -->
         <div class="pagination-container" v-if="favourites.length > 0">
-          <Paginator :pageNumber="currentPage" :numberOfPages="totalPages" :pagesArray="pagesArray"
-            @paging="handlePageChange" />
+          <Paginator
+            :pageNumber="currentPage"
+            :numberOfPages="totalPages"
+            :pagesArray="pagesArray"
+            @paging="handlePageChange"
+          />
         </div>
       </div>
       <Modal :title="title" :yes="yes" :no="no" :size="size" @yesEvent="yesEventHandler">
         <div v-if="state === 'Delete'">{{ messageYesNo }}</div>
-        <ReviewForm v-if="state === 'Create' || state === 'Update'" :itemForm="item" @saveItem="saveItemHandler" />
+        <ReviewForm
+          v-if="state === 'Create' || state === 'Update'"
+          :itemForm="item"
+          @saveItem="saveItemHandler"
+        />
       </Modal>
     </div>
   </div>
@@ -76,20 +94,11 @@
 import Modal from "@/components/Modal.vue";
 import Paginator from "@/components/Paginator.vue";
 import OperationsCrud from "@/components/OperationsCrud.vue";
+import ReviewForm from "@/components/forms/ReviewForm.vue";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { BASE_URL } from "../helpers/baseUrls";
 import axios from "axios";
-import ReviewForm from "@/components/forms/ReviewForm.vue";
 import * as bootstrap from "bootstrap";
-
-class Item {
-  constructor(id = null, userId = null, filmId = null, evaluation = null) {
-    this.id = id;
-    this.userId = userId;
-    this.filmId = filmId;
-    this.evaluation = evaluation;
-  }
-}
 
 export default {
   components: { Paginator, OperationsCrud, Modal, ReviewForm },
@@ -103,7 +112,7 @@ export default {
       errorMessages: null,
       loading: false,
       modal: null,
-      item: new Item(),
+      item: {},
       messageYesNo: null,
       state: "Read",
       title: null,
@@ -146,6 +155,7 @@ export default {
       try {
         this.loading = true;
         const token = this.authStore.token;
+        // Now using a backend join query, API should return userName and filmTitle already
         const response = await axios.get(`${BASE_URL}/favourites`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -154,41 +164,6 @@ export default {
             ...fav,
             evaluation: Number(fav.evaluation) || 0,
           }));
-          const enrichedFavourites = await Promise.all(
-            this.favourites.map(async (fav) => {
-              try {
-                const [userResponse, filmResponse] = await Promise.all([
-                  axios.get(`${BASE_URL}/users/${fav.userId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                  }),
-                  axios.get(`${BASE_URL}/films/${fav.filmId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                  }),
-                ]);
-                return {
-                  ...fav,
-                  userName:
-                    userResponse.data.data?.name ||
-                    userResponse.data.name ||
-                    "Unknown User",
-                  filmName:
-                    filmResponse.data.data?.title ||
-                    filmResponse.data.title ||
-                    filmResponse.data.name ||
-                    filmResponse.data.filmName ||
-                    filmResponse.data.film_title ||
-                    "Unknown Film",
-                };
-              } catch (error) {
-                return {
-                  ...fav,
-                  userName: "Unknown User",
-                  filmName: "Unknown Film",
-                };
-              }
-            })
-          );
-          this.favourites = enrichedFavourites;
         }
       } catch (error) {
         console.error("Error fetching favourites:", error);
@@ -247,9 +222,9 @@ export default {
 
 <style scoped>
 :root {
-  --primary-color: #8B0000;
-  --secondary-color: #FFD700;
-  --accent-color: #000000;
+  --primary-color: #8B0000; /* Dark Red */
+  --secondary-color: #FFD700; /* Gold */
+  --accent-color: #000000;   /* Black */
   --background-dark: #1a1a1a;
   --text-light: #ffffff;
   --text-muted: #cccccc;
@@ -294,12 +269,10 @@ export default {
     opacity: 0.6;
     transform: scale(0.95);
   }
-
   50% {
     opacity: 1;
     transform: scale(1);
   }
-
   100% {
     opacity: 0.6;
     transform: scale(0.95);
@@ -314,6 +287,7 @@ export default {
   filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.4));
 }
 
+/* Table Styling */
 .custom-table {
   width: 100%;
   border-collapse: separate;
@@ -337,16 +311,16 @@ export default {
 
 .custom-table tbody tr {
   background-color: rgba(248, 249, 250, 1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background 0.3s;
   color: #000;
 }
 
 .custom-table tbody tr:hover {
   background: rgba(240, 240, 240, 1);
-  transform: scale(1.02);
   box-shadow: 0 3px 15px rgba(255, 215, 0, 0.2);
 }
 
+/* Review Card */
 .review-card {
   border: 1px solid #ddd;
   padding: 1rem;
@@ -354,6 +328,7 @@ export default {
   border-radius: 8px;
 }
 
+/* Star Rating */
 .star-rating {
   font-size: 1.1rem;
   line-height: 1;
@@ -364,12 +339,14 @@ export default {
   vertical-align: middle;
 }
 
+/* Date Styling */
 .date {
   color: var(--text-muted);
   font-size: 0.9rem;
   font-style: italic;
 }
 
+/* Fixed Paginator at Bottom */
 .pagination-container {
   position: fixed;
   bottom: 20px;
@@ -379,7 +356,7 @@ export default {
   padding: 10px 20px;
   border-radius: 30px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-  border: 1px solid var(--primary-color);
+  border: 1px solid var(--secondary-color);
   z-index: 1000;
 }
 
@@ -439,7 +416,6 @@ export default {
     padding: 0.5rem;
     font-size: 0.9rem;
   }
-
   .pagination .page-item .page-link {
     min-width: 30px;
     padding: 0.4rem 0.6rem;
