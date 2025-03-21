@@ -1,6 +1,16 @@
 <template>
   <div class="film-reviews">
-    <!-- Full-page Loading Overlay -->
+    <!-- Toggle Button (admin only) -->
+    <div v-if="isAdmin" class="toggle-container">
+      <button class="btn-toggle" @click="toggleViewMode">
+        <i :class="viewMode === 'admin' ? 'bi bi-toggle-on' : 'bi bi-toggle-off'"></i>
+        <span class="toggle-text">
+          Switch to {{ viewMode === 'admin' ? 'Guest' : 'Admin' }} View
+        </span>
+      </button>
+    </div>
+
+    <!-- Loading Overlay -->
     <div v-if="loading" class="loading-overlay">
       <div class="loading-content">
         <div class="spinner-border" role="status">
@@ -10,11 +20,11 @@
       </div>
     </div>
 
-    <!-- Main Content -->
     <div v-else>
       <h3 class="text-center my-4">Reviews</h3>
       <div class="container">
-        <div class="row d-flex justify-content-center">
+        <!-- Admin View -->
+        <div v-if="viewMode === 'admin'" class="admin-view">
           <div v-if="favourites.length > 0" class="col-12 col-lg-10 tabla-container">
             <table class="table custom-table">
               <thead class="table-dark">
@@ -67,17 +77,59 @@
               </tbody>
             </table>
           </div>
+
+          <!-- Paginator -->
+          <div class="pagination-container" v-if="favourites.length > 0">
+            <Paginator
+              :pageNumber="currentPage"
+              :numberOfPages="totalPages"
+              :pagesArray="pagesArray"
+              @paging="handlePageChange"
+            />
+          </div>
         </div>
-        <!-- Fixed Paginator -->
-        <div class="pagination-container" v-if="favourites.length > 0">
-          <Paginator
-            :pageNumber="currentPage"
-            :numberOfPages="totalPages"
-            :pagesArray="pagesArray"
-            @paging="handlePageChange"
-          />
+
+        <!-- Guest View -->
+        <div v-else class="guest-view">
+          <!-- Review Form -->
+          <div class="guest-review-form">
+            <div class="user-info">
+              <img :src="userAvatar" alt="User Avatar" class="avatar" />
+              <span class="username">{{ username }}</span>
+            </div>
+            <textarea
+              v-model="reviewText"
+              class="review-input"
+              placeholder="Write a public review..."
+            ></textarea>
+            <div class="review-actions">
+              <button
+                class="btn-submit"
+                @click="submitReview"
+                :disabled="submitting || !reviewText.trim()"
+              >
+                Submit Review
+              </button>
+              <span v-if="errorMessage" class="error-message">{{ errorMessage }}</span>
+            </div>
+          </div>
+
+          <!-- Public Reviews -->
+          <div class="public-reviews" v-if="publicReviews.length > 0">
+            <div v-for="review in publicReviews" :key="review.id" class="review-card">
+              <div class="review-header">
+                <img :src="review.user.avatar || userAvatar" class="avatar-small" />
+                <div class="review-meta">
+                  <span class="review-author">{{ review.user.name }}</span>
+                  <span class="review-date">{{ formatDate(review.created_at) }}</span>
+                </div>
+              </div>
+              <div class="review-content">{{ review.content }}</div>
+            </div>
+          </div>
         </div>
       </div>
+
       <Modal :title="title" :yes="yes" :no="no" :size="size" @yesEvent="yesEventHandler">
         <div v-if="state === 'Delete'">{{ messageYesNo }}</div>
         <ReviewForm
@@ -105,6 +157,7 @@ export default {
   data() {
     return {
       favourites: [],
+      publicReviews: [],
       authStore: useAuthStore(),
       currentPage: 1,
       itemsPerPage: 5,
@@ -120,13 +173,22 @@ export default {
       no: null,
       size: null,
       debug: false,
+      viewMode: "admin",
+      reviewText: "",
+      submitting: false,
+      errorMessage: "",
     };
   },
-  mounted() {
-    this.fetchFavourites();
-    this.modal = new bootstrap.Modal("#modal", { keyboard: false });
-  },
   computed: {
+    isAdmin() {
+      return this.authStore.positionId === 1;
+    },
+    username() {
+      return this.authStore.user || "Guest";
+    },
+    userAvatar() {
+      return this.authStore.avatar || "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM4QjAwMDAiLz48L3N2Zz4=";
+    },
     paginatedFavourites() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       return this.favourites.slice(start, start + this.itemsPerPage);
@@ -138,10 +200,53 @@ export default {
       return Array.from({ length: this.totalPages }, (_, i) => i + 1);
     },
   },
+  mounted() {
+    if (this.isAdmin) {
+      this.fetchFavourites();
+    } else {
+      this.fetchPublicReviews();
+    }
+    this.modal = new bootstrap.Modal("#modal", { keyboard: false });
+  },
   methods: {
-    yesEventHandler() {
-      if (this.state === "Delete") {
-        this.deleteItemById();
+    toggleViewMode() {
+      if (this.isAdmin) {
+        this.viewMode = this.viewMode === 'admin' ? 'guest' : 'admin';
+        if (this.viewMode === 'guest') this.fetchPublicReviews();
+      }
+    },
+    async fetchPublicReviews() {
+      try {
+        const response = await axios.get(`${BASE_URL}/public-reviews`);
+        this.publicReviews = response.data.data;
+      } catch (error) {
+        console.error('Error fetching public reviews:', error);
+      }
+    },
+    async submitReview() {
+      if (!this.reviewText.trim()) return;
+      this.submitting = true;
+      this.errorMessage = "";
+      try {
+        await axios.post(
+          `${BASE_URL}/reviews`,
+          {
+            content: this.reviewText,
+            userId: this.authStore.userId
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${this.authStore.token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        this.reviewText = "";
+        await this.fetchPublicReviews();
+      } catch (error) {
+        this.errorMessage = error.response?.data?.message || "Failed to submit review.";
+      } finally {
+        this.submitting = false;
       }
     },
     getEvaluation(favourite) {
@@ -155,7 +260,6 @@ export default {
       try {
         this.loading = true;
         const token = this.authStore.token;
-        // Now using a backend join query, API should return userName and filmTitle already
         const response = await axios.get(`${BASE_URL}/favourites`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -222,9 +326,9 @@ export default {
 
 <style scoped>
 :root {
-  --primary-color: #8B0000; /* Dark Red */
-  --secondary-color: #FFD700; /* Gold */
-  --accent-color: #000000;   /* Black */
+  --primary-color: #8B0000;
+  --secondary-color: #FFD700;
+  --accent-color: #000000;
   --background-dark: #1a1a1a;
   --text-light: #ffffff;
   --text-muted: #cccccc;
@@ -233,11 +337,35 @@ export default {
 .film-reviews {
   background: var(--background-dark);
   min-height: 100vh;
-  padding-bottom: 100px;
+  padding-bottom: 120px;
   color: var(--text-light);
 }
 
-/* Enhanced Loading Overlay */
+.toggle-container {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.btn-toggle {
+  background: var(--primary-color);
+  color: var(--secondary-color);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-toggle:hover {
+  background: var(--secondary-color);
+  color: var(--accent-color);
+}
+
+.toggle-text {
+  margin-left: 0.5rem;
+  font-weight: bold;
+}
+
 .loading-overlay {
   position: fixed;
   top: 0;
@@ -265,18 +393,9 @@ export default {
 }
 
 @keyframes pulse {
-  0% {
-    opacity: 0.6;
-    transform: scale(0.95);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0.6;
-    transform: scale(0.95);
-  }
+  0% { opacity: 0.6; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.6; transform: scale(0.95); }
 }
 
 .spinner-border {
@@ -287,7 +406,6 @@ export default {
   filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.4));
 }
 
-/* Table Styling */
 .custom-table {
   width: 100%;
   border-collapse: separate;
@@ -320,7 +438,6 @@ export default {
   box-shadow: 0 3px 15px rgba(255, 215, 0, 0.2);
 }
 
-/* Review Card */
 .review-card {
   border: 1px solid #ddd;
   padding: 1rem;
@@ -328,7 +445,6 @@ export default {
   border-radius: 8px;
 }
 
-/* Star Rating */
 .star-rating {
   font-size: 1.1rem;
   line-height: 1;
@@ -339,75 +455,136 @@ export default {
   vertical-align: middle;
 }
 
-/* Date Styling */
 .date {
   color: var(--text-muted);
   font-size: 0.9rem;
   font-style: italic;
 }
 
-/* Fixed Paginator at Bottom */
 .pagination-container {
-  position: fixed;
+  position: sticky;
   bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--accent-color);
-  padding: 10px 20px;
-  border-radius: 30px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-  border: 1px solid var(--secondary-color);
-  z-index: 1000;
-}
-
-.pagination {
-  list-style: none;
+  margin-top: 2rem;
   display: flex;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.9);
+  padding: 1rem;
+  border-radius: 8px;
+  z-index: 100;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.guest-review-form {
+  background: #f9f9f9;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 1rem auto;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
   gap: 0.5rem;
-  padding: 0;
-  margin: 0;
+  margin-bottom: 0.5rem;
 }
 
-.pagination .page-item {
-  cursor: pointer;
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
-.pagination .page-item .page-link {
-  display: block;
-  padding: 0.5rem 0.75rem;
-  border: none;
-  border-radius: 15px;
-  background: var(--accent-color);
-  color: var(--secondary-color);
-  min-width: 40px;
-  text-align: center;
-  transition: all 0.3s ease;
-}
-
-.pagination .page-item.active .page-link {
-  background: var(--primary-color) !important;
-  color: var(--secondary-color) !important;
+.username {
   font-weight: bold;
+  color: #333;
 }
 
-.pagination .page-item:hover .page-link {
-  background: var(--secondary-color);
-  color: var(--accent-color) !important;
-  transform: translateY(-2px);
+.review-input {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 1rem;
+  color: #333;
 }
 
-.text-nowrap.text-center {
-  min-width: 120px;
+.review-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
 }
 
-.text-nowrap.text-center button {
-  transition: all 0.3s ease;
-  border: 1px solid var(--primary-color) !important;
+.btn-submit {
+  background: #cc181e;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
 }
 
-.text-nowrap.text-center button:hover {
-  background: var(--primary-color) !important;
-  color: var(--secondary-color) !important;
+.btn-submit:hover {
+  background: #b10d12;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.9rem;
+}
+
+.public-reviews {
+  margin-top: 2rem;
+}
+
+.review-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  color: #333;
+}
+
+.avatar-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.review-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.review-author {
+  font-weight: 500;
+}
+
+.review-date {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.review-content {
+  white-space: pre-wrap;
+  line-height: 1.5;
 }
 
 @media (max-width: 768px) {
@@ -416,6 +593,7 @@ export default {
     padding: 0.5rem;
     font-size: 0.9rem;
   }
+  
   .pagination .page-item .page-link {
     min-width: 30px;
     padding: 0.4rem 0.6rem;
