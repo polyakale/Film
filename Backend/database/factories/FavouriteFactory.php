@@ -18,6 +18,7 @@ class FavouriteFactory extends Factory
         } while ($userId == 1);
 
         $filmId = Film::inRandomOrder()->first()->id;
+
         // Generate ratings in 0.5 increments from 0.5 to 5
         $evaluation = $faker->numberBetween(1, 10) / 2;
 

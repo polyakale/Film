@@ -1,5 +1,6 @@
 <template>
   <div class="film-reviews">
+    <!-- Toggle Button (admin only) -->
     <div v-if="isAdmin" class="toggle-container">
       <button class="btn-toggle" @click="toggleViewMode">
         <i :class="viewMode === 'admin' ? 'bi bi-toggle-on' : 'bi bi-toggle-off'"></i>
@@ -9,6 +10,7 @@
       </button>
     </div>
 
+    <!-- Full-page Loading Overlay -->
     <div v-if="loading" class="loading-overlay">
       <div class="loading-content">
         <div class="spinner-border" role="status">
@@ -18,9 +20,11 @@
       </div>
     </div>
 
+    <!-- Main Content -->
     <div v-else>
       <h3 class="text-center my-4">Reviews</h3>
       <div class="container">
+        <!-- Admin View -->
         <div v-if="viewMode === 'admin'" class="admin-view">
           <div v-if="favourites.length > 0" class="col-12 col-lg-10 tabla-container">
             <table class="table custom-table">
@@ -45,12 +49,16 @@
                   </td>
                   <td data-label="Evaluation" class="text-center">
                     <div class="star-rating d-inline-flex align-items-center">
-                      <i v-for="starIndex in 5" :key="starIndex" class="bi mx-1 text-warning"
+                      <i
+                        v-for="starIndex in 5"
+                        :key="starIndex"
+                        class="bi mx-1 text-warning"
                         :class="{
                           'bi-star-fill': getEvaluation(favourite) >= starIndex,
                           'bi-star-half': getEvaluation(favourite) + 0.5 >= starIndex && getEvaluation(favourite) < starIndex,
                           'bi-star': getEvaluation(favourite) + 0.5 < starIndex
-                        }"></i>
+                        }"
+                      ></i>
                       <small class="text-muted ms-2">
                         ({{ formatEvaluation(favourite.evaluation) }})
                       </small>
@@ -80,6 +88,7 @@
           </div>
         </div>
 
+        <!-- Guest View -->
         <div v-else class="guest-view">
           <div class="guest-review-form">
             <div class="user-info">
@@ -125,12 +134,16 @@
                 {{ review.content || 'It was a great film!' }}
               </div>
               <div class="star-rating d-inline-flex align-items-center ml-3">
-                <i v-for="starIndex in 5" :key="`star-${review.id}-${starIndex}`" class="bi mx-1 text-warning"
+                <i
+                  v-for="starIndex in 5"
+                  :key="`star-${review.id}-${starIndex}`"
+                  class="bi mx-1 text-warning"
                   :class="{
                     'bi-star-fill': getEvaluation(review) >= starIndex,
                     'bi-star-half': getEvaluation(review) + 0.5 >= starIndex && getEvaluation(review) < starIndex,
                     'bi-star': getEvaluation(review) + 0.5 < starIndex
-                  }"></i>
+                  }"
+                ></i>
                 <small class="text-muted ms-2">
                   ({{ formatEvaluation(review.evaluation) }})
                 </small>
@@ -170,7 +183,7 @@ export default {
     return {
       favourites: [],
       publicReviews: [],
-      films: [], // For guest film selection
+      films: [],
       authStore: useAuthStore(),
       currentPage: 1,
       itemsPerPage: 5,
@@ -204,7 +217,7 @@ export default {
       return this.authStore.user || "Guest";
     },
     userAvatar() {
-      return this.authStore.avatar || ""; // No avatar image
+      return this.authStore.avatar || "";
     },
     paginatedFavourites() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
@@ -224,7 +237,7 @@ export default {
       this.fetchPublicReviews();
     }
     this.fetchFilms();
-    // Initialize Bootstrap modal (make sure Modal component has id="modal")
+    // Initialize Bootstrap modal (ensure the Modal component has id="modal")
     this.modal = new bootstrap.Modal(document.getElementById("modal"), { keyboard: false });
   },
   methods: {
@@ -262,7 +275,7 @@ export default {
             ...fav,
             evaluation: Number(fav.evaluation) || 0
           }));
-          // In admin view, we assume the favourites data already include joined fields (userName, filmTitle)
+          // In admin view, assume favourites data already includes joined fields (userName, filmTitle)
         }
       } catch (error) {
         console.error("Error fetching favourites:", error);
@@ -275,22 +288,20 @@ export default {
       try {
         this.loading = true;
         const token = this.authStore.token;
-        // For guest reviews, use the same favourites endpoint and filter by isPublic flag
+        // For guest reviews, use favourites endpoint and filter by isPublic flag
         const response = await axios.get(`${BASE_URL}/favourites`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (response.data?.data) {
-          this.publicReviews = response.data.data.filter(review => review.isPublic).map(review => {
-            return {
-              ...review,
-              userName: review.userName || "Anonymous",
-              filmTitle: review.filmTitle || "Unknown Film",
-              content: review.content || "It was a great film!",
-              created_at: review.created_at,
-              userAvatar: review.userAvatar || "",
-              evaluation: Number(review.evaluation) || 0 // Ensure evaluation is a number
-            }
-          });
+          this.publicReviews = response.data.data.filter(review => review.isPublic).map(review => ({
+            ...review,
+            userName: review.userName || "Anonymous",
+            filmTitle: review.filmTitle || "Unknown Film",
+            content: review.content || "It was a great film!",
+            created_at: review.created_at,
+            userAvatar: review.userAvatar || "",
+            evaluation: Number(review.evaluation) || 0
+          }));
         }
       } catch (error) {
         console.error("Error fetching public reviews:", error);
@@ -301,7 +312,6 @@ export default {
     },
     async fetchFilms() {
       try {
-        // Fetch all films for the review submission dropdown
         const response = await axios.get(`${BASE_URL}/films`);
         if (response.data?.data) {
           this.films = response.data.data;
@@ -363,21 +373,24 @@ export default {
       this.submitting = true;
       this.errorMessage = "";
       try {
+        // If token exists, include it; if not, omit Authorization header for guest submission.
         const token = this.authStore.token;
-        // Submit the review using the favourites endpoint (adjust payload as needed)
-        const response = await axios.post(`${BASE_URL}/favourites`, {
+        const headers = {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        };
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+        // Use a default guest user ID if authStore.id is not set.
+        const userId = this.authStore.id || 2;
+        await axios.post(`${BASE_URL}/favourites`, {
           filmId: this.selectedFilmId,
           evaluation: this.rating,
           content: this.reviewText,
           isPublic: true,
-          userId: this.authStore.id // Ensure userId is included
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-            "Content-Type": "application/json"
-          }
-        });
+          userId: userId
+        }, { headers });
         this.reviewText = "";
         this.selectedFilmId = "";
         this.rating = 0;
@@ -397,12 +410,9 @@ export default {
 
 <style scoped>
 :root {
-  --primary-color: #8B0000;
-  /* Dark Red */
-  --secondary-color: #FFD700;
-  /* Gold */
-  --accent-color: #000000;
-  /* Black */
+  --primary-color: #8B0000; /* Dark Red */
+  --secondary-color: #FFD700; /* Gold */
+  --accent-color: #000000;   /* Black */
   --background-dark: #1a1a1a;
   --text-light: #ffffff;
   --text-muted: #cccccc;
@@ -471,12 +481,10 @@ export default {
     opacity: 0.6;
     transform: scale(0.95);
   }
-
   50% {
     opacity: 1;
     transform: scale(1);
   }
-
   100% {
     opacity: 0.6;
     transform: scale(0.95);
@@ -761,7 +769,6 @@ export default {
     padding: 0.5rem;
     font-size: 0.9rem;
   }
-
   .pagination .page-item .page-link {
     min-width: 30px;
     padding: 0.4rem 0.6rem;
