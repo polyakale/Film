@@ -1,5 +1,15 @@
 <template>
   <div class="film-reviews">
+    <!-- Toggle Button (admin only) -->
+    <div v-if="isAdmin" class="toggle-container">
+      <button class="btn-toggle" @click="toggleViewMode">
+        <i :class="viewMode === 'admin' ? 'bi bi-toggle-on' : 'bi bi-toggle-off'"></i>
+        <span class="toggle-text">
+          Switch to {{ viewMode === 'admin' ? 'Guest' : 'Admin' }} View
+        </span>
+      </button>
+    </div>
+
     <!-- Full-page Loading Overlay -->
     <div v-if="loading" class="loading-overlay">
       <div class="loading-content">
@@ -14,7 +24,8 @@
     <div v-else>
       <h3 class="text-center my-4">Reviews</h3>
       <div class="container">
-        <div class="row d-flex justify-content-center">
+        <!-- Admin View -->
+        <div v-if="viewMode === 'admin'" class="admin-view">
           <div v-if="favourites.length > 0" class="col-12 col-lg-10 tabla-container">
             <table class="table custom-table">
               <thead class="table-dark">
@@ -45,7 +56,7 @@
                         :class="{
                           'bi-star-fill': getEvaluation(favourite) >= starIndex,
                           'bi-star-half': getEvaluation(favourite) + 0.5 >= starIndex && getEvaluation(favourite) < starIndex,
-                          'bi-star': getEvaluation(favourite) + 0.5 < starIndex,
+                          'bi-star': getEvaluation(favourite) + 0.5 < starIndex
                         }"
                       ></i>
                       <small class="text-muted ms-2">
@@ -67,15 +78,81 @@
               </tbody>
             </table>
           </div>
+          <div class="pagination-container" v-if="favourites.length > 0">
+            <Paginator
+              :pageNumber="currentPage"
+              :numberOfPages="totalPages"
+              :pagesArray="pagesArray"
+              @paging="handlePageChange"
+            />
+          </div>
         </div>
-        <!-- Fixed Paginator -->
-        <div class="pagination-container" v-if="favourites.length > 0">
-          <Paginator
-            :pageNumber="currentPage"
-            :numberOfPages="totalPages"
-            :pagesArray="pagesArray"
-            @paging="handlePageChange"
-          />
+
+        <!-- Guest View -->
+        <div v-else class="guest-view">
+          <div class="guest-review-form">
+            <div class="user-info">
+              <span class="username">{{ username }}</span>
+            </div>
+            <select v-model="selectedFilmId" class="film-select">
+              <option value="" disabled>Select Film</option>
+              <option v-for="film in films" :key="film.id" :value="film.id">
+                {{ film.title }}
+              </option>
+            </select>
+            <div class="star-input">
+              <span v-for="starIndex in 5" :key="starIndex" @click="setRating(starIndex)">
+                <i :class="rating >= starIndex ? 'bi bi-star-fill' : 'bi bi-star'" class="star-icon"></i>
+              </span>
+              <span class="rating-display">({{ rating }})</span>
+            </div>
+            <textarea
+              v-model="reviewText"
+              class="review-input"
+              placeholder="Write a public review..."
+            ></textarea>
+            <div class="review-actions">
+              <button
+                class="btn-submit"
+                @click="submitReview"
+                :disabled="submitting || !reviewText.trim() || !selectedFilmId || rating === 0"
+              >
+                Submit Review
+              </button>
+              <span v-if="errorMessage" class="error-message">{{ errorMessage }}</span>
+            </div>
+          </div>
+          <div class="public-reviews" v-if="publicReviews.length > 0">
+            <div v-for="review in publicReviews" :key="review.id" class="review-card">
+              <div class="review-header">
+                <div class="review-meta">
+                  <span class="review-author">{{ review.userName || 'Anonymous' }}</span>
+                  <span class="review-date">{{ formatDate(review.created_at) }}</span>
+                </div>
+              </div>
+              <div class="review-content">
+                {{ review.content || 'It was a great film!' }}
+              </div>
+              <div class="star-rating d-inline-flex align-items-center ml-3">
+                <i
+                  v-for="starIndex in 5"
+                  :key="`star-${review.id}-${starIndex}`"
+                  class="bi mx-1 text-warning"
+                  :class="{
+                    'bi-star-fill': getEvaluation(review) >= starIndex,
+                    'bi-star-half': getEvaluation(review) + 0.5 >= starIndex && getEvaluation(review) < starIndex,
+                    'bi-star': getEvaluation(review) + 0.5 < starIndex
+                  }"
+                ></i>
+                <small class="text-muted ms-2">
+                  ({{ formatEvaluation(review.evaluation) }})
+                </small>
+              </div>
+            </div>
+          </div>
+          <div v-else class="no-reviews">
+            No reviews yet. Be the first to write one!
+          </div>
         </div>
       </div>
       <Modal :title="title" :yes="yes" :no="no" :size="size" @yesEvent="yesEventHandler">
@@ -105,6 +182,8 @@ export default {
   data() {
     return {
       favourites: [],
+      publicReviews: [],
+      films: [],
       authStore: useAuthStore(),
       currentPage: 1,
       itemsPerPage: 5,
@@ -112,6 +191,7 @@ export default {
       errorMessages: null,
       loading: false,
       modal: null,
+      // For admin CRUD modal
       item: {},
       messageYesNo: null,
       state: "Read",
@@ -120,13 +200,25 @@ export default {
       no: null,
       size: null,
       debug: false,
+      viewMode: "admin", // "admin" or "guest"
+      reviewText: "",
+      submitting: false,
+      errorMessage: "",
+      // For guest review submission
+      selectedFilmId: "",
+      rating: 0
     };
   },
-  mounted() {
-    this.fetchFavourites();
-    this.modal = new bootstrap.Modal("#modal", { keyboard: false });
-  },
   computed: {
+    isAdmin() {
+      return this.authStore.positionId === 1;
+    },
+    username() {
+      return this.authStore.user || "Guest";
+    },
+    userAvatar() {
+      return this.authStore.avatar || "";
+    },
     paginatedFavourites() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       return this.favourites.slice(start, start + this.itemsPerPage);
@@ -136,16 +228,36 @@ export default {
     },
     pagesArray() {
       return Array.from({ length: this.totalPages }, (_, i) => i + 1);
-    },
+    }
+  },
+  mounted() {
+    if (this.isAdmin) {
+      this.fetchFavourites();
+    } else {
+      this.fetchPublicReviews();
+    }
+    this.fetchFilms();
+    // Initialize Bootstrap modal (ensure the Modal component has id="modal")
+    this.modal = new bootstrap.Modal(document.getElementById("modal"), { keyboard: false });
   },
   methods: {
+    toggleViewMode() {
+      if (this.isAdmin) {
+        this.viewMode = this.viewMode === "admin" ? "guest" : "admin";
+        if (this.viewMode === "guest") {
+          this.fetchPublicReviews();
+        } else {
+          this.fetchFavourites();
+        }
+      }
+    },
     yesEventHandler() {
       if (this.state === "Delete") {
         this.deleteItemById();
       }
     },
-    getEvaluation(favourite) {
-      return Number(favourite.evaluation) || 0;
+    getEvaluation(item) {
+      return Number(item.evaluation) || 0;
     },
     formatEvaluation(value) {
       const num = Number(value);
@@ -155,15 +267,15 @@ export default {
       try {
         this.loading = true;
         const token = this.authStore.token;
-        // Now using a backend join query, API should return userName and filmTitle already
         const response = await axios.get(`${BASE_URL}/favourites`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token}` }
         });
         if (response.data?.data) {
-          this.favourites = response.data.data.map((fav) => ({
+          this.favourites = response.data.data.map(fav => ({
             ...fav,
-            evaluation: Number(fav.evaluation) || 0,
+            evaluation: Number(fav.evaluation) || 0
           }));
+          // In admin view, assume favourites data already includes joined fields (userName, filmTitle)
         }
       } catch (error) {
         console.error("Error fetching favourites:", error);
@@ -172,13 +284,53 @@ export default {
         this.loading = false;
       }
     },
+    async fetchPublicReviews() {
+      try {
+        this.loading = true;
+        const token = this.authStore.token;
+        // For guest reviews, use favourites endpoint and filter by isPublic flag
+        const response = await axios.get(`${BASE_URL}/favourites`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (response.data?.data) {
+          this.publicReviews = response.data.data.filter(review => review.isPublic).map(review => ({
+            ...review,
+            userName: review.userName || "Anonymous",
+            filmTitle: review.filmTitle || "Unknown Film",
+            content: review.content || "It was a great film!",
+            created_at: review.created_at,
+            userAvatar: review.userAvatar || "",
+            evaluation: Number(review.evaluation) || 0
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching public reviews:", error);
+        this.errorMessages = "Error fetching data from the server.";
+      } finally {
+        this.loading = false;
+      }
+    },
+    async fetchFilms() {
+      try {
+        const response = await axios.get(`${BASE_URL}/films`);
+        if (response.data?.data) {
+          this.films = response.data.data;
+        }
+      } catch (error) {
+        console.error("Error fetching films:", error);
+      }
+    },
     async deleteItemById() {
       const id = this.selectedRowId;
       try {
         await axios.delete(`${BASE_URL}/favourites/${id}`, {
-          headers: { Authorization: `Bearer ${this.authStore.token}` },
+          headers: { Authorization: `Bearer ${this.authStore.token}` }
         });
-        this.fetchFavourites();
+        if (this.viewMode === "admin") {
+          this.fetchFavourites();
+        } else {
+          this.fetchPublicReviews();
+        }
       } catch (error) {
         this.errorMessages = "The review cannot be deleted.";
       }
@@ -216,7 +368,43 @@ export default {
       if (this.state === "Delete") this.deleteItemById();
       this.modal.hide();
     },
-  },
+    async submitReview() {
+      if (!this.reviewText.trim() || !this.selectedFilmId || this.rating === 0) return;
+      this.submitting = true;
+      this.errorMessage = "";
+      try {
+        // If token exists, include it; if not, omit Authorization header for guest submission.
+        const token = this.authStore.token;
+        const headers = {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        };
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+        // Use a default guest user ID if authStore.id is not set.
+        const userId = this.authStore.id || 2;
+        await axios.post(`${BASE_URL}/favourites`, {
+          filmId: this.selectedFilmId,
+          evaluation: this.rating,
+          content: this.reviewText,
+          isPublic: true,
+          userId: userId
+        }, { headers });
+        this.reviewText = "";
+        this.selectedFilmId = "";
+        this.rating = 0;
+        await this.fetchPublicReviews();
+      } catch (error) {
+        this.errorMessage = error.response?.data?.message || "Failed to submit review.";
+      } finally {
+        this.submitting = false;
+      }
+    },
+    setRating(star) {
+      this.rating = star;
+    }
+  }
 };
 </script>
 
@@ -233,11 +421,35 @@ export default {
 .film-reviews {
   background: var(--background-dark);
   min-height: 100vh;
-  padding-bottom: 100px;
+  padding-bottom: 120px;
   color: var(--text-light);
 }
 
-/* Enhanced Loading Overlay */
+.toggle-container {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.btn-toggle {
+  background: var(--primary-color);
+  color: var(--secondary-color);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-toggle:hover {
+  background: var(--secondary-color);
+  color: var(--accent-color);
+}
+
+.toggle-text {
+  margin-left: 0.5rem;
+  font-weight: bold;
+}
+
 .loading-overlay {
   position: fixed;
   top: 0;
@@ -346,18 +558,20 @@ export default {
   font-style: italic;
 }
 
-/* Fixed Paginator at Bottom */
+/* Fixed Paginator */
 .pagination-container {
-  position: fixed;
+  position: sticky;
   bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--accent-color);
-  padding: 10px 20px;
-  border-radius: 30px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-  border: 1px solid var(--secondary-color);
-  z-index: 1000;
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.9);
+  padding: 1rem;
+  border-radius: 8px;
+  z-index: 100;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .pagination {
@@ -408,6 +622,145 @@ export default {
 .text-nowrap.text-center button:hover {
   background: var(--primary-color) !important;
   color: var(--secondary-color) !important;
+}
+
+/* Guest Review Form (YouTube Comment Style) */
+.guest-review-form {
+  background: #f9f9f9;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 1rem auto;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.username {
+  font-weight: bold;
+  color: #333;
+}
+
+/* Film Selection Dropdown */
+.film-select {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+/* Star Input for Rating */
+.star-input {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.star-icon {
+  font-size: 1.5rem;
+  color: #FFD700;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.star-icon:hover {
+  transform: scale(1.2);
+}
+
+.rating-display {
+  font-weight: bold;
+  margin-left: 0.5rem;
+}
+
+/* Review Input Textarea */
+.review-input {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 1rem;
+  color: #333;
+}
+
+/* Review Actions */
+.review-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.btn-submit {
+  background: #cc181e;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-submit:hover {
+  background: #b10d12;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.9rem;
+}
+
+.public-reviews {
+  margin-top: 2rem;
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.avatar-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.review-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.review-author {
+  font-weight: 500;
+}
+
+.review-date {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.review-content {
+  white-space: pre-wrap;
+  line-height: 1.5;
 }
 
 @media (max-width: 768px) {
