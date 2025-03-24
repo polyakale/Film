@@ -3,9 +3,11 @@
     <!-- Toggle Button (admin only) -->
     <div v-if="isAdmin" class="toggle-container">
       <button class="btn-toggle" @click="toggleViewMode">
-        <i :class="viewMode === 'admin' ? 'bi bi-toggle-on' : 'bi bi-toggle-off'"></i>
+        <i
+          :class="viewMode === 'admin' ? 'bi bi-toggle-on' : 'bi bi-toggle-off'"
+        ></i>
         <span class="toggle-text">
-          Switch to {{ viewMode === 'admin' ? 'Guest' : 'Admin' }} View
+          Switch to {{ viewMode === "admin" ? "Guest" : "Admin" }} View
         </span>
       </button>
     </div>
@@ -26,7 +28,10 @@
       <div class="container">
         <!-- Admin View -->
         <div v-if="viewMode === 'admin'" class="admin-view">
-          <div v-if="favourites.length > 0" class="col-12 col-lg-10 tabla-container">
+          <div
+            v-if="favourites.length > 0"
+            class="col-12 col-lg-10 tabla-container"
+          >
             <table class="table custom-table">
               <thead class="table-dark">
                 <tr>
@@ -39,7 +44,11 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="favourite in paginatedFavourites" :key="favourite.id" class="review-card">
+                <tr
+                  v-for="favourite in paginatedFavourites"
+                  :key="favourite.id"
+                  class="review-card"
+                >
                   <td data-label="#" v-if="debug">{{ favourite.id }}</td>
                   <td data-label="User" class="user">
                     {{ favourite.userName || "Unknown User" }}
@@ -49,12 +58,18 @@
                   </td>
                   <td data-label="Evaluation" class="text-center">
                     <div class="star-rating d-inline-flex align-items-center">
-                      <i v-for="starIndex in 5" :key="starIndex" class="bi mx-1 text-warning"
+                      <i
+                        v-for="starIndex in 5"
+                        :key="starIndex"
+                        class="bi mx-1 text-warning"
                         :class="{
                           'bi-star-fill': getEvaluation(favourite) >= starIndex,
-                          'bi-star-half': getEvaluation(favourite) + 0.5 >= starIndex && getEvaluation(favourite) < starIndex,
-                          'bi-star': getEvaluation(favourite) + 0.5 < starIndex
-                        }"></i>
+                          'bi-star-half':
+                            getEvaluation(favourite) + 0.5 >= starIndex &&
+                            getEvaluation(favourite) < starIndex,
+                          'bi-star': getEvaluation(favourite) + 0.5 < starIndex,
+                        }"
+                      ></i>
                       <small class="text-muted ms-2">
                         ({{ formatEvaluation(favourite.evaluation) }})
                       </small>
@@ -97,8 +112,17 @@
               </option>
             </select>
             <div class="star-input">
-              <span v-for="starIndex in 5" :key="starIndex" @click="setRating(starIndex)">
-                <i :class="rating >= starIndex ? 'bi bi-star-fill' : 'bi bi-star'" class="star-icon"></i>
+              <span
+                v-for="starIndex in 5"
+                :key="starIndex"
+                @click="setRating(starIndex)"
+              >
+                <i
+                  :class="
+                    rating >= starIndex ? 'bi bi-star-fill' : 'bi bi-star'
+                  "
+                  class="star-icon"
+                ></i>
               </span>
               <span class="rating-display">({{ rating }})</span>
             </div>
@@ -111,31 +135,52 @@
               <button
                 class="btn-submit"
                 @click="submitReview"
-                :disabled="submitting || !reviewText.trim() || !selectedFilmId || rating === 0"
+                :disabled="
+                  submitting ||
+                  !reviewText.trim() ||
+                  !selectedFilmId ||
+                  rating === 0
+                "
               >
                 Submit Review
               </button>
-              <span v-if="errorMessage" class="error-message">{{ errorMessage }}</span>
+              <span v-if="errorMessage" class="error-message">{{
+                errorMessage
+              }}</span>
             </div>
           </div>
           <div class="public-reviews" v-if="publicReviews.length > 0">
-            <div v-for="review in publicReviews" :key="review.id" class="review-card">
+            <div
+              v-for="review in publicReviews"
+              :key="review.id"
+              class="review-card"
+            >
               <div class="review-header">
                 <div class="review-meta">
-                  <span class="review-author">{{ review.userName || 'Anonymous' }}</span>
-                  <span class="review-date">{{ formatDate(review.created_at) }}</span>
+                  <span class="review-author">{{
+                    review.userName || "Anonymous"
+                  }}</span>
+                  <span class="review-date">{{
+                    formatDate(review.created_at)
+                  }}</span>
                 </div>
               </div>
               <div class="review-content">
                 {{ review.content || randomDefaultReview() }}
               </div>
               <div class="star-rating d-inline-flex align-items-center ml-3">
-                <i v-for="starIndex in 5" :key="`star-${review.id}-${starIndex}`" class="bi mx-1 text-warning"
+                <i
+                  v-for="starIndex in 5"
+                  :key="`star-${review.id}-${starIndex}`"
+                  class="bi mx-1 text-warning"
                   :class="{
                     'bi-star-fill': getEvaluation(review) >= starIndex,
-                    'bi-star-half': getEvaluation(review) + 0.5 >= starIndex && getEvaluation(review) < starIndex,
-                    'bi-star': getEvaluation(review) + 0.5 < starIndex
-                  }"></i>
+                    'bi-star-half':
+                      getEvaluation(review) + 0.5 >= starIndex &&
+                      getEvaluation(review) < starIndex,
+                    'bi-star': getEvaluation(review) + 0.5 < starIndex,
+                  }"
+                ></i>
                 <small class="text-muted ms-2">
                   ({{ formatEvaluation(review.evaluation) }})
                 </small>
@@ -147,7 +192,13 @@
           </div>
         </div>
       </div>
-      <Modal :title="title" :yes="yes" :no="no" :size="size" @yesEvent="yesEventHandler">
+      <Modal
+        :title="title"
+        :yes="yes"
+        :no="no"
+        :size="size"
+        @yesEvent="yesEventHandler"
+      >
         <div v-if="state === 'Delete'">{{ messageYesNo }}</div>
         <ReviewForm
           v-if="state === 'Create' || state === 'Update'"
@@ -230,9 +281,37 @@ export default {
       return Math.ceil(this.favourites.length / this.itemsPerPage);
     },
     pagesArray() {
-      return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+      if (this.totalPages <= 5) {
+        return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+      }
+
+      const firstPage = 1;
+      const lastPage = this.totalPages;
+      let middlePages = [];
+
+      if (this.currentPage <= 3) {
+        // If near the beginning, show first few pages
+        middlePages = [2, 3, 4];
+      } else if (this.currentPage >= this.totalPages - 2) {
+        // If near the end, show last few before last page
+        middlePages = [
+          this.totalPages - 3,
+          this.totalPages - 2,
+          this.totalPages - 1,
+        ];
+      } else {
+        // Middle pages: show current and next two
+        middlePages = [
+          this.currentPage,
+          this.currentPage + 1,
+          this.currentPage + 2,
+        ];
+      }
+
+      return [firstPage, ...middlePages, lastPage];
     },
   },
+
   mounted() {
     if (this.isAdmin) {
       this.viewMode = "admin";
@@ -243,7 +322,9 @@ export default {
     }
     this.fetchFilms();
     // Initialize Bootstrap modal (ensure the Modal component has id="modal")
-    this.modal = new bootstrap.Modal(document.getElementById("modal"), { keyboard: false });
+    this.modal = new bootstrap.Modal(document.getElementById("modal"), {
+      keyboard: false,
+    });
   },
   methods: {
     toggleViewMode() {
@@ -277,12 +358,12 @@ export default {
         this.loading = true;
         const token = this.authStore.token;
         const response = await axios.get(`${BASE_URL}/favourites`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
         if (response.data?.data) {
-          this.favourites = response.data.data.map(fav => ({
+          this.favourites = response.data.data.map((fav) => ({
             ...fav,
-            evaluation: Number(fav.evaluation) || 0
+            evaluation: Number(fav.evaluation) || 0,
           }));
           // In admin view, we assume favourites data already includes joined fields (userName, filmTitle)
         }
@@ -299,17 +380,17 @@ export default {
         const token = this.authStore.token;
         // For guest reviews, use favourites endpoint and filter by isPublic flag
         const response = await axios.get(`${BASE_URL}/favourites`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         if (response.data?.data) {
           this.publicReviews = response.data.data
-            .filter(review => review.isPublic)
-            .map(review => ({
+            .filter((review) => review.isPublic)
+            .map((review) => ({
               ...review,
               userName: review.userName || "Anonymous",
               filmTitle: review.filmTitle || "Unknown Film",
               content: review.content || this.randomDefaultReview(),
-              evaluation: Number(review.evaluation) || 0
+              evaluation: Number(review.evaluation) || 0,
             }));
         }
       } catch (error) {
@@ -333,7 +414,7 @@ export default {
       const id = this.selectedRowId;
       try {
         await axios.delete(`${BASE_URL}/favourites/${id}`, {
-          headers: { Authorization: `Bearer ${this.authStore.token}` }
+          headers: { Authorization: `Bearer ${this.authStore.token}` },
         });
         if (this.viewMode === "admin") {
           this.fetchFavourites();
@@ -353,7 +434,11 @@ export default {
       }
     },
     handlePageChange(pageInfo) {
-      this.currentPage = pageInfo.pageNumber;
+      if (pageInfo === "...") {
+        this.currentPage = this.totalPages; // Jump to last page
+      } else {
+        this.currentPage = pageInfo.pageNumber;
+      }
     },
     onClickDeleteButton(item) {
       this.state = "Delete";
@@ -378,7 +463,8 @@ export default {
       this.modal.hide();
     },
     async submitReview() {
-      if (!this.reviewText.trim() || !this.selectedFilmId || this.rating === 0) return;
+      if (!this.reviewText.trim() || !this.selectedFilmId || this.rating === 0)
+        return;
       this.submitting = true;
       this.errorMessage = "";
       try {
@@ -386,11 +472,13 @@ export default {
         const headers = {
           Accept: "application/json",
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         };
         // Use a default guest user ID if none is provided
         const userId = this.authStore.id || 2;
-        const selectedFilm = this.films.find(f => f.id === this.selectedFilmId);
+        const selectedFilm = this.films.find(
+          (f) => f.id === this.selectedFilmId
+        );
         // Create a new review object for optimistic UI update
         const newReview = {
           id: Date.now(), // temporary ID
@@ -405,20 +493,26 @@ export default {
         };
         // Optimistically add the review
         this.publicReviews.unshift(newReview);
-        const response = await axios.post(`${BASE_URL}/favourites`, {
-          filmId: this.selectedFilmId,
-          evaluation: this.rating,
-          content: this.reviewText,
-          isPublic: true,
-          userId: userId
-        }, { headers });
+        const response = await axios.post(
+          `${BASE_URL}/favourites`,
+          {
+            filmId: this.selectedFilmId,
+            evaluation: this.rating,
+            content: this.reviewText,
+            isPublic: true,
+            userId: userId,
+          },
+          { headers }
+        );
         // Replace temporary review with actual data from server
         if (response.data?.data) {
-          const index = this.publicReviews.findIndex(r => r.id === newReview.id);
+          const index = this.publicReviews.findIndex(
+            (r) => r.id === newReview.id
+          );
           if (index !== -1) {
             this.publicReviews[index] = {
               ...this.publicReviews[index],
-              ...response.data.data
+              ...response.data.data,
             };
           }
         }
@@ -427,23 +521,26 @@ export default {
         this.rating = 0;
       } catch (error) {
         // Remove optimistic review if submission failed
-        this.publicReviews = this.publicReviews.filter(r => r.id !== newReview.id);
-        this.errorMessage = error.response?.data?.message || "Failed to submit review.";
+        this.publicReviews = this.publicReviews.filter(
+          (r) => r.id !== newReview.id
+        );
+        this.errorMessage =
+          error.response?.data?.message || "Failed to submit review.";
       } finally {
         this.submitting = false;
       }
     },
     setRating(star) {
       this.rating = star;
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style scoped>
 :root {
-  --primary-color: #8B0000; /* Dark Red */
-  --secondary-color: #FFD700; /* Gold */
+  --primary-color: #8b0000; /* Dark Red */
+  --secondary-color: #ffd700; /* Gold */
   --accent-color: #000000; /* Black */
   --background-dark: #1a1a1a;
   --text-light: #ffffff;
