@@ -1,6 +1,5 @@
 <template>
   <div class="film-reviews">
-    <!-- Toggle Button (admin only) -->
     <div v-if="isAdmin" class="toggle-container">
       <button class="btn-toggle" @click="toggleViewMode">
         <i :class="viewMode === 'admin' ? 'bi bi-toggle-on' : 'bi bi-toggle-off'"></i>
@@ -10,7 +9,6 @@
       </button>
     </div>
 
-    <!-- Full-page Loading Overlay -->
     <div v-if="loading" class="loading-overlay">
       <div class="loading-content">
         <div class="spinner-border" role="status">
@@ -20,11 +18,9 @@
       </div>
     </div>
 
-    <!-- Main Content -->
     <div v-else>
       <h3 class="text-center my-4">Reviews</h3>
       <div class="container">
-        <!-- Admin View -->
         <div v-if="viewMode === 'admin'" class="admin-view">
           <div v-if="favourites.length > 0" class="col-12 col-lg-10 tabla-container">
             <table class="table custom-table">
@@ -88,7 +84,6 @@
           </div>
         </div>
 
-        <!-- Guest View -->
         <div v-else class="guest-view">
           <div class="guest-review-form">
             <div class="user-info">
@@ -384,17 +379,28 @@ export default {
         }
         // Use a default guest user ID if authStore.id is not set.
         const userId = this.authStore.id || 2;
-        await axios.post(`${BASE_URL}/favourites`, {
+        const response = await axios.post(`${BASE_URL}/favourites`, {
           filmId: this.selectedFilmId,
           evaluation: this.rating,
           content: this.reviewText,
           isPublic: true,
           userId: userId
         }, { headers });
+
+        // Add the new review to the publicReviews array to show it immediately
+        this.publicReviews.unshift({
+          id: response.data.id, // Get the ID from the response
+          userName: this.username,  // Use the current username
+          filmTitle: this.films.find(film => film.id === this.selectedFilmId)?.title || "Unknown Film",
+          content: this.reviewText,
+          created_at: new Date().toISOString(), // Use current date
+          evaluation: this.rating,
+        });
+
         this.reviewText = "";
         this.selectedFilmId = "";
         this.rating = 0;
-        await this.fetchPublicReviews();
+        // await this.fetchPublicReviews();  // No need to fetch all data again
       } catch (error) {
         this.errorMessage = error.response?.data?.message || "Failed to submit review.";
       } finally {
