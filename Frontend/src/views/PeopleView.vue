@@ -162,7 +162,7 @@ export default {
       }
     },
     getImageUrl(photo) {
-      return photo ? `/Images/${photo}` : "/Images/default.jpg";
+      return photo ? `/Images/${photo}` : "/Images/Missing.png";
     },
     searchPeople() {
       const query = this.searchQuery.toLowerCase();
