@@ -1,5 +1,6 @@
 <template>
   <div class="film-reviews">
+    <!-- Toggle Button (admin only) -->
     <div v-if="isAdmin" class="toggle-container">
       <button class="btn-toggle" @click="toggleViewMode">
         <i :class="viewMode === 'admin' ? 'bi bi-toggle-on' : 'bi bi-toggle-off'"></i>
@@ -9,6 +10,7 @@
       </button>
     </div>
 
+    <!-- Full-page Loading Overlay -->
     <div v-if="loading" class="loading-overlay">
       <div class="loading-content">
         <div class="spinner-border" role="status">
@@ -18,9 +20,11 @@
       </div>
     </div>
 
+    <!-- Main Content -->
     <div v-else>
       <h3 class="text-center my-4">Reviews</h3>
       <div class="container">
+        <!-- Admin View -->
         <div v-if="viewMode === 'admin'" class="admin-view">
           <div v-if="favourites.length > 0" class="col-12 col-lg-10 tabla-container">
             <table class="table custom-table">
@@ -45,16 +49,12 @@
                   </td>
                   <td data-label="Evaluation" class="text-center">
                     <div class="star-rating d-inline-flex align-items-center">
-                      <i
-                        v-for="starIndex in 5"
-                        :key="starIndex"
-                        class="bi mx-1 text-warning"
+                      <i v-for="starIndex in 5" :key="starIndex" class="bi mx-1 text-warning"
                         :class="{
                           'bi-star-fill': getEvaluation(favourite) >= starIndex,
                           'bi-star-half': getEvaluation(favourite) + 0.5 >= starIndex && getEvaluation(favourite) < starIndex,
                           'bi-star': getEvaluation(favourite) + 0.5 < starIndex
-                        }"
-                      ></i>
+                        }"></i>
                       <small class="text-muted ms-2">
                         ({{ formatEvaluation(favourite.evaluation) }})
                       </small>
@@ -84,6 +84,7 @@
           </div>
         </div>
 
+        <!-- Guest View -->
         <div v-else class="guest-view">
           <div class="guest-review-form">
             <div class="user-info">
@@ -126,19 +127,15 @@
                 </div>
               </div>
               <div class="review-content">
-                {{ review.content || 'It was a great film!' }}
+                {{ review.content || randomDefaultReview() }}
               </div>
               <div class="star-rating d-inline-flex align-items-center ml-3">
-                <i
-                  v-for="starIndex in 5"
-                  :key="`star-${review.id}-${starIndex}`"
-                  class="bi mx-1 text-warning"
+                <i v-for="starIndex in 5" :key="`star-${review.id}-${starIndex}`" class="bi mx-1 text-warning"
                   :class="{
                     'bi-star-fill': getEvaluation(review) >= starIndex,
                     'bi-star-half': getEvaluation(review) + 0.5 >= starIndex && getEvaluation(review) < starIndex,
                     'bi-star': getEvaluation(review) + 0.5 < starIndex
-                  }"
-                ></i>
+                  }"></i>
                 <small class="text-muted ms-2">
                   ({{ formatEvaluation(review.evaluation) }})
                 </small>
@@ -201,7 +198,18 @@ export default {
       errorMessage: "",
       // For guest review submission
       selectedFilmId: "",
-      rating: 0
+      rating: 0,
+      // Default review texts for missing content
+      defaultReviews: [
+        "It was a great film!",
+        "An unforgettable experience.",
+        "I really enjoyed this movie.",
+        "A masterpiece of cinema.",
+        "It was a decent watch.",
+        "A remarkable performance by the cast.",
+        "Simply outstanding!",
+        "A solid film with a compelling story.",
+      ],
     };
   },
   computed: {
@@ -223,12 +231,14 @@ export default {
     },
     pagesArray() {
       return Array.from({ length: this.totalPages }, (_, i) => i + 1);
-    }
+    },
   },
   mounted() {
     if (this.isAdmin) {
+      this.viewMode = "admin";
       this.fetchFavourites();
     } else {
+      this.viewMode = "guest";
       this.fetchPublicReviews();
     }
     this.fetchFilms();
@@ -258,6 +268,10 @@ export default {
       const num = Number(value);
       return Number.isNaN(num) ? "N/A" : num.toFixed(1);
     },
+    randomDefaultReview() {
+      const index = Math.floor(Math.random() * this.defaultReviews.length);
+      return this.defaultReviews[index];
+    },
     async fetchFavourites() {
       try {
         this.loading = true;
@@ -270,7 +284,7 @@ export default {
             ...fav,
             evaluation: Number(fav.evaluation) || 0
           }));
-          // In admin view, assume favourites data already includes joined fields (userName, filmTitle)
+          // In admin view, we assume favourites data already includes joined fields (userName, filmTitle)
         }
       } catch (error) {
         console.error("Error fetching favourites:", error);
@@ -285,18 +299,18 @@ export default {
         const token = this.authStore.token;
         // For guest reviews, use favourites endpoint and filter by isPublic flag
         const response = await axios.get(`${BASE_URL}/favourites`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         if (response.data?.data) {
-          this.publicReviews = response.data.data.filter(review => review.isPublic).map(review => ({
-            ...review,
-            userName: review.userName || "Anonymous",
-            filmTitle: review.filmTitle || "Unknown Film",
-            content: review.content || "It was a great film!",
-            created_at: review.created_at,
-            userAvatar: review.userAvatar || "",
-            evaluation: Number(review.evaluation) || 0
-          }));
+          this.publicReviews = response.data.data
+            .filter(review => review.isPublic)
+            .map(review => ({
+              ...review,
+              userName: review.userName || "Anonymous",
+              filmTitle: review.filmTitle || "Unknown Film",
+              content: review.content || this.randomDefaultReview(),
+              evaluation: Number(review.evaluation) || 0
+            }));
         }
       } catch (error) {
         console.error("Error fetching public reviews:", error);
@@ -368,17 +382,29 @@ export default {
       this.submitting = true;
       this.errorMessage = "";
       try {
-        // If token exists, include it; if not, omit Authorization header for guest submission.
         const token = this.authStore.token;
         const headers = {
           Accept: "application/json",
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
         };
-        if (token) {
-          headers.Authorization = `Bearer ${token}`;
-        }
-        // Use a default guest user ID if authStore.id is not set.
+        // Use a default guest user ID if none is provided
         const userId = this.authStore.id || 2;
+        const selectedFilm = this.films.find(f => f.id === this.selectedFilmId);
+        // Create a new review object for optimistic UI update
+        const newReview = {
+          id: Date.now(), // temporary ID
+          filmId: this.selectedFilmId,
+          evaluation: this.rating,
+          content: this.reviewText,
+          isPublic: true,
+          userId: userId,
+          userName: this.username,
+          filmTitle: selectedFilm ? selectedFilm.title : "Unknown Film",
+          created_at: new Date().toISOString(),
+        };
+        // Optimistically add the review
+        this.publicReviews.unshift(newReview);
         const response = await axios.post(`${BASE_URL}/favourites`, {
           filmId: this.selectedFilmId,
           evaluation: this.rating,
@@ -386,22 +412,22 @@ export default {
           isPublic: true,
           userId: userId
         }, { headers });
-
-        // Add the new review to the publicReviews array to show it immediately
-        this.publicReviews.unshift({
-          id: response.data.id, // Get the ID from the response
-          userName: this.username,  // Use the current username
-          filmTitle: this.films.find(film => film.id === this.selectedFilmId)?.title || "Unknown Film",
-          content: this.reviewText,
-          created_at: new Date().toISOString(), // Use current date
-          evaluation: this.rating,
-        });
-
+        // Replace temporary review with actual data from server
+        if (response.data?.data) {
+          const index = this.publicReviews.findIndex(r => r.id === newReview.id);
+          if (index !== -1) {
+            this.publicReviews[index] = {
+              ...this.publicReviews[index],
+              ...response.data.data
+            };
+          }
+        }
         this.reviewText = "";
         this.selectedFilmId = "";
         this.rating = 0;
-        // await this.fetchPublicReviews();  // No need to fetch all data again
       } catch (error) {
+        // Remove optimistic review if submission failed
+        this.publicReviews = this.publicReviews.filter(r => r.id !== newReview.id);
         this.errorMessage = error.response?.data?.message || "Failed to submit review.";
       } finally {
         this.submitting = false;
@@ -418,7 +444,7 @@ export default {
 :root {
   --primary-color: #8B0000; /* Dark Red */
   --secondary-color: #FFD700; /* Gold */
-  --accent-color: #000000;   /* Black */
+  --accent-color: #000000; /* Black */
   --background-dark: #1a1a1a;
   --text-light: #ffffff;
   --text-muted: #cccccc;
@@ -510,7 +536,7 @@ export default {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0 0.5rem;
-  background: #FFFFFF;
+  background: #ffffff;
   border: 2px solid var(--primary-color);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
@@ -679,7 +705,7 @@ export default {
 
 .star-icon {
   font-size: 1.5rem;
-  color: #FFD700;
+  color: #ffd700;
   cursor: pointer;
   transition: transform 0.2s;
 }

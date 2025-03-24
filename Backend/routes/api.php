@@ -11,6 +11,7 @@ use App\Http\Controllers\TaskController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+// Route::post('/favourites', [FavouriteController::class, 'store'])->withoutMiddleware('auth:api');
 // users
 Route::post('users/login', [UserController::class, 'login']);
 Route::patch('users/change-password', [UserController::class, 'changePassword'])
