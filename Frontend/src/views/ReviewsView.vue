@@ -646,14 +646,12 @@ export default {
 .custom-table th {
   font-weight: 700;
   letter-spacing: 1px;
-  color: var(--secondary-color) !important;
   text-transform: uppercase;
 }
 
 .custom-table tbody tr {
-  background-color: rgba(248, 249, 250, 1);
   transition: background 0.3s;
-  color: #000;
+  color: #000000;
 }
 
 .custom-table tbody tr:hover {
