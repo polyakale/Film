@@ -2,7 +2,6 @@
   <div class="container">
     <h1>People</h1>
 
-    <!-- Kereső -->
     <div class="search-container">
       <input
         type="text"
@@ -13,7 +12,6 @@
       />
     </div>
 
-    <!-- Admin gombok -->
     <div v-if="isAdmin" class="admin-actions">
       <button @click="openAddPersonModal" class="add-people-button">
         Add New Person
@@ -22,26 +20,29 @@
 
     <div v-if="people.length" class="people-grid">
       <div v-for="person in filteredPeople" :key="person.id" class="person-card">
-        <!-- Kép -->
-        <img :src="getImageUrl(person.photo)" alt="Image" class="person-image" />
-        <!-- Név -->
+        <img 
+          :src="getImageUrl(person.photo)" 
+          @error="handleImageError"
+          alt="Person image" 
+          class="person-image" 
+        />
+        
         <div v-if="!person.imdbLink" class="name-container no-imdb">
           {{ person.name }}
         </div>
-        <!-- IMDb link -->
+        
         <div v-else>
           <a :href="person.imdbLink" target="_blank" rel="noopener noreferrer" class="imdb-link">
             {{ person.name }}
           </a>
         </div>
-        <!-- Alternatív nevek -->
+        
         <ul class="name-list">
           <li v-for="(name, index) in person.names" :key="index">
             {{ name }}
           </li>
         </ul>
 
-        <!-- Admin műveletek -->
         <div v-if="isAdmin" class="people-actions">
           <button @click="openEditPersonModal(person)" class="edit-button">
             Edit
@@ -55,7 +56,6 @@
 
     <p v-else>Loading...</p>
 
-    <!-- Új személy hozzáadása modal -->
     <div v-if="showAddPersonModal" class="modal">
       <div class="modal-content">
         <h2>Add New Person</h2>
@@ -64,12 +64,11 @@
           <input v-model="newPerson.name" required />
 
           <label>Photo URL (optional):</label>
-          <input v-model="newPerson.photo" />
+          <input v-model="newPerson.photo" placeholder="Leave empty for default image" />
 
           <label>IMDb Link:</label>
           <input v-model="newPerson.imdbLink" />
 
-          <!-- Nem kiválasztása -->
           <label>Gender:</label>
           <select v-model="newPerson.gender" required>
             <option value="">Select gender</option>
@@ -83,7 +82,6 @@
       </div>
     </div>
 
-    <!-- Személy szerkesztése modal -->
     <div v-if="showEditPersonModal" class="modal">
       <div class="modal-content">
         <h2>Edit Person</h2>
@@ -92,12 +90,11 @@
           <input v-model="editingPerson.name" required />
 
           <label>Photo URL (optional):</label>
-          <input v-model="editingPerson.photo" />
+          <input v-model="editingPerson.photo" placeholder="Leave empty for default image" />
 
           <label>IMDb Link:</label>
           <input v-model="editingPerson.imdbLink" />
 
-          <!-- Nem kiválasztása -->
           <label>Gender:</label>
           <select v-model="editingPerson.gender" required>
             <option value="">Select gender</option>
@@ -152,37 +149,21 @@ export default {
     async fetchPeopleFromBackend() {
       try {
         const response = await axios.get(`${BASE_URL}/people`);
-        console.log("API response:", response.data); // Ellenőrizd a választ
-        this.people = Array.isArray(response.data.data)
-          ? response.data.data
-          : [];
+        this.people = Array.isArray(response.data.data) ? response.data.data : [];
         this.filteredPeople = this.people;
       } catch (error) {
         console.error("Error:", error);
       }
     },
+    
     getImageUrl(photo) {
       return photo ? `/Images/${photo}` : "/Images/Missing.png";
     },
-    searchPeople() {
-      const query = this.searchQuery.toLowerCase();
-      this.filteredPeople = this.people.filter(
-        (person) =>
-          person.name.toLowerCase().includes(query) // Módosítva: person.name
-      );
+    
+    handleImageError(event) {
+      event.target.src = "/Images/Missing.png";
     },
-    openAddPersonModal() {
-      this.showAddPersonModal = true;
-    },
-    closeAddPersonModal() {
-      this.showAddPersonModal = false;
-      this.newPerson = {
-        name: "",
-        photo: "",
-        imdbLink: "",
-        gender: "",
-      };
-    },
+    
     async submitNewPerson() {
       try {
         const token = this.stateAuth.token;
@@ -193,26 +174,49 @@ export default {
         };
         const data = {
           name: this.newPerson.name,
-          photo: this.newPerson.photo || null,
+          photo: this.newPerson.photo.trim() === "" ? "Missing.png" : this.newPerson.photo,
           imdbLink: this.newPerson.imdbLink,
           gender: this.newPerson.gender === "true",
         };
-        const response = await axios.post(this.urlApi, data, { headers });
+        await axios.post(this.urlApi, data, { headers });
         this.fetchPeopleFromBackend();
-        this.filteredPeople = this.people;
         this.closeAddPersonModal();
       } catch (error) {
         console.error("Error adding new person:", error.response?.data || error.message);
       }
     },
+
+    searchPeople() {
+      const query = this.searchQuery.toLowerCase();
+      this.filteredPeople = this.people.filter(person =>
+        person.name.toLowerCase().includes(query)
+      );
+    },
+    
+    openAddPersonModal() {
+      this.showAddPersonModal = true;
+    },
+    
+    closeAddPersonModal() {
+      this.showAddPersonModal = false;
+      this.newPerson = {
+        name: "",
+        photo: "",
+        imdbLink: "",
+        gender: "",
+      };
+    },
+    
     openEditPersonModal(person) {
       this.editingPerson = { ...person };
       this.showEditPersonModal = true;
     },
+    
     closeEditPersonModal() {
       this.showEditPersonModal = false;
       this.editingPerson = null;
     },
+    
     async submitEditedPerson() {
       try {
         const token = this.stateAuth.token;
@@ -223,25 +227,22 @@ export default {
         };
         const data = {
           name: this.editingPerson.name,
-          photo: this.editingPerson.photo || null,
+          photo: this.editingPerson.photo.trim() === "" ? "Missing.png" : this.editingPerson.photo,
           imdbLink: this.editingPerson.imdbLink,
           gender: this.editingPerson.gender,
         };
-        const response = await axios.patch(
+        await axios.patch(
           `${this.urlApi}/${this.editingPerson.id}`,
           data,
           { headers }
         );
-        const index = this.people.findIndex(
-          (person) => person.id === this.editingPerson.id
-        );
-        this.people.splice(index, 1, response.data.data);
-        this.filteredPeople = this.people;
+        this.fetchPeopleFromBackend();
         this.closeEditPersonModal();
       } catch (error) {
         console.error("Error editing person:", error);
       }
     },
+    
     async deletePerson(personId) {
       if (confirm("Are you sure you want to delete this person?")) {
         try {
@@ -253,7 +254,6 @@ export default {
           };
           await axios.delete(`${this.urlApi}/${personId}`, { headers });
           this.fetchPeopleFromBackend();
-          this.filteredPeople = this.people;
         } catch (error) {
           console.error("Error deleting person:", error);
         }
@@ -264,7 +264,6 @@ export default {
 </script>
 
 <style scoped>
-/* Az eredeti stílusok maradnak változatlanok */
 .container {
   max-width: 1200px;
   margin: auto;
@@ -311,12 +310,11 @@ export default {
   border-radius: 8px;
 }
 
-/* Új stílus a név szövegdobozhoz */
 .name-container {
   padding: 10px;
   margin-top: 10px;
-  background: #666; /* Szürke háttér */
-  color: white; /* Fehér szöveg */
+  background: #666;
+  color: white;
   border-radius: 5px;
   font-size: 1.2em;
 }
@@ -403,32 +401,56 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
 .modal-content {
   background: #1e1e1e;
   padding: 20px;
   border-radius: 10px;
-  width: 300px;
+  width: 90%;
+  max-width: 500px;
   color: white;
 }
 
 .modal-content form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
 }
 
-.modal-content input {
-  padding: 5px;
+.modal-content label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.modal-content input,
+.modal-content select {
+  width: 100%;
+  padding: 8px;
   border-radius: 5px;
-  border: 1px solid #ccc;
+  border: 1px solid #444;
+  background: #333;
+  color: white;
 }
 
 .modal-content button {
-  padding: 5px 10px;
+  padding: 10px;
+  margin-top: 10px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-weight: bold;
+}
+
+.modal-content button[type="submit"] {
+  background: #4caf50;
+  color: white;
+}
+
+.modal-content button[type="button"] {
+  background: #666;
+  color: white;
 }
 </style>
