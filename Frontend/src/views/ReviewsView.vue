@@ -949,23 +949,29 @@ export default {
     padding: 0.5rem;
     font-size: 0.9rem;
   }
-
   .pagination .page-item .page-link {
     min-width: 30px;
     padding: 0.4rem 0.6rem;
     font-size: 0.85rem;
   }
+  .input-group {
+    flex-direction: column;
+    align-items: flex-end;
+  }
 
+  .review-input {
+    margin-right: 0;
+    margin-bottom: 15px;
+    width: 100%;
+  }
   .film-and-stars {
     flex-direction: column;
     align-items: flex-start;
   }
-
   .film-select {
     width: 100%;
     margin-bottom: 1rem;
   }
-
   .star-input {
     margin-left: 0;
   }
