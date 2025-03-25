@@ -69,8 +69,8 @@
                             getEvaluation(favourite) < starIndex,
                           'bi-star': getEvaluation(favourite) + 0.5 < starIndex,
                         }"
-                      ></i
-                      ><small class="text-muted ms-2">
+                      ></i>
+                      <small class="text-muted ms-2">
                         ({{ formatEvaluation(favourite.evaluation) }})
                       </small>
                     </div>
@@ -216,45 +216,45 @@
 </template>
 
 <script>
-import Modal from "@/components/Modal.vue";
-import Paginator from "@/components/Paginator.vue";
-import OperationsCrud from "@/components/OperationsCrud.vue";
-import ReviewForm from "@/components/forms/ReviewForm.vue";
-import { useAuthStore } from "@/stores/useAuthStore";
-import { BASE_URL } from "../helpers/baseUrls";
+import Modal from "@/components/Modal.vue"; // Assuming this is the correct path
+import Paginator from "@/components/Paginator.vue"; // Assuming this is the correct path
+import OperationsCrud from "@/components/OperationsCrud.vue"; // Assuming this is the correct path
+import ReviewForm from "@/components/forms/ReviewForm.vue"; // Assuming this is the correct path
+import { useAuthStore } from "@/stores/useAuthStore"; // Assuming this is the correct path
+import { BASE_URL } from "../helpers/baseUrls"; // Assuming this is the correct path
 import axios from "axios";
-import * as bootstrap from "bootstrap";
+import * as bootstrap from "bootstrap"; // Import Bootstrap for modal functionality
 
 export default {
   components: { Paginator, OperationsCrud, Modal, ReviewForm },
   data() {
     return {
-      favourites: [],
-      publicReviews: [],
-      films: [],
+      favourites: [], // For admin view
+      publicReviews: [], // For guest view
+      films: [], // List of films for the dropdown
       authStore: useAuthStore(),
       currentPage: 1,
       itemsPerPage: 5,
-      selectedRowId: null,
+      selectedRowId: null, // ID of the selected review for deletion/update
       errorMessages: null,
       loading: false,
-      modal: null,
+      modal: null, // Instance of the Bootstrap modal
       // For admin CRUD modal
       item: {},
       messageYesNo: null,
-      state: "Read",
+      state: "Read", // "Read", "Create", "Update", "Delete"
       title: null,
       yes: null,
       no: null,
       size: null,
-      debug: false,
-      viewMode: "admin", // "guest"
-      reviewText: "",
-      submitting: false,
-      errorMessage: "",
+      debug: false, // Flag to show/hide debug info
+      viewMode: "admin", // "admin" or "guest"
+      reviewText: "", // Text of the review being submitted by a guest
+      submitting: false, // Flag to indicate if a review is being submitted
+      errorMessage: "", // Error message for review submission
       // For guest review submission
-      selectedFilmId: "",
-      rating: 0,
+      selectedFilmId: "", // ID of the selected film for review
+      rating: 0, // Star rating given by the guest
       // Default review texts for missing content
       defaultReviews: [
         "It was a great film!",
@@ -270,28 +270,31 @@ export default {
   },
   computed: {
     isAdmin() {
-      return this.authStore.positionId === 1;
+      return this.authStore.positionId === 1; // Check if the user is an admin
     },
     username() {
-      return this.authStore.user || "Guest";
+      return this.authStore.user || "Guest"; // Get username or "Guest"
     },
     fullStars() {
-      return Math.floor(this.rating);
+      return Math.floor(this.rating); // Get the number of full stars
     },
     hasHalfStar() {
-      return this.rating % 1 >= 0.5;
+      return this.rating % 1 >= 0.5; // Check if there's a half star
     },
     halfStar() {
-      return this.fullStars + 1;
+      return this.fullStars + 1; // Get the index of the half star
     },
     paginatedFavourites() {
+      // Get the subset of reviews for the current page (admin view)
       const start = (this.currentPage - 1) * this.itemsPerPage;
       return this.favourites.slice(start, start + this.itemsPerPage);
     },
     totalPages() {
+      // Calculate the total number of pages (admin view)
       return Math.ceil(this.favourites.length / this.itemsPerPage);
     },
     pagesArray() {
+      // Generate an array of page numbers for the paginator (admin view)
       if (this.totalPages <= 5) {
         return Array.from({ length: this.totalPages }, (_, i) => i + 1);
       }
@@ -317,47 +320,54 @@ export default {
     },
   },
   mounted() {
+    // Fetch data and initialize modal when the component is mounted
     if (this.isAdmin) {
       this.viewMode = "admin";
-      this.fetchFavourites();
+      this.fetchFavourites(); // Fetch data for admin view
     } else {
       this.viewMode = "guest";
-      this.fetchPublicReviews();
+      this.fetchPublicReviews(); // Fetch data for guest view
     }
-    this.fetchFilms();
-    // Initialize Bootstrap modal (ensure the Modal component has id="modal")
+    this.fetchFilms(); // Fetch the list of films for the dropdown
+    // Initialize Bootstrap modal
     this.modal = new bootstrap.Modal(document.getElementById("modal"), {
-      keyboard: false,
+      keyboard: false, // Prevent closing with keyboard
     });
   },
   methods: {
     toggleViewMode() {
+      // Switch between admin and guest views
       if (this.isAdmin) {
         this.viewMode = this.viewMode === "admin" ? "guest" : "admin";
         if (this.viewMode === "guest") {
-          this.fetchPublicReviews();
+          this.fetchPublicReviews(); // Fetch public reviews for guest view
         } else {
-          this.fetchFavourites();
+          this.fetchFavourites(); // Fetch all reviews for admin view
         }
       }
     },
     yesEventHandler() {
+      // Handle "Yes" button click in the modal
       if (this.state === "Delete") {
-        this.deleteItemById();
+        this.deleteItemById(); // Delete the selected review
       }
     },
     getEvaluation(item) {
+      // Helper function to get the evaluation (or default to 0)
       return Number(item.evaluation) || 0;
     },
     formatEvaluation(value) {
+      // Helper function to format the evaluation value
       const num = Number(value);
       return Number.isNaN(num) ? "N/A" : num.toFixed(1);
     },
     randomDefaultReview() {
+      // Get a random default review
       const index = Math.floor(Math.random() * this.defaultReviews.length);
       return this.defaultReviews[index];
     },
     async fetchFavourites() {
+      // Fetch all reviews (for admin view)
       try {
         this.loading = true;
         const token = this.authStore.token;
@@ -367,7 +377,7 @@ export default {
         if (response.data?.data) {
           this.favourites = response.data.data.map((fav) => ({
             ...fav,
-            evaluation: Number(fav.evaluation) || 0,
+            evaluation: Number(fav.evaluation) || 0, // Ensure evaluation is a number
           }));
         }
       } catch (error) {
@@ -378,6 +388,7 @@ export default {
       }
     },
     async fetchPublicReviews() {
+      // Fetch public reviews (for guest view)
       try {
         this.loading = true;
         const token = this.authStore.token;
@@ -386,12 +397,12 @@ export default {
         });
         if (response.data?.data) {
           this.publicReviews = response.data.data
-            .filter((review) => review.isPublic)
+            .filter((review) => review.isPublic) // Filter for public reviews
             .map((review) => ({
               ...review,
               userName: review.userName || "Anonymous",
               filmTitle: review.filmTitle || "Unknown Film",
-              evaluation: Number(review.evaluation) || 0,
+              evaluation: Number(review.evaluation) || 0, // Ensure evaluation is a number
             }));
         }
       } catch (error) {
@@ -402,6 +413,7 @@ export default {
       }
     },
     async fetchFilms() {
+      // Fetch the list of films
       try {
         const response = await axios.get(`${BASE_URL}/films`);
         if (response.data?.data) {
@@ -412,21 +424,24 @@ export default {
       }
     },
     async deleteItemById() {
+      // Delete a review by its ID (admin view)
       const id = this.selectedRowId;
       try {
         await axios.delete(`${BASE_URL}/favourites/${id}`, {
           headers: { Authorization: `Bearer ${this.authStore.token}` },
         });
         if (this.viewMode === "admin") {
-          this.fetchFavourites();
+          this.fetchFavourites(); // Refresh admin view
         } else {
-          this.fetchPublicReviews();
+          this.fetchPublicReviews(); // Refresh guest view
         }
+        this.modal.hide(); // Hide the modal after deletion
       } catch (error) {
         this.errorMessages = "The review cannot be deleted.";
       }
     },
     formatDate(date) {
+      // Helper function to format dates
       try {
         const d = new Date(date);
         return isNaN(d) ? "N/A" : d.toLocaleString("hu-HU");
@@ -435,6 +450,7 @@ export default {
       }
     },
     handlePageChange(pageInfo) {
+      // Handle page change in the paginator (admin view)
       if (pageInfo === "...") {
         this.currentPage = this.totalPages;
       } else {
@@ -442,28 +458,34 @@ export default {
       }
     },
     onClickDeleteButton(item) {
+      // Handle delete button click (admin view)
       this.state = "Delete";
       this.title = "Delete Review";
       this.messageYesNo = `Are you sure you want to delete the review by ${item.userName}?`;
       this.yes = "Yes";
       this.no = "No";
-      this.selectedRowId = item.id;
+      this.selectedRowId = item.id; // Store the ID of the review to delete
+      this.modal.show(); // Show the modal
     },
     onClickUpdate(item) {
+      // Handle update button click (admin view)
       this.state = "Update";
       this.title = "Update Review";
       this.yes = null;
       this.no = "Cancel";
       this.size = "lg";
-      this.item = { ...item };
-      this.selectedRowId = item.id;
+      this.item = { ...item }; // Store the review data for editing
+      this.selectedRowId = item.id; // Store the ID of the review to update
+      this.modal.show(); // Show the modal
     },
     saveItemHandler() {
-      if (this.state === "Update") this.updateItem();
-      if (this.state === "Delete") this.deleteItemById();
-      this.modal.hide();
+      // Handle save button click in the modal (admin view)
+      if (this.state === "Update") this.updateItem(); // Call update function
+      if (this.state === "Delete") this.deleteItemById(); // Call delete function
+      this.modal.hide(); // Hide the modal after saving
     },
     async submitReview() {
+      // Submit a review (guest view)
       if (!this.selectedFilmId || this.rating === 0) return;
 
       this.submitting = true;
@@ -476,7 +498,7 @@ export default {
           ...(token && { Authorization: `Bearer ${token}` }),
         };
 
-        const userId = this.authStore.id || 2;
+        const userId = this.authStore.id || 2; // Use a default user ID if not logged in
         const selectedFilm = this.films.find(
           (f) => f.id === this.selectedFilmId
         );
@@ -494,7 +516,7 @@ export default {
           { headers }
         );
 
-        // Manually construct review object for display
+        // Manually construct review object for display in guest view
         this.publicReviews.unshift({
           id: response.data.data.id,
           filmId: this.selectedFilmId,
@@ -519,6 +541,7 @@ export default {
       }
     },
     setRating(starIndex, event) {
+      // Set the star rating (guest view)
       const target =
         event.currentTarget.querySelector("i") || event.currentTarget;
       const rect = target.getBoundingClientRect();
@@ -619,12 +642,10 @@ export default {
     opacity: 0.6;
     transform: scale(0.95);
   }
-
   50% {
     opacity: 1;
     transform: scale(1);
   }
-
   100% {
     opacity: 0.6;
     transform: scale(0.95);
@@ -761,9 +782,10 @@ export default {
   background: #383838;
   border: 3px solid #1f1f1f;
   padding: 1rem;
-  border-radius: 8px;
-  max-width: 600px;
-  margin: 1rem auto;
+  border-radius: 0px;
+  max-width: 1256px;
+  min-width: 230px;
+  margin: 0px auto;
   color: #ffd700;
 }
 
@@ -835,21 +857,24 @@ export default {
   resize: vertical;
   border: none;
   background: #383838;
-  border-bottom: 2px solid #1a1a1a; /* White bottom border */
+  border-bottom: 2px solid #1a1a1a;
+  /* White bottom border */
   border-radius: 0px;
   padding: 0.5rem;
   font-size: 0.9rem;
   color: #b0b0b0;
   box-sizing: border-box;
-  outline: none; /* Remove default focus border */
+  outline: none;
+  /* Remove default focus border */
 }
 
 /* Add the focus effect for the bottom border */
 .review-input:focus {
-  border-bottom: 2px solid #fff; /* White border on focus */
-  color: #fff;  /* Keep text color white on focus */
+  border-bottom: 2px solid #fff;
+  /* White border on focus */
+  color: #fff;
+  /* Keep text color white on focus */
 }
-
 
 /* Review Actions Styles */
 .review-actions {
