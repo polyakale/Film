@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Favourite;
 use App\Http\Requests\StoreFavouriteRequest;
 use App\Http\Requests\UpdateFavouriteRequest;
+use Illuminate\Http\Request; // ✅ Correct import
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 
 class FavouriteController extends Controller
@@ -27,71 +27,74 @@ class FavouriteController extends Controller
 
     public function store(Request $request)
     {
-        // Validate incoming request
-        $validator = Validator::make($request->all(), [
-            'userId'    => 'required|exists:users,id',
-            'filmId'    => 'required|exists:films,id',
-            'evaluation' => 'required|numeric|min:0.5|max:5',
-            'content'   => 'nullable|string',
-        ]);
+        try {
+            $validated = $request->validate([
+                'userId' => 'required|exists:users,id',
+                'filmId' => 'required|exists:films,id',
+                'evaluation' => 'required|numeric|min:0.5|max:5'
+                // Removed content validation
+            ]);
 
-        if ($validator->fails()) {
+            // Check for existing review
+            $exists = Favourite::where('userId', $validated['userId'])
+                ->where('filmId', $validated['filmId'])
+                ->exists();
+
+            if ($exists) {
+                return response()->json([
+                    'message' => "You've already reviewed this film."
+                ], 409); // Using 409 Conflict status
+            }
+
+            $favourite = Favourite::create([
+                'userId' => $validated['userId'],
+                'filmId' => $validated['filmId'],
+                'evaluation' => $validated['evaluation']
+            ]);
+
             return response()->json([
-                'message' => 'Validation failed',
-                'errors'  => $validator->errors()
-            ], 422);
-        }
-        // Check if review already exists for the user and film
-        $exists = Favourite::where('userId', $request->userId)
-            ->where('filmId', $request->filmId)
-            ->exists();
-        if ($exists) {
+                'message' => 'Review created successfully',
+                'data' => $favourite
+            ], 201);
+        } catch (\Exception $e) {
             return response()->json([
-                'message' => "You've already reviewed this film."
-            ], 422);
+                'message' => 'Server Error',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // Create the review
-        $favourite = Favourite::create($request->all());
-
-        return response()->json([
-            'message' => 'Review created successfully',
-            'data'    => $favourite
-        ], 201);
     }
+
     public function show(int $id)
     {
         $row = Favourite::find($id);
         if ($row) {
-            $data = [
+            return response()->json([
                 'message' => 'ok',
-                'data' => $row
-            ];
+                'data'    => $row
+            ]);
         } else {
-            $data = [
+            return response()->json([
                 'message' => 'Not found',
-                'data' => ['id' => $id]
-            ];
+                'data'    => ['id' => $id]
+            ]);
         }
-        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
 
     public function update(UpdateFavouriteRequest $request, int $id)
     {
         $row = Favourite::find($id);
         if ($row) {
-            $row->update($request->all());
-            $data = [
+            $row->update($request->validated()); // ✅ Only validated data
+            return response()->json([
                 'message' => 'ok',
-                'data' => $row
-            ];
+                'data'    => $row
+            ]);
         } else {
-            $data = [
+            return response()->json([
                 'message' => 'Not found',
-                'data' => ['id' => $id]
-            ];
+                'data'    => ['id' => $id]
+            ]);
         }
-        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
 
     public function destroy(int $id)
@@ -99,16 +102,15 @@ class FavouriteController extends Controller
         $row = Favourite::find($id);
         if ($row) {
             $row->delete();
-            $data = [
+            return response()->json([
                 'message' => 'ok',
-                'data' => ['id' => $id]
-            ];
+                'data'    => ['id' => $id]
+            ]);
         } else {
-            $data = [
+            return response()->json([
                 'message' => 'Not found',
-                'data' => ['id' => $id]
-            ];
+                'data'    => ['id' => $id]
+            ]);
         }
-        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
 }
