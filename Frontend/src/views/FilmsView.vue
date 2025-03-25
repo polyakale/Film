@@ -134,7 +134,8 @@ export default {
         production: "",
         length: "",
         presentation: "",
-        imdbLink: ""
+        imdbLink: "",
+        evaluation: null
       },
       editingFilm: null,
     };
@@ -143,24 +144,45 @@ export default {
     await this.fetchFilmsFromBackend();
     this.isAdmin = this.stateAuth.positionId === 1;
   },
+  watch: {
+    searchQuery() {
+      this.searchFilms();
+    },
+    sortOption() {
+      this.sortFilms();
+    },
+  },
   methods: {
+    async queryFilmsWithEvaluation() {
+      try {
+        const response = await axios.get(`${BASE_URL}/films/evaluations`);
+        return response.data.data || [];
+      } catch (error) {
+        console.error("Error fetching evaluations:", error);
+        return [];
+      }
+    },
+
     async fetchFilmsFromBackend() {
       try {
-        const token = this.stateAuth.token;
-        const headers = {
-          Authorization: `Bearer ${token}`
-        };
-
-        const response = await axios.get(this.urlApi, { headers });
-        this.films = Array.isArray(response.data.data) 
-          ? response.data.data
+        // 1. Lekérjük a filmeket
+        const filmsResponse = await axios.get(`${BASE_URL}/films`);
+        this.films = Array.isArray(filmsResponse.data.data) 
+          ? filmsResponse.data.data 
           : [];
+
+        // 2. Lekérjük az értékeléseket
+        const evaluations = await this.queryFilmsWithEvaluation();
+
+        // 3. Összekapcsoljuk a filmeket az értékelésekkel
+        this.films.forEach(film => {
+          const filmEval = evaluations.find(e => e.filmId === film.id);
+          film.evaluation = filmEval ? filmEval.value : null;
+        });
 
         this.filteredFilms = [...this.films];
       } catch (error) {
         console.error("Error loading films:", error);
-        this.films = [];
-        this.filteredFilms = [];
       }
     },
 
@@ -217,7 +239,8 @@ export default {
         production: "",
         length: "",
         presentation: "",
-        imdbLink: ""
+        imdbLink: "",
+        evaluation: null
       };
     },
 
@@ -225,9 +248,10 @@ export default {
       try {
         const token = this.stateAuth.token;
         const headers = {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         };
 
+        // 1. Film létrehozása
         const filmData = {
           title: this.newFilm.title,
           production: this.newFilm.production,
@@ -236,7 +260,18 @@ export default {
           imdbLink: this.newFilm.imdbLink
         };
 
-        await axios.post(this.urlApi, filmData, { headers });
+        const filmResponse = await axios.post(this.urlApi, filmData, { headers });
+
+        // 2. Értékelés hozzáadása (ha van)
+        if (this.newFilm.evaluation) {
+          await axios.post(
+            `${BASE_URL}/films/${filmResponse.data.data.id}/evaluation`,
+            { value: this.newFilm.evaluation },
+            { headers }
+          );
+        }
+
+        // 3. Frissítjük a listát
         await this.fetchFilmsFromBackend();
         this.closeAddFilmModal();
       } catch (error) {
@@ -258,9 +293,10 @@ export default {
       try {
         const token = this.stateAuth.token;
         const headers = {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         };
 
+        // 1. Film adatainak frissítése
         const filmData = {
           title: this.editingFilm.title,
           production: this.editingFilm.production,
@@ -269,7 +305,20 @@ export default {
           imdbLink: this.editingFilm.imdbLink
         };
 
-        await axios.patch(`${this.urlApi}/${this.editingFilm.id}`, filmData, { headers });
+        await axios.patch(
+          `${this.urlApi}/${this.editingFilm.id}`,
+          filmData,
+          { headers }
+        );
+
+        // 2. Értékelés frissítése
+        await axios.patch(
+          `${BASE_URL}/films/${this.editingFilm.id}/evaluation`,
+          { value: this.editingFilm.evaluation || null },
+          { headers }
+        );
+
+        // 3. Frissítjük a listát
         await this.fetchFilmsFromBackend();
         this.closeEditFilmModal();
       } catch (error) {
@@ -282,17 +331,26 @@ export default {
         try {
           const token = this.stateAuth.token;
           const headers = {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           };
 
+          // 1. Értékelés törlése (ha van)
+          await axios.delete(
+            `${BASE_URL}/films/${filmId}/evaluation`,
+            { headers }
+          );
+
+          // 2. Film törlése
           await axios.delete(`${this.urlApi}/${filmId}`, { headers });
+
+          // 3. Frissítjük a listát
           await this.fetchFilmsFromBackend();
         } catch (error) {
           console.error("Error deleting film:", error);
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
