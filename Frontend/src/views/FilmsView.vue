@@ -23,7 +23,7 @@
         Add New Film
       </button>
     </div>
-
+      <!-- Kártyák -->
     <div v-if="films.length" class="films-grid">
       <div v-for="film in filteredFilms" :key="film.id" class="film-card">
         <h2 class="film-title">{{ film.title }}</h2>
@@ -166,21 +166,15 @@ export default {
     async fetchFilmsFromBackend() {
       try {
         // 1. Lekérjük a filmeket
-        const filmsResponse = await axios.get(`${BASE_URL}/films`);
+        const filmsResponse = await axios.get(`${BASE_URL}/queryFilmsWithEvaluation`);
         this.films = Array.isArray(filmsResponse.data.data) 
           ? filmsResponse.data.data 
           : [];
 
-        // 2. Lekérjük az értékeléseket
-        const evaluations = await this.queryFilmsWithEvaluation();
-
-        // 3. Összekapcsoljuk a filmeket az értékelésekkel
-        this.films.forEach(film => {
-          const filmEval = evaluations.find(e => e.filmId === film.id);
-          film.evaluation = filmEval ? filmEval.value : null;
-        });
 
         this.filteredFilms = [...this.films];
+        console.log("Filmek", this.filteredFilms);
+
       } catch (error) {
         console.error("Error loading films:", error);
       }

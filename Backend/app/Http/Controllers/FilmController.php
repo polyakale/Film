@@ -29,6 +29,7 @@ class FilmController extends Controller
             fi.length, 
             fi.presentation, 
             fi.imdbLink
+        Order by evaluation desc    
             '
         );
 
