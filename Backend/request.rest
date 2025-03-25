@@ -72,8 +72,13 @@ get {{host}}/api/
 
 # FILMS
 
+### get queryFilmsWithEvaluation
+get {{host}}/api/queryFilmsWithEvaluation
+
 ### get films
 get {{host}}/api/films
+
+
 ### get films by id
 get {{host}}/api/films/1
 ### post films

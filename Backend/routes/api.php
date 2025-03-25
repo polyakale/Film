@@ -43,6 +43,7 @@ Route::patch('positions/{id}', [PositionController::class, 'update'])
 Route::delete('positions/{id}', [PositionController::class, 'destroy'])
     ->middleware('auth:sanctum');
 // films
+Route::get('queryFilmsWithEvaluation', [FilmController::class, 'queryFilmsWithEvaluation']);
 Route::get('films', [FilmController::class, 'index']);
 Route::get('films/{id}', [FilmController::class, 'show']);
 Route::post('films', [FilmController::class, 'store'])
