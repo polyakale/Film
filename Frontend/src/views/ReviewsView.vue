@@ -678,21 +678,14 @@ export default {
   vertical-align: middle;
 }
 
-/* Date Styling */
-.date {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  font-style: italic;
-}
-
 /* Fixed Paginator */
 .pagination-container {
   position: sticky;
-  bottom: 20px;
+  bottom: 0%;
   margin-top: 2rem;
   display: flex;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(105, 91, 91, 0.9);
   padding: 1rem;
   border-radius: 8px;
   z-index: 100;
@@ -735,6 +728,13 @@ export default {
   background: var(--secondary-color);
   color: var(--accent-color) !important;
   transform: translateY(-2px);
+}
+
+/* Date Styling */
+.date {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-style: italic;
 }
 
 .text-nowrap.text-center {
@@ -903,3 +903,4 @@ export default {
   }
 }
 </style>
+.

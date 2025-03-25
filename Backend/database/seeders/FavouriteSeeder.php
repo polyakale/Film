@@ -22,7 +22,7 @@ class FavouriteSeeder extends Seeder
             // foreach ($favouriteData as $item) {
             //     Favourite::create($item);
             // }
-            Favourite::factory(2000)->create();
+            Favourite::factory(611)->create();
         }
     }
 }
