@@ -14,6 +14,7 @@
         <option value="abc">ABC</option>
         <option value="production">Production Year</option>
         <option value="length">Length</option>
+        <option value="evaluation">Evaluation</option>
       </select>
     </div>
 
@@ -32,6 +33,9 @@
         <p class="film-info"><strong>Length:</strong> {{ film.length }} min</p>
         <p class="film-info">
           <strong>Presentation:</strong> {{ formatDate(film.presentation) }}
+        </p>
+        <p class="film-info">
+          <strong>Evaluation:</strong> {{ film.evaluation || "This film hasn't been rated yet." }}
         </p>
         <a
           v-if="film.imdbLink"
@@ -111,7 +115,6 @@
 <script>
 import axios from "axios";
 import { BASE_URL } from "../helpers/baseUrls";
-
 import { useAuthStore } from "@/stores/useAuthStore";
 
 export default {
@@ -120,7 +123,7 @@ export default {
       urlApi: `${BASE_URL}/films`,
       stateAuth: useAuthStore(),
       films: [],
-      isAdmin: true,
+      isAdmin: false,
       searchQuery: "",
       sortOption: "abc",
       filteredFilms: [],
@@ -131,44 +134,42 @@ export default {
         production: "",
         length: "",
         presentation: "",
-        imdbLink: "",
+        imdbLink: ""
       },
       editingFilm: null,
     };
   },
   async mounted() {
     await this.fetchFilmsFromBackend();
-    this.filteredFilms = this.films;
-    this.isAdmin = this.stateAuth.positionId == 1 ? true : false;
-  },
-  watch: {
-    searchQuery() {
-      this.searchFilms();
-    },
-    sortOption() {
-      this.sortFilms();
-    },
+    this.isAdmin = this.stateAuth.positionId === 1;
   },
   methods: {
     async fetchFilmsFromBackend() {
       try {
-        const response = await axios.get(`${BASE_URL}/films`);
-        this.films = Array.isArray(response.data.data)
+        const token = this.stateAuth.token;
+        const headers = {
+          Authorization: `Bearer ${token}`
+        };
+
+        const response = await axios.get(this.urlApi, { headers });
+        this.films = Array.isArray(response.data.data) 
           ? response.data.data
           : [];
-        this.filteredFilms = this.films;
-        // console.log("useAuthStore.positionId", this.stateAuth.positionId);
+
+        this.filteredFilms = [...this.films];
       } catch (error) {
-        console.error("Error fetching films from backend:", error);
+        console.error("Error loading films:", error);
         this.films = [];
         this.filteredFilms = [];
       }
     },
+
     formatDate(dateString) {
       if (!dateString) return "Unknown";
       const date = new Date(dateString);
       return date.toISOString().split("T")[0];
     },
+
     formatImdbUrl(imdbLink) {
       if (!imdbLink || imdbLink.trim() === "") return "#";
       if (!imdbLink.startsWith("http")) {
@@ -176,16 +177,19 @@ export default {
       }
       return imdbLink;
     },
+
     searchFilms() {
       const query = this.searchQuery.toLowerCase();
       this.filteredFilms = this.films.filter(
         (film) =>
           film.title.toLowerCase().includes(query) ||
-          film.production.toString().includes(query) ||
-          film.length.toString().includes(query)
+          String(film.production).includes(query) ||
+          String(film.length).includes(query) ||
+          (film.evaluation && String(film.evaluation).includes(query))
       );
       this.sortFilms();
     },
+
     sortFilms() {
       if (this.sortOption === "abc") {
         this.filteredFilms.sort((a, b) => a.title.localeCompare(b.title));
@@ -193,11 +197,19 @@ export default {
         this.filteredFilms.sort((a, b) => a.production - b.production);
       } else if (this.sortOption === "length") {
         this.filteredFilms.sort((a, b) => a.length - b.length);
+      } else if (this.sortOption === "evaluation") {
+        this.filteredFilms.sort((a, b) => {
+          const aEval = a.evaluation || 0;
+          const bEval = b.evaluation || 0;
+          return bEval - aEval;
+        });
       }
     },
+
     openAddFilmModal() {
       this.showAddFilmModal = true;
     },
+
     closeAddFilmModal() {
       this.showAddFilmModal = false;
       this.newFilm = {
@@ -205,83 +217,82 @@ export default {
         production: "",
         length: "",
         presentation: "",
-        imdbLink: "",
+        imdbLink: ""
       };
     },
+
     async submitNewFilm() {
       try {
         const token = this.stateAuth.token;
         const headers = {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`
         };
-        const data = {
+
+        const filmData = {
           title: this.newFilm.title,
           production: this.newFilm.production,
           length: this.newFilm.length,
           presentation: this.newFilm.presentation,
-          imdbLink: this.newFilm.imdbLink,
+          imdbLink: this.newFilm.imdbLink
         };
-        // Küldés a backend felé
-        const response = await axios.post(this.urlApi, data, { headers });
-        // Új film hozzáadása a listához
-        this.films.push(response.data.data);
-        this.filteredFilms = this.films;
-        this.closeAddFilmModal(); // Modal bezárása
+
+        await axios.post(this.urlApi, filmData, { headers });
+        await this.fetchFilmsFromBackend();
+        this.closeAddFilmModal();
       } catch (error) {
-        console.error("Error adding new film:", error);
+        console.error("Error adding film:", error);
       }
     },
+
     openEditFilmModal(film) {
       this.editingFilm = { ...film };
       this.showEditFilmModal = true;
     },
+
     closeEditFilmModal() {
       this.showEditFilmModal = false;
       this.editingFilm = null;
     },
+
     async submitEditedFilm() {
-  try {
-    const token = this.stateAuth.token;
-    const headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    };
-    const response = await axios.patch(
-      `${this.urlApi}/${this.editingFilm.id}`,
-      this.editingFilm,
-      { headers }
-    );
-    const index = this.films.findIndex(
-      (film) => film.id === this.editingFilm.id
-    );
-    this.films.splice(index, 1, response.data.data);
-    this.filteredFilms = this.films;
-    this.closeEditFilmModal();
-  } catch (error) {
-    console.error("Error editing film:", error);
-  }
-},
-async deleteFilm(filmId) {
-  if (confirm("Are you sure you want to delete this film?")) {
-    try {
-      const token = this.stateAuth.token;
-      const headers = {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
-      await axios.delete(`${this.urlApi}/${filmId}`, { headers });
-      this.films = this.films.filter((film) => film.id !== filmId);
-      this.filteredFilms = this.films;
-    } catch (error) {
-      console.error("Error deleting film:", error);
+      try {
+        const token = this.stateAuth.token;
+        const headers = {
+          Authorization: `Bearer ${token}`
+        };
+
+        const filmData = {
+          title: this.editingFilm.title,
+          production: this.editingFilm.production,
+          length: this.editingFilm.length,
+          presentation: this.editingFilm.presentation,
+          imdbLink: this.editingFilm.imdbLink
+        };
+
+        await axios.patch(`${this.urlApi}/${this.editingFilm.id}`, filmData, { headers });
+        await this.fetchFilmsFromBackend();
+        this.closeEditFilmModal();
+      } catch (error) {
+        console.error("Error editing film:", error);
+      }
+    },
+
+    async deleteFilm(filmId) {
+      if (confirm("Are you sure you want to delete this film?")) {
+        try {
+          const token = this.stateAuth.token;
+          const headers = {
+            Authorization: `Bearer ${token}`
+          };
+
+          await axios.delete(`${this.urlApi}/${filmId}`, { headers });
+          await this.fetchFilmsFromBackend();
+        } catch (error) {
+          console.error("Error deleting film:", error);
+        }
+      }
     }
   }
-},
-  },
 };
 </script>
 
