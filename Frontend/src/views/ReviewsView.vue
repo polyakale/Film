@@ -851,6 +851,11 @@ export default {
 }
 
 /* Review Input Styles */
+.input-group {
+  display: flex;
+  align-items: flex-end; /* Align button with textarea bottom */
+}
+
 .review-input {
   width: 80%;
   height: 40px;
@@ -859,6 +864,8 @@ export default {
   background: #383838;
   border-bottom: 2px solid #1a1a1a;
   /* White bottom border */
+  flex: 1; /* Take remaining space */
+  margin-right: 20px; /* Fixed gap between textarea and button */
   border-radius: 0px;
   padding: 0.5rem;
   font-size: 0.9rem;
@@ -888,14 +895,13 @@ export default {
   background: #cc181e;
   color: #fff;
   border: none;
-  margin-left: 27px;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1.5rem;
   border-radius: 60px;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.3s;
+  white-space: nowrap;
+  /* Remove all margins - positioning handled by flexbox */
 }
-
 .btn-submit:hover {
   background: #b10d12;
 }
