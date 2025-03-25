@@ -1,18 +1,21 @@
 <template>
   <div class="film-reviews">
-    <!-- Toggle Button (admin only) -->
-    <div v-if="isAdmin" class="toggle-container">
-      <button class="btn-toggle" @click="toggleViewMode">
-        <i
-          :class="viewMode === 'admin' ? 'bi bi-toggle-on' : 'bi bi-toggle-off'"
-        ></i>
-        <span class="toggle-text">
-          Switch to {{ viewMode === "admin" ? "Guest" : "Admin" }} View
-        </span>
-      </button>
+    <div v-if="isAdmin" class="header-container">
+      <h3 class="text-center my-4 title-text">Reviews</h3>
+      <div class="toggle-container">
+        <button class="btn-toggle" @click="toggleViewMode">
+          <i
+            :class="
+              viewMode === 'admin' ? 'bi bi-toggle-on' : 'bi bi-toggle-off'
+            "
+          ></i>
+          <span class="toggle-text">
+            Switch to {{ viewMode === "admin" ? "Guest" : "Admin" }} View
+          </span>
+        </button>
+      </div>
     </div>
 
-    <!-- Full-page Loading Overlay -->
     <div v-if="loading" class="loading-overlay">
       <div class="loading-content">
         <div class="spinner-border" role="status">
@@ -22,18 +25,15 @@
       </div>
     </div>
 
-    <!-- Main Content -->
     <div v-else>
-      <h3 class="text-center my-4">Reviews</h3>
       <div class="container">
-        <!-- Admin View -->
         <div v-if="viewMode === 'admin'" class="admin-view">
           <div
             v-if="favourites.length > 0"
             class="col-12 col-lg-10 tabla-container"
           >
-            <table class="table custom-table">
-              <thead class="table-dark">
+            <table class="custom-table">
+              <thead>
                 <tr>
                   <th v-if="debug">#</th>
                   <th>User</th>
@@ -69,8 +69,8 @@
                             getEvaluation(favourite) < starIndex,
                           'bi-star': getEvaluation(favourite) + 0.5 < starIndex,
                         }"
-                      ></i>
-                      <small class="text-muted ms-2">
+                      ></i
+                      ><small class="text-muted ms-2">
                         ({{ formatEvaluation(favourite.evaluation) }})
                       </small>
                     </div>
@@ -99,54 +99,59 @@
           </div>
         </div>
 
-        <!-- Guest View -->
         <div v-else class="guest-view">
           <div class="guest-review-form">
             <div class="user-info">
               <span class="username">{{ username }}</span>
+              <div class="star-input">
+                <span
+                  v-for="starIndex in 5"
+                  :key="starIndex"
+                  @click="setRating(starIndex, $event)"
+                >
+                  <i
+                    class="bi star-icon"
+                    :class="{
+                      'bi-star-fill': starIndex <= fullStars,
+                      'bi-star-half': starIndex === halfStar && hasHalfStar,
+                      'bi-star':
+                        starIndex > fullStars &&
+                        !(starIndex === halfStar && hasHalfStar),
+                    }"
+                  ></i>
+                </span>
+                <span class="rating-display"> ({{ rating.toFixed(1) }}) </span>
+              </div>
+              <select v-model="selectedFilmId" class="film-select">
+                <option value="" disabled>Select Film</option>
+                <option v-for="film in films" :key="film.id" :value="film.id">
+                  {{ film.title }}
+                </option>
+              </select>
             </div>
-            <select v-model="selectedFilmId" class="film-select">
-              <option value="" disabled>Select Film</option>
-              <option v-for="film in films" :key="film.id" :value="film.id">
-                {{ film.title }}
-              </option>
-            </select>
-            <div class="star-input">
-              <span
-                v-for="starIndex in 5"
-                :key="starIndex"
-                @click="setRating(starIndex)"
-              >
-                <i
-                  :class="
-                    rating >= starIndex ? 'bi bi-star-fill' : 'bi bi-star'
+            <div class="input-group">
+              <textarea
+                v-model="reviewText"
+                class="review-input"
+                placeholder="Write a review..."
+              ></textarea>
+              <div class="review-actions">
+                <button
+                  class="btn-submit"
+                  @click="submitReview"
+                  :disabled="
+                    submitting ||
+                    !reviewText.trim() ||
+                    !selectedFilmId ||
+                    rating === 0
                   "
-                  class="star-icon"
-                ></i>
-              </span>
-              <span class="rating-display">({{ rating }})</span>
-            </div>
-            <textarea
-              v-model="reviewText"
-              class="review-input"
-              placeholder="Write a public review..."
-            ></textarea>
-            <div class="review-actions">
-              <button
-                class="btn-submit"
-                @click="submitReview"
-                :disabled="
-                  submitting ||
-                  !reviewText.trim() ||
-                  !selectedFilmId ||
-                  rating === 0
-                "
-              >
-                Submit Review
-              </button>
-              <span v-if="errorMessage" class="error-message">{{
-                errorMessage
-              }}</span>
+                >
+                  Submit
+                </button>
+                <span v-if="errorMessage" class="error-message">{{
+                  errorMessage
+                }}</span>
+              </div>
             </div>
           </div>
           <div class="public-reviews" v-if="publicReviews.length > 0">
@@ -243,7 +248,7 @@ export default {
       no: null,
       size: null,
       debug: false,
-      viewMode: "admin", // "admin" or "guest"
+      viewMode: "admin", // "guest"
       reviewText: "",
       submitting: false,
       errorMessage: "",
@@ -270,8 +275,14 @@ export default {
     username() {
       return this.authStore.user || "Guest";
     },
-    userAvatar() {
-      return this.authStore.avatar || "";
+    fullStars() {
+      return Math.floor(this.rating);
+    },
+    hasHalfStar() {
+      return this.rating % 1 >= 0.5;
+    },
+    halfStar() {
+      return this.fullStars + 1;
     },
     paginatedFavourites() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
@@ -284,34 +295,27 @@ export default {
       if (this.totalPages <= 5) {
         return Array.from({ length: this.totalPages }, (_, i) => i + 1);
       }
-
       const firstPage = 1;
       const lastPage = this.totalPages;
       let middlePages = [];
-
       if (this.currentPage <= 3) {
-        // If near the beginning, show first few pages
         middlePages = [2, 3, 4];
       } else if (this.currentPage >= this.totalPages - 2) {
-        // If near the end, show last few before last page
         middlePages = [
           this.totalPages - 3,
           this.totalPages - 2,
           this.totalPages - 1,
         ];
       } else {
-        // Middle pages: show current and next two
         middlePages = [
           this.currentPage,
           this.currentPage + 1,
           this.currentPage + 2,
         ];
       }
-
       return [firstPage, ...middlePages, lastPage];
     },
   },
-
   mounted() {
     if (this.isAdmin) {
       this.viewMode = "admin";
@@ -365,7 +369,6 @@ export default {
             ...fav,
             evaluation: Number(fav.evaluation) || 0,
           }));
-          // In admin view, we assume favourites data already includes joined fields (userName, filmTitle)
         }
       } catch (error) {
         console.error("Error fetching favourites:", error);
@@ -378,7 +381,6 @@ export default {
       try {
         this.loading = true;
         const token = this.authStore.token;
-        // For guest reviews, use favourites endpoint and filter by isPublic flag
         const response = await axios.get(`${BASE_URL}/favourites`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
@@ -389,7 +391,6 @@ export default {
               ...review,
               userName: review.userName || "Anonymous",
               filmTitle: review.filmTitle || "Unknown Film",
-              content: review.content || this.randomDefaultReview(),
               evaluation: Number(review.evaluation) || 0,
             }));
         }
@@ -428,14 +429,14 @@ export default {
     formatDate(date) {
       try {
         const d = new Date(date);
-        return isNaN(d) ? "N/A" : d.toLocaleString("en-US");
+        return isNaN(d) ? "N/A" : d.toLocaleString("hu-HU");
       } catch {
         return "N/A";
       }
     },
     handlePageChange(pageInfo) {
       if (pageInfo === "...") {
-        this.currentPage = this.totalPages; // Jump to last page
+        this.currentPage = this.totalPages;
       } else {
         this.currentPage = pageInfo.pageNumber;
       }
@@ -463,100 +464,107 @@ export default {
       this.modal.hide();
     },
     async submitReview() {
-      if (!this.reviewText.trim() || !this.selectedFilmId || this.rating === 0)
-        return;
+      if (!this.selectedFilmId || this.rating === 0) return;
+
       this.submitting = true;
       this.errorMessage = "";
+
       try {
         const token = this.authStore.token;
         const headers = {
-          Accept: "application/json",
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(token && { Authorization: `Bearer ${token}` }),
         };
-        // Use a default guest user ID if none is provided
+
         const userId = this.authStore.id || 2;
         const selectedFilm = this.films.find(
           (f) => f.id === this.selectedFilmId
         );
-        // Create a new review object for optimistic UI update
-        const newReview = {
-          id: Date.now(), // temporary ID
+
+        // Create review object without content/isPublic since DB doesn't have these
+        const reviewData = {
           filmId: this.selectedFilmId,
           evaluation: this.rating,
-          content: this.reviewText,
-          isPublic: true,
           userId: userId,
-          userName: this.username,
-          filmTitle: selectedFilm ? selectedFilm.title : "Unknown Film",
-          created_at: new Date().toISOString(),
         };
-        // Optimistically add the review
-        this.publicReviews.unshift(newReview);
+
         const response = await axios.post(
           `${BASE_URL}/favourites`,
-          {
-            filmId: this.selectedFilmId,
-            evaluation: this.rating,
-            content: this.reviewText,
-            isPublic: true,
-            userId: userId,
-          },
+          reviewData,
           { headers }
         );
-        // Replace temporary review with actual data from server
-        if (response.data?.data) {
-          const index = this.publicReviews.findIndex(
-            (r) => r.id === newReview.id
-          );
-          if (index !== -1) {
-            this.publicReviews[index] = {
-              ...this.publicReviews[index],
-              ...response.data.data,
-            };
-          }
-        }
+
+        // Manually construct review object for display
+        this.publicReviews.unshift({
+          id: response.data.data.id,
+          filmId: this.selectedFilmId,
+          filmTitle: selectedFilm?.title || "Unknown Film",
+          evaluation: this.rating,
+          userName: this.username,
+          created_at: new Date().toISOString(),
+          // Client-side only fields:
+          content: this.reviewText, // Store in memory only
+        });
+
         this.reviewText = "";
         this.selectedFilmId = "";
         this.rating = 0;
       } catch (error) {
-        // Remove optimistic review if submission failed
-        this.publicReviews = this.publicReviews.filter(
-          (r) => r.id !== newReview.id
-        );
         this.errorMessage =
-          error.response?.data?.message || "Failed to submit review.";
+          error.response?.data?.message ||
+          "Failed to submit review. Please try again.";
+        console.error("Review submission error:", error);
       } finally {
         this.submitting = false;
       }
     },
-    setRating(star) {
-      this.rating = star;
+    setRating(starIndex, event) {
+      const target =
+        event.currentTarget.querySelector("i") || event.currentTarget;
+      const rect = target.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const isHalfStar = clickX < rect.width / 2;
+      this.rating = isHalfStar ? starIndex - 0.5 : starIndex;
     },
   },
 };
 </script>
 
 <style scoped>
+/* Root Variables */
 :root {
-  --primary-color: #8b0000; /* Dark Red */
-  --secondary-color: #ffd700; /* Gold */
-  --accent-color: #000000; /* Black */
+  --primary-color: #8b0000;
+  /* Dark Red */
+  --secondary-color: #ffd700;
+  /* Gold */
+  --accent-color: #000000;
+  /* Black */
   --background-dark: #1a1a1a;
   --text-light: #ffffff;
   --text-muted: #cccccc;
 }
 
+/* General Styles */
 .film-reviews {
-  background: var(--background-dark);
-  min-height: 100vh;
-  padding-bottom: 120px;
   color: var(--text-light);
 }
 
+/* Header Styles */
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0 1rem;
+}
+
+.title-text {
+  color: var(--text-light);
+  margin: 0;
+}
+
 .toggle-container {
-  text-align: center;
-  margin: 1rem 0;
+  color: #ffd700;
 }
 
 .btn-toggle {
@@ -579,6 +587,7 @@ export default {
   font-weight: bold;
 }
 
+/* Loading Overlay Styles */
 .loading-overlay {
   position: fixed;
   top: 0;
@@ -610,10 +619,12 @@ export default {
     opacity: 0.6;
     transform: scale(0.95);
   }
+
   50% {
     opacity: 1;
     transform: scale(1);
   }
+
   100% {
     opacity: 0.6;
     transform: scale(0.95);
@@ -628,9 +639,9 @@ export default {
   filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.4));
 }
 
-/* Table Styling */
+/* Table Styles */
 .custom-table {
-  width: 100%;
+  width: 120%;
   border-collapse: separate;
   border-spacing: 0 0.5rem;
   background: #ffffff;
@@ -659,15 +670,15 @@ export default {
   box-shadow: 0 3px 15px rgba(255, 215, 0, 0.2);
 }
 
-/* Review Card */
+/* Review Card Styles */
 .review-card {
   border: 1px solid #ddd;
   padding: 1rem;
   margin-bottom: 0.5rem;
-  border-radius: 8px;
+  border-radius: 0px;
 }
 
-/* Star Rating */
+/* Star Rating Styles */
 .star-rating {
   font-size: 1.1rem;
   line-height: 1;
@@ -678,7 +689,7 @@ export default {
   vertical-align: middle;
 }
 
-/* Fixed Paginator */
+/* Paginator Styles */
 .pagination-container {
   position: sticky;
   bottom: 0%;
@@ -730,13 +741,7 @@ export default {
   transform: translateY(-2px);
 }
 
-/* Date Styling */
-.date {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  font-style: italic;
-}
-
+/* Operations Styles */
 .text-nowrap.text-center {
   min-width: 120px;
 }
@@ -751,51 +756,59 @@ export default {
   color: var(--secondary-color) !important;
 }
 
-/* Guest Review Form (YouTube Comment Style) */
+/* Guest Review Form Styles */
 .guest-review-form {
-  background: #f9f9f9;
-  border: 1px solid #ccc;
+  background: #383838;
+  border: 3px solid #1f1f1f;
   padding: 1rem;
   border-radius: 8px;
   max-width: 600px;
   margin: 1rem auto;
+  color: #ffd700;
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .username {
   font-weight: bold;
-  color: #333;
+  color: #ffd700;
+  margin-right: 1rem;
 }
 
-/* Film Selection Dropdown */
-.film-select {
-  width: 100%;
-  padding: 0.5rem;
+.film-and-stars {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   margin-bottom: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
+  width: 100%;
 }
 
-/* Star Input for Rating */
+.film-select {
+  width: 60%;
+  padding: 0.5rem;
+  background: #383838;
+  border: 3px solid #1f1f1f;
+  border-radius: 0px;
+  font-size: 0.9rem;
+  color: #b0b0b0;
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Star Input Styles */
 .star-input {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0rem;
+  margin-left: 0;
 }
 
 .star-icon {
@@ -812,21 +825,33 @@ export default {
 .rating-display {
   font-weight: bold;
   margin-left: 0.5rem;
+  font-size: 0.9rem;
 }
 
-/* Review Input Textarea */
+/* Review Input Styles */
 .review-input {
-  width: 100%;
-  min-height: 80px;
+  width: 80%;
+  height: 40px;
   resize: vertical;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: none;
+  background: #383838;
+  border-bottom: 2px solid #1a1a1a; /* White bottom border */
+  border-radius: 0px;
   padding: 0.5rem;
-  font-size: 1rem;
-  color: #333;
+  font-size: 0.9rem;
+  color: #b0b0b0;
+  box-sizing: border-box;
+  outline: none; /* Remove default focus border */
 }
 
-/* Review Actions */
+/* Add the focus effect for the bottom border */
+.review-input:focus {
+  border-bottom: 2px solid #fff; /* White border on focus */
+  color: #fff;  /* Keep text color white on focus */
+}
+
+
+/* Review Actions Styles */
 .review-actions {
   display: flex;
   justify-content: space-between;
@@ -838,8 +863,9 @@ export default {
   background: #cc181e;
   color: #fff;
   border: none;
+  margin-left: 27px;
   padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border-radius: 60px;
   font-weight: bold;
   cursor: pointer;
   transition: background 0.3s;
@@ -854,6 +880,7 @@ export default {
   font-size: 0.9rem;
 }
 
+/* Submitted Review Styles */
 .public-reviews {
   margin-top: 2rem;
 }
@@ -863,12 +890,6 @@ export default {
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 0.5rem;
-}
-
-.avatar-small {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
 }
 
 .review-meta {
@@ -890,17 +911,32 @@ export default {
   line-height: 1.5;
 }
 
+/* Responsive Styles */
 @media (max-width: 768px) {
   .custom-table th,
   .custom-table td {
     padding: 0.5rem;
     font-size: 0.9rem;
   }
+
   .pagination .page-item .page-link {
     min-width: 30px;
     padding: 0.4rem 0.6rem;
     font-size: 0.85rem;
   }
+
+  .film-and-stars {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .film-select {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  .star-input {
+    margin-left: 0;
+  }
 }
 </style>
-.
