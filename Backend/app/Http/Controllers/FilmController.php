@@ -28,7 +28,7 @@ class FilmController extends Controller
             fi.production, 
             fi.length, 
             fi.presentation, 
-            fi.imdbLink
+            fi.imdbLink  
             '
         );
 
