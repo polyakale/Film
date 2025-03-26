@@ -3,8 +3,6 @@
     @submit.prevent="onClickSubmit"
     class="row g-4 needs-validation was-validated"
   >
-    <p v-if="debug">{{ itemForm }}</p>
-
     <div class="col-md-4 position-relative">
       <label for="userId" class="form-label">User ID:</label>
       <input
@@ -43,7 +41,7 @@
       <div class="invalid-feedback">Please provide an evaluation (1-5).</div>
     </div>
 
-    <button type="submit" class="btn btn-success">Mentés</button>
+    <button type="submit" class="btn btn-success">Save</button>
   </form>
 </template>
   

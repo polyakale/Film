@@ -11,6 +11,25 @@ use Illuminate\Support\Facades\Validator;
 
 class FavouriteController extends Controller
 {
+    public function getByUserId($userId)
+    {
+        // Option 1: Just get the favourites for the user
+        $favourites = Favourite::where('userId', $userId)->get();
+
+        // Option 2: Get favourites with joined user and film info:
+        $favourites = DB::table('favourites as fa')
+            ->join('users as u', 'fa.userId', '=', 'u.id')
+            ->join('films as f', 'fa.filmId', '=', 'f.id')
+            ->where('fa.userId', $userId)
+            ->select('fa.*', 'u.name as userName', 'f.title as filmTitle')
+            ->get();
+
+        return response()->json([
+            'message' => 'ok',
+            'data' => $favourites,
+        ]);
+    }
+
     public function index()
     {
         $favourites = DB::table('favourites as fa')

@@ -27,5 +27,17 @@ class UserSeeder extends Seeder
             'password' => bcrypt('guest123'),
             'positionId' => 2, // 2 = Guest
         ]);
+        User::factory()->create([
+            'name' => 'xXtreeEaterXx',
+            'email' => 'guest1@example.com',
+            'password' => bcrypt('guest123'),
+            'positionId' => 2, // 2 = Guest
+        ]);
+        User::factory()->create([
+            'name' => 'rAnd3l',
+            'email' => 'guest2@example.com',
+            'password' => bcrypt('guest123'),
+            'positionId' => 2, // 2 = Guest
+        ]);
     }
 }

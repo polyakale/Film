@@ -2,18 +2,6 @@
   <div class="film-reviews">
     <div v-if="isAdmin" class="header-container">
       <h3 class="text-center my-4 title-text">Reviews</h3>
-      <div class="toggle-container">
-        <button class="btn-toggle" @click="toggleViewMode">
-          <i
-            :class="
-              viewMode === 'admin' ? 'bi bi-toggle-on' : 'bi bi-toggle-off'
-            "
-          ></i>
-          <span class="toggle-text">
-            Switch to {{ viewMode === "admin" ? "Guest" : "Admin" }} View
-          </span>
-        </button>
-      </div>
     </div>
 
     <div v-if="loading" class="loading-overlay">
@@ -27,20 +15,31 @@
 
     <div v-else>
       <div class="container">
-        <div v-if="viewMode === 'admin'" class="admin-view">
+        <div class="admin-view">
           <div
-            v-if="favourites.length > 0"
+            v-if="favourites.length >= 0"
             class="col-12 col-lg-10 tabla-container"
           >
             <table class="custom-table">
               <thead>
                 <tr>
-                  <th v-if="debug">#</th>
                   <th>User</th>
                   <th>Film</th>
                   <th class="text-center">Evaluation</th>
                   <th>Date</th>
-                  <th class="text-center">Operations</th>
+                  <th class="text-center">
+                    Operations
+                    <button
+                      type="button"
+                      class="btn btn-outline-success"
+                      @click="showReviewSubmit"
+                    >
+                      <i
+                        class="bi"
+                        :class="showReviewForm ? 'bi-dash-lg' : 'bi-plus-lg'"
+                      ></i>
+                    </button>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -49,7 +48,6 @@
                   :key="favourite.id"
                   class="review-card"
                 >
-                  <td data-label="#" v-if="debug">{{ favourite.id }}</td>
                   <td data-label="User" class="user">
                     {{ favourite.userName || "Unknown User" }}
                   </td>
@@ -89,7 +87,7 @@
               </tbody>
             </table>
           </div>
-          <div class="pagination-container" v-if="favourites.length > 0">
+          <div class="pagination-container" v-if="favourites.length >= 6">
             <Paginator
               :pageNumber="currentPage"
               :numberOfPages="totalPages"
@@ -97,10 +95,8 @@
               @paging="handlePageChange"
             />
           </div>
-        </div>
-
-        <div v-else class="guest-view">
-          <div class="guest-review-form">
+          <!-- Make this modal -->
+          <div class="guest-review-form" v-show="showReviewForm">
             <div class="user-info">
               <span class="username">{{ username }}</span>
               <div class="star-input">
@@ -154,7 +150,8 @@
               </div>
             </div>
           </div>
-          <div class="public-reviews" v-if="publicReviews.length > 0">
+          <!-- For an all reviews part later... -->
+          <!-- <div class="public-reviews" v-if="publicReviews.length > 0">
             <div
               v-for="review in publicReviews"
               :key="review.id"
@@ -191,10 +188,7 @@
                 </small>
               </div>
             </div>
-          </div>
-          <div v-else class="no-reviews">
-            No reviews yet. Be the first to write one!
-          </div>
+          </div> -->
         </div>
       </div>
       <Modal
@@ -229,6 +223,7 @@ export default {
   components: { Paginator, OperationsCrud, Modal, ReviewForm },
   data() {
     return {
+      showReviewForm: false,
       favourites: [], // For admin view
       publicReviews: [], // For guest view
       films: [], // List of films for the dropdown
@@ -253,19 +248,17 @@ export default {
       submitting: false, // Flag to indicate if a review is being submitted
       errorMessage: "", // Error message for review submission
       // For guest review submission
+      defaultReviews: [
+        "This film left a lasting impression with its stunning cinematography.",
+        "A cinematic masterpiece that kept me engaged throughout.",
+        "An interesting take on the genre, though not without flaws.",
+        "The performances were outstanding, particularly the lead actor.",
+        "A visual feast that deserves multiple viewings.",
+        "While the plot had potential, the execution fell short.",
+        "A thought-provoking film that stayed with me long after credits rolled.",
+      ],
       selectedFilmId: "", // ID of the selected film for review
       rating: 0, // Star rating given by the guest
-      // Default review texts for missing content
-      defaultReviews: [
-        "It was a great film!",
-        "An unforgettable experience.",
-        "I really enjoyed this movie.",
-        "A masterpiece of cinema.",
-        "It was a decent watch.",
-        "A remarkable performance by the cast.",
-        "Simply outstanding!",
-        "A solid film with a compelling story.",
-      ],
     };
   },
   computed: {
@@ -285,7 +278,6 @@ export default {
       return this.fullStars + 1; // Get the index of the half star
     },
     paginatedFavourites() {
-      // Get the subset of reviews for the current page (admin view)
       const start = (this.currentPage - 1) * this.itemsPerPage;
       return this.favourites.slice(start, start + this.itemsPerPage);
     },
@@ -320,14 +312,7 @@ export default {
     },
   },
   mounted() {
-    // Fetch data and initialize modal when the component is mounted
-    if (this.isAdmin) {
-      this.viewMode = "admin";
-      this.fetchFavourites(); // Fetch data for admin view
-    } else {
-      this.viewMode = "guest";
-      this.fetchPublicReviews(); // Fetch data for guest view
-    }
+    this.fetchFavourites();
     this.fetchFilms(); // Fetch the list of films for the dropdown
     // Initialize Bootstrap modal
     this.modal = new bootstrap.Modal(document.getElementById("modal"), {
@@ -335,16 +320,8 @@ export default {
     });
   },
   methods: {
-    toggleViewMode() {
-      // Switch between admin and guest views
-      if (this.isAdmin) {
-        this.viewMode = this.viewMode === "admin" ? "guest" : "admin";
-        if (this.viewMode === "guest") {
-          this.fetchPublicReviews(); // Fetch public reviews for guest view
-        } else {
-          this.fetchFavourites(); // Fetch all reviews for admin view
-        }
-      }
+    showReviewSubmit() {
+      this.showReviewForm = !this.showReviewForm;
     },
     yesEventHandler() {
       // Handle "Yes" button click in the modal
@@ -369,9 +346,13 @@ export default {
     async fetchFavourites() {
       // Fetch all reviews (for admin view)
       try {
+        const userId = this.authStore.id;
         this.loading = true;
         const token = this.authStore.token;
-        const response = await axios.get(`${BASE_URL}/favourites`, {
+        let url = `${BASE_URL}/favouritesByUserId/${userId}`;
+        console.log(url);
+
+        const response = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (response.data?.data) {
@@ -531,6 +512,7 @@ export default {
         this.reviewText = "";
         this.selectedFilmId = "";
         this.rating = 0;
+        this.fetchFavourites();
       } catch (error) {
         this.errorMessage =
           error.response?.data?.message ||
@@ -575,7 +557,7 @@ export default {
 /* Header Styles */
 .header-container {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
   margin-bottom: 1rem;
   padding: 0 1rem;

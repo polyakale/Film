@@ -11,6 +11,9 @@ use App\Http\Controllers\TaskController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+
+Route::get('favouritesByUserId/{userId}', [FavouriteController::class, 'getByUserId']);
+
 // Route::post('/favourites', [FavouriteController::class, 'store'])->withoutMiddleware('auth:api');
 // users
 Route::post('users/login', [UserController::class, 'login']);
@@ -64,12 +67,12 @@ Route::delete('videos/{id}', [VideoController::class, 'destroy'])
 // favourites
 Route::get('favourites', [FavouriteController::class, 'index']);
 Route::get('favourites/{id}', [FavouriteController::class, 'show']);
-Route::post('favourites', [FavouriteController::class, 'store'])
-    ->middleware('auth:sanctum');
-Route::patch('favourites/{id}', [FavouriteController::class, 'update'])
-    ->middleware('auth:sanctum');
-Route::delete('favourites/{id}', [FavouriteController::class, 'destroy'])
-    ->middleware('auth:sanctum');
+Route::post('favourites', [FavouriteController::class, 'store']);
+    // ->middleware('auth:sanctum');
+Route::patch('favourites/{id}', [FavouriteController::class, 'update']);
+    // ->middleware('auth:sanctum');
+Route::delete('favourites/{id}', [FavouriteController::class, 'destroy']);
+    // ->middleware('auth:sanctum');
 // roles
 Route::get('roles', [RoleController::class, 'index']);
 Route::get('roles/{id}', [RoleController::class, 'show']);

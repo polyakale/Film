@@ -265,6 +265,9 @@ get {{host}}/api/favourites
 ### get favourites by id
 get {{host}}/api/favourites/1
 
+### get favourites by id
+get {{host}}/api/favouritesByUserId/3
+
 ### post favourites
 POST {{host}}/api/favourites
 Accept: application/json
