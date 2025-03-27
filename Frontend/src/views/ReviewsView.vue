@@ -1,6 +1,6 @@
 <template>
   <div class="film-reviews">
-    <div v-if="isAdmin" class="header-container">
+    <div class="header-container">
       <h3 class="text-center my-4 title-text">Reviews</h3>
     </div>
 
@@ -32,12 +32,9 @@
                     <button
                       type="button"
                       class="btn btn-outline-success"
-                      @click="showReviewSubmit"
+                      @click="onClickCreate"
                     >
-                      <i
-                        class="bi"
-                        :class="showReviewForm ? 'bi-dash-lg' : 'bi-plus-lg'"
-                      ></i>
+                      <i class="bi bi-plus-lg"></i>
                     </button>
                   </th>
                 </tr>
@@ -78,8 +75,9 @@
                   </td>
                   <td class="text-nowrap text-center">
                     <OperationsCrud
-                      @onClickDeleteButton="onClickDeleteButton"
+                      @onClickDelete="onClickDelete"
                       @onClickUpdate="onClickUpdate"
+                      @onClickCreate="onClickCreate"
                       :data="favourite"
                     />
                   </td>
@@ -98,61 +96,6 @@
               @paging="handlePageChange"
             />
           </div>
-          <!-- Made into modal -->
-          <!-- <div class="guest-review-form" v-show="showReviewForm">
-            <div class="user-info">
-              <span class="username">{{ username }}</span>
-              <div class="star-input">
-                <span
-                  v-for="starIndex in 5"
-                  :key="starIndex"
-                  @click="setRating(starIndex, $event)"
-                >
-                  <i
-                    class="bi star-icon"
-                    :class="{
-                      'bi-star-fill': starIndex <= fullStars,
-                      'bi-star-half': starIndex === halfStar && hasHalfStar,
-                      'bi-star':
-                        starIndex > fullStars &&
-                        !(starIndex === halfStar && hasHalfStar),
-                    }"
-                  ></i>
-                </span>
-                <span class="rating-display"> ({{ rating.toFixed(1) }}) </span>
-              </div>
-              <select v-model="selectedFilmId" class="film-select">
-                <option value="" disabled>Select Film</option>
-                <option v-for="film in films" :key="film.id" :value="film.id">
-                  {{ film.title }}
-                </option>
-              </select>
-            </div>
-            <div class="input-group">
-              <textarea
-                v-model="reviewText"
-                class="review-input"
-                placeholder="Write a review..."
-              ></textarea>
-              <div class="review-actions">
-                <button
-                  class="btn-submit"
-                  @click="submitReview"
-                  :disabled="
-                    submitting ||
-                    !reviewText.trim() ||
-                    !selectedFilmId ||
-                    rating === 0
-                  "
-                >
-                  Submit
-                </button>
-                <span v-if="errorMessage" class="error-message">{{
-                  errorMessage
-                }}</span>
-              </div>
-            </div>
-          </div> -->
           <!-- For an all reviews part later... -->
           <!-- <div class="public-reviews" v-if="publicReviews.length > 0">
             <div
@@ -222,7 +165,6 @@ import ReviewForm from "@/components/forms/ReviewForm.vue"; // Assuming this is 
 import { useAuthStore } from "@/stores/useAuthStore"; // Assuming this is the correct path
 import { BASE_URL } from "../helpers/baseUrls"; // Assuming this is the correct path
 import axios from "axios";
-import * as bootstrap from "bootstrap"; // Import Bootstrap for modal functionality
 
 export default {
   components: { Paginator, OperationsCrud, Modal, ReviewForm },
@@ -239,7 +181,6 @@ export default {
       errorMessages: null,
       loading: false,
       modal: null, // Instance of the Bootstrap modal
-      // For admin CRUD modal
       item: {},
       messageYesNo: null,
       state: "Read", // "Read", "Create", "Update", "Delete"
@@ -247,21 +188,10 @@ export default {
       yes: null,
       no: null,
       size: null,
-      debug: false, // Flag to show/hide debug info
-      viewMode: "admin", // "admin" or "guest"
+      username: null, // Username of the logged-in user
       reviewText: "", // Text of the review being submitted by a guest
       submitting: false, // Flag to indicate if a review is being submitted
       errorMessage: "", // Error message for review submission
-      // For guest review submission
-      defaultReviews: [
-        "This film left a lasting impression with its stunning cinematography.",
-        "A cinematic masterpiece that kept me engaged throughout.",
-        "An interesting take on the genre, though not without flaws.",
-        "The performances were outstanding, particularly the lead actor.",
-        "A visual feast that deserves multiple viewings.",
-        "While the plot had potential, the execution fell short.",
-        "A thought-provoking film that stayed with me long after credits rolled.",
-      ],
       selectedFilmId: "", // ID of the selected film for review
       rating: 0, // Star rating given by the guest
     };
@@ -312,11 +242,7 @@ export default {
   },
   mounted() {
     this.fetchFavourites();
-    this.fetchFilms(); // Fetch the list of films for the dropdown
-    // Initialize Bootstrap modal
-    this.modal = new bootstrap.Modal(document.getElementById("modal"), {
-      keyboard: false, // Prevent closing with keyboard
-    });
+    this.fetchFilms();
   },
   methods: {
     async fetchFavourites() {
@@ -344,8 +270,7 @@ export default {
         this.loading = false;
       }
     },
-    async fetchPublicReviews() {
-      // Fetch public reviews (for guest view)
+    async fetchAllReviews() {
       try {
         this.loading = true;
         const token = this.authStore.token;
@@ -380,48 +305,53 @@ export default {
         console.error("Error fetching films:", error);
       }
     },
-    async deleteItemById() {
-      // Delete a review by its ID (admin view)
-      const id = this.selectedRowId;
-      try {
-        await axios.delete(`${BASE_URL}/favourites/${id}`, {
-          headers: { Authorization: `Bearer ${this.authStore.token}` },
-        });
-        if (this.viewMode === "admin") {
-          this.fetchFavourites(); // Refresh admin view
-        } else {
-          this.fetchPublicReviews(); // Refresh guest view
-        }
-        this.modal.hide(); // Hide the modal after deletion
-      } catch (error) {
-        this.errorMessages = "The review cannot be deleted.";
-      }
-    },
     async saveItemHandler(formData) {
       this.loading = true;
       const token = this.authStore.token;
       const headers = {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        /*...*/
       };
+
       try {
+        // Check for existing review before creation
+        if (this.state === "Create") {
+          const exists = this.favourites.some(
+            (fav) =>
+              fav.filmId === formData.filmId && fav.userId === this.authStore.id
+          );
+
+          if (exists) {
+            this.errorMessages = "You've already reviewed this film";
+            return;
+          }
+        }
+
+        // Proceed with API call
         if (this.state === "Create") {
           await this.createReview(formData, headers);
         } else if (this.state === "Update") {
           await this.updateReview(formData, headers);
         }
-        this.fetchFavourites(); // Refresh the list
-        this.modal.hide();
+        this.fetchFavourites();
       } catch (error) {
-        console.error("Error saving review:", error);
+        console.error("Error details:", error.response?.data); // Log server response
         this.errorMessages =
-          this.state === "Create"
-            ? "Review creation failed."
-            : "Review update failed.";
+          error.response?.data?.message ||
+          "Review operation failed. Please try again.";
       } finally {
         this.loading = false;
         this.state = "Read";
+      }
+    },
+    async deleteReview() {
+      const id = this.selectedRowId;
+      try {
+        await axios.delete(`${BASE_URL}/favourites/${id}`, {
+          /* ... */
+        });
+        this.fetchFavourites();
+      } catch (error) {
+        this.errorMessages = "The review cannot be deleted.";
       }
     },
     async createReview(data, headers) {
@@ -434,34 +364,32 @@ export default {
         },
         { headers }
       );
-
       return response.data;
     },
     async updateReview(data, headers) {
       const response = await axios.patch(
         `${BASE_URL}/favourites/${this.selectedRowId}`,
-        {
-          evaluation: data.evaluation,
-          filmId: data.filmId,
-        },
+        { evaluation: data.evaluation, filmId: data.filmId },
         { headers }
       );
-
+      this.modal.hide();
       return response.data;
     },
-    
+    // non-async methods
     yesEventHandler() {
       // Handle "Yes" button click in the modal
       if (this.state === "Delete") {
-        this.deleteItemById(); // Delete the selected review
+        this.deleteReview(); // Delete the selected review
+      } else if (this.state === "Update") {
+        this.updateReview(this.item, this.headers);
+      } else if (this.state === "Create") {
+        this.createReview(this.item, this.headers);
       }
     },
     getEvaluation(item) {
-      // Helper function to get the evaluation (or default to 0)
       return Number(item.evaluation) || 0;
     },
     formatEvaluation(value) {
-      // Helper function to format the evaluation value
       const num = Number(value);
       return Number.isNaN(num) ? "N/A" : num.toFixed(1);
     },
@@ -470,7 +398,7 @@ export default {
       const index = Math.floor(Math.random() * this.defaultReviews.length);
       return this.defaultReviews[index];
     },
-    showReviewSubmit() {
+    showCreateModal() {
       this.state = "Create";
       this.item = {
         filmId: "",
@@ -478,7 +406,10 @@ export default {
         userId: this.authStore.id,
       };
       this.title = "Add New Review";
-      this.showReviewForm = true;
+      this.yes = null;
+      this.no = "Cancel";
+      this.size = "lg";
+      this.modal.show();
     },
     formatDate(date) {
       // Helper function to format dates
@@ -499,36 +430,37 @@ export default {
         this.currentPage = pageInfo.pageNumber;
       }
     },
-    onClickDeleteButton(item) {
-      // Handle delete button click
+    onClickDelete(item) {
       this.state = "Delete";
       this.title = "Delete Review";
       this.messageYesNo = `Are you sure you want to delete the review by ${item.userName}?`;
       this.yes = "Yes";
       this.no = "No";
+      this.size = null;
       this.selectedRowId = item.id; // Store the ID of the review to delete
-      this.modal.show(); // Show the modal
-    },
-    onClickUpdate(item) {
-      // Handle update button click
-      this.state = "Update";
-      this.title = "Update Review";
-      this.yes = null;
-      this.no = "Cancel";
-      this.size = "lg";
-      this.item = { ...item }; // Store the review data for editing
-      this.selectedRowId = item.id; // Store the ID of the review to update
-      this.modal.show(); // Show the modal
     },
     onClickUpdate(item) {
       this.state = "Update";
       this.selectedRowId = item.id;
       this.item = {
         ...item,
-        content: item.content || "", // Ensure content exists
       };
-      this.title = "Edit Review";
-      this.modal.show();
+      this.title = "Update Review";
+      this.yes = null;
+      this.no = "Cancel";
+      this.size = "lg";
+    },
+    onClickCreate() {
+      this.state = "Create";
+      this.title = "New Review";
+      this.yes = null;
+      this.no = "Cancel";
+      this.size = "lg";
+      this.item = {
+        filmId: "",
+        evaluation: 0,
+        userId: this.authStore.id,
+      };
     },
   },
 };
@@ -757,7 +689,6 @@ export default {
   background: var(--primary-color) !important;
   color: var(--secondary-color) !important;
 }
-
 /* Guest Review Form Styles */
 .guest-review-form {
   background: #383838;
@@ -775,7 +706,6 @@ export default {
   align-items: center;
   gap: 1rem;
   margin-bottom: 1rem;
-  width: 100%;
   flex-wrap: wrap;
 }
 
@@ -785,32 +715,10 @@ export default {
   margin-right: 1rem;
 }
 
-.film-and-stars {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  width: 100%;
-}
-
-.film-select {
-  width: 60%;
-  padding: 0.5rem;
-  background: #383838;
-  border: 3px solid #1f1f1f;
-  border-radius: 0px;
-  font-size: 0.9rem;
-  color: #b0b0b0;
-  flex: 1;
-  min-width: 200px;
-}
-
-/* Star Input Styles */
 .star-input {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  margin-bottom: 0rem;
   margin-left: 0;
 }
 
@@ -831,45 +739,39 @@ export default {
   font-size: 0.9rem;
 }
 
-/* Review Input Styles */
-.input-group {
-  display: flex;
-  align-items: flex-end; /* Align button with textarea bottom */
+.film-select {
+  width: 100%;
+  padding: 0.5rem;
+  background: #383838;
+  border: 3px solid #1f1f1f;
+  border-radius: 0;
+  font-size: 0.9rem;
+  color: #b0b0b0;
 }
 
 .review-input {
-  width: 80%;
-  height: 40px;
+  width: 100%;
+  height: 100px;
   resize: vertical;
-  border: none;
   background: #383838;
-  border-bottom: 2px solid #1a1a1a;
-  /* White bottom border */
-  flex: 1; /* Take remaining space */
-  margin-right: 20px; /* Fixed gap between textarea and button */
-  border-radius: 0px;
+  border: 2px solid #1f1f1f;
+  border-radius: 0;
   padding: 0.5rem;
   font-size: 0.9rem;
   color: #b0b0b0;
-  box-sizing: border-box;
-  outline: none;
-  /* Remove default focus border */
+  margin-top: 1rem;
 }
 
-/* Add the focus effect for the bottom border */
 .review-input:focus {
-  border-bottom: 2px solid #fff;
-  /* White border on focus */
+  border-color: #ffd700;
   color: #fff;
-  /* Keep text color white on focus */
+  box-shadow: none;
 }
 
-/* Review Actions Styles */
-.review-actions {
+.form-actions {
+  margin-top: 1rem;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 0.5rem;
+  justify-content: flex-end;
 }
 
 .btn-submit {
@@ -879,48 +781,22 @@ export default {
   padding: 0.5rem 1.5rem;
   border-radius: 60px;
   font-weight: bold;
-  cursor: pointer;
-  white-space: nowrap;
-  /* Remove all margins - positioning handled by flexbox */
+  transition: background 0.3s;
 }
+
 .btn-submit:hover {
   background: #b10d12;
 }
 
+.btn-submit:disabled {
+  background: #666;
+  cursor: not-allowed;
+}
+
 .error-message {
-  color: red;
+  color: #cc181e;
   font-size: 0.9rem;
-}
-
-/* Submitted Review Styles */
-.public-reviews {
-  margin-top: 2rem;
-}
-
-.review-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
-}
-
-.review-meta {
-  display: flex;
-  flex-direction: column;
-}
-
-.review-author {
-  font-weight: 500;
-}
-
-.review-date {
-  font-size: 0.8rem;
-  color: #666;
-}
-
-.review-content {
-  white-space: pre-wrap;
-  line-height: 1.5;
+  margin-top: 0.5rem;
 }
 
 /* Responsive Styles */
@@ -949,12 +825,18 @@ export default {
     flex-direction: column;
     align-items: flex-start;
   }
+  .user-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .film-select {
     width: 100%;
-    margin-bottom: 1rem;
   }
+
   .star-input {
-    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
   }
 }
 </style>

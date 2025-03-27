@@ -65,4 +65,26 @@ export default {
 </script>
 
 <style>
+/* For modal style */
+.modal-content {
+  background: #383838;
+  border: 3px solid #1f1f1f;
+  color: #ffd700;
+}
+
+.modal-header {
+  border-bottom: 2px solid #1f1f1f;
+}
+
+.modal-title {
+  color: #ffd700 !important;
+}
+
+.btn-close {
+  filter: invert(1);
+}
+
+.modal-body {
+  padding: 20px;
+}
 </style>
