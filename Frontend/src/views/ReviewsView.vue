@@ -87,7 +87,10 @@
               </tbody>
             </table>
           </div>
-          <div class="pagination-container" v-if="favourites.length >= 6">
+          <div
+            class="pagination-container"
+            v-if="favourites.length >= itemsPerPage"
+          >
             <Paginator
               :pageNumber="currentPage"
               :numberOfPages="totalPages"
@@ -95,8 +98,8 @@
               @paging="handlePageChange"
             />
           </div>
-          <!-- Make this modal -->
-          <div class="guest-review-form" v-show="showReviewForm">
+          <!-- Made into modal -->
+          <!-- <div class="guest-review-form" v-show="showReviewForm">
             <div class="user-info">
               <span class="username">{{ username }}</span>
               <div class="star-input">
@@ -149,7 +152,7 @@
                 }}</span>
               </div>
             </div>
-          </div>
+          </div> -->
           <!-- For an all reviews part later... -->
           <!-- <div class="public-reviews" v-if="publicReviews.length > 0">
             <div
@@ -202,6 +205,8 @@
         <ReviewForm
           v-if="state === 'Create' || state === 'Update'"
           :itemForm="item"
+          :films="films"
+          :username="username"
           @saveItem="saveItemHandler"
         />
       </Modal>
@@ -229,7 +234,7 @@ export default {
       films: [], // List of films for the dropdown
       authStore: useAuthStore(),
       currentPage: 1,
-      itemsPerPage: 5,
+      itemsPerPage: 12,
       selectedRowId: null, // ID of the selected review for deletion/update
       errorMessages: null,
       loading: false,
@@ -262,12 +267,6 @@ export default {
     };
   },
   computed: {
-    isAdmin() {
-      return this.authStore.positionId === 1; // Check if the user is an admin
-    },
-    username() {
-      return this.authStore.user || "Guest"; // Get username or "Guest"
-    },
     fullStars() {
       return Math.floor(this.rating); // Get the number of full stars
     },
@@ -320,29 +319,6 @@ export default {
     });
   },
   methods: {
-    showReviewSubmit() {
-      this.showReviewForm = !this.showReviewForm;
-    },
-    yesEventHandler() {
-      // Handle "Yes" button click in the modal
-      if (this.state === "Delete") {
-        this.deleteItemById(); // Delete the selected review
-      }
-    },
-    getEvaluation(item) {
-      // Helper function to get the evaluation (or default to 0)
-      return Number(item.evaluation) || 0;
-    },
-    formatEvaluation(value) {
-      // Helper function to format the evaluation value
-      const num = Number(value);
-      return Number.isNaN(num) ? "N/A" : num.toFixed(1);
-    },
-    randomDefaultReview() {
-      // Get a random default review
-      const index = Math.floor(Math.random() * this.defaultReviews.length);
-      return this.defaultReviews[index];
-    },
     async fetchFavourites() {
       // Fetch all reviews (for admin view)
       try {
@@ -421,6 +397,89 @@ export default {
         this.errorMessages = "The review cannot be deleted.";
       }
     },
+    async saveItemHandler(formData) {
+      this.loading = true;
+      const token = this.authStore.token;
+      const headers = {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+      try {
+        if (this.state === "Create") {
+          await this.createReview(formData, headers);
+        } else if (this.state === "Update") {
+          await this.updateReview(formData, headers);
+        }
+        this.fetchFavourites(); // Refresh the list
+        this.modal.hide();
+      } catch (error) {
+        console.error("Error saving review:", error);
+        this.errorMessages =
+          this.state === "Create"
+            ? "Review creation failed."
+            : "Review update failed.";
+      } finally {
+        this.loading = false;
+        this.state = "Read";
+      }
+    },
+    async createReview(data, headers) {
+      const response = await axios.post(
+        `${BASE_URL}/favourites`,
+        {
+          filmId: data.filmId,
+          evaluation: data.evaluation,
+          userId: data.userId,
+        },
+        { headers }
+      );
+
+      return response.data;
+    },
+    async updateReview(data, headers) {
+      const response = await axios.patch(
+        `${BASE_URL}/favourites/${this.selectedRowId}`,
+        {
+          evaluation: data.evaluation,
+          filmId: data.filmId,
+        },
+        { headers }
+      );
+
+      return response.data;
+    },
+    
+    yesEventHandler() {
+      // Handle "Yes" button click in the modal
+      if (this.state === "Delete") {
+        this.deleteItemById(); // Delete the selected review
+      }
+    },
+    getEvaluation(item) {
+      // Helper function to get the evaluation (or default to 0)
+      return Number(item.evaluation) || 0;
+    },
+    formatEvaluation(value) {
+      // Helper function to format the evaluation value
+      const num = Number(value);
+      return Number.isNaN(num) ? "N/A" : num.toFixed(1);
+    },
+    randomDefaultReview() {
+      // Get a random default review
+      const index = Math.floor(Math.random() * this.defaultReviews.length);
+      return this.defaultReviews[index];
+    },
+    showReviewSubmit() {
+      this.state = "Create";
+      this.item = {
+        filmId: "",
+        evaluation: 0,
+        userId: this.authStore.id,
+      };
+      this.title = "Add New Review";
+      this.showReviewForm = true;
+    },
     formatDate(date) {
       // Helper function to format dates
       try {
@@ -431,7 +490,9 @@ export default {
       }
     },
     handlePageChange(pageInfo) {
-      // Handle page change in the paginator (admin view)
+      // Handle page change in the paginator
+      this.page = pageInfo.pageNumber;
+      this.pageSize = pageInfo.pageSize;
       if (pageInfo === "...") {
         this.currentPage = this.totalPages;
       } else {
@@ -439,7 +500,7 @@ export default {
       }
     },
     onClickDeleteButton(item) {
-      // Handle delete button click (admin view)
+      // Handle delete button click
       this.state = "Delete";
       this.title = "Delete Review";
       this.messageYesNo = `Are you sure you want to delete the review by ${item.userName}?`;
@@ -449,7 +510,7 @@ export default {
       this.modal.show(); // Show the modal
     },
     onClickUpdate(item) {
-      // Handle update button click (admin view)
+      // Handle update button click
       this.state = "Update";
       this.title = "Update Review";
       this.yes = null;
@@ -459,77 +520,15 @@ export default {
       this.selectedRowId = item.id; // Store the ID of the review to update
       this.modal.show(); // Show the modal
     },
-    saveItemHandler() {
-      // Handle save button click in the modal (admin view)
-      if (this.state === "Update") this.updateItem(); // Call update function
-      if (this.state === "Delete") this.deleteItemById(); // Call delete function
-      this.modal.hide(); // Hide the modal after saving
-    },
-    async submitReview() {
-      // Submit a review (guest view)
-      if (!this.selectedFilmId || this.rating === 0) return;
-
-      this.submitting = true;
-      this.errorMessage = "";
-
-      try {
-        const token = this.authStore.token;
-        const headers = {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        };
-
-        const userId = this.authStore.id || 2; // Use a default user ID if not logged in
-        const selectedFilm = this.films.find(
-          (f) => f.id === this.selectedFilmId
-        );
-
-        // Create review object without content/isPublic since DB doesn't have these
-        const reviewData = {
-          filmId: this.selectedFilmId,
-          evaluation: this.rating,
-          userId: userId,
-        };
-
-        const response = await axios.post(
-          `${BASE_URL}/favourites`,
-          reviewData,
-          { headers }
-        );
-
-        // Manually construct review object for display in guest view
-        this.publicReviews.unshift({
-          id: response.data.data.id,
-          filmId: this.selectedFilmId,
-          filmTitle: selectedFilm?.title || "Unknown Film",
-          evaluation: this.rating,
-          userName: this.username,
-          created_at: new Date().toISOString(),
-          // Client-side only fields:
-          content: this.reviewText, // Store in memory only
-        });
-
-        this.reviewText = "";
-        this.selectedFilmId = "";
-        this.rating = 0;
-        this.fetchFavourites();
-      } catch (error) {
-        this.errorMessage =
-          error.response?.data?.message ||
-          "Failed to submit review. Please try again.";
-        console.error("Review submission error:", error);
-      } finally {
-        this.submitting = false;
-      }
-    },
-    setRating(starIndex, event) {
-      // Set the star rating (guest view)
-      const target =
-        event.currentTarget.querySelector("i") || event.currentTarget;
-      const rect = target.getBoundingClientRect();
-      const clickX = event.clientX - rect.left;
-      const isHalfStar = clickX < rect.width / 2;
-      this.rating = isHalfStar ? starIndex - 0.5 : starIndex;
+    onClickUpdate(item) {
+      this.state = "Update";
+      this.selectedRowId = item.id;
+      this.item = {
+        ...item,
+        content: item.content || "", // Ensure content exists
+      };
+      this.title = "Edit Review";
+      this.modal.show();
     },
   },
 };

@@ -1,62 +1,102 @@
 <template>
-  <form
-    @submit.prevent="onClickSubmit"
-    class="row g-4 needs-validation was-validated"
-  >
-    <div class="col-md-4 position-relative">
-      <label for="userId" class="form-label">User ID:</label>
-      <input
-        type="number"
-        class="form-control"
-        id="userId"
-        required
-        v-model="itemForm.userId"
-      />
-      <div class="invalid-feedback">Please provide a User ID.</div>
+  <form @submit.prevent="onClickSubmit" class="review-form">
+    <div class="user-info">
+      <span class="username">{{ username }}</span>
+      
+      <!-- Star Rating -->
+      <div class="star-input">
+        <span v-for="starIndex in 5" :key="starIndex" @click="setRating(starIndex, $event)">
+          <i class="bi star-icon" :class="getStarClass(starIndex)"></i>
+        </span>
+        <span class="rating-display">({{ itemForm.evaluation.toFixed(1) }})</span>
+      </div>
+      
+      <!-- Film Selection -->
+      <select v-model="itemForm.filmId" class="film-select" required>
+        <option value="" disabled>Select Film</option>
+        <option v-for="film in films" :key="film.id" :value="film.id">
+          {{ film.title }}
+        </option>
+      </select>
     </div>
 
-    <div class="col-md-4 position-relative">
-      <label for="filmId" class="form-label">Film ID:</label>
-      <input
-        type="number"
-        class="form-control"
-        id="filmId"
-        required
-        v-model="itemForm.filmId"
-      />
-      <div class="invalid-feedback">Please provide a Film ID.</div>
-    </div>
+    <!-- Review Content -->
+    <textarea
+      v-model="itemForm.content"
+      class="review-input"
+      placeholder="Write your review..."
+      required
+    ></textarea>
 
-    <div class="col-md-4 position-relative">
-      <label for="evaluation" class="form-label">Evaluation:</label>
-      <input
-        type="number"
-        class="form-control"
-        id="evaluation"
-        required
-        v-model="itemForm.evaluation"
-        min="1"
-        max="5"
-      />
-      <div class="invalid-feedback">Please provide an evaluation (1-5).</div>
+    <div class="form-actions">
+      <button type="submit" class="btn-submit" :disabled="isSubmitting">
+        {{ isSubmitting ? 'Saving...' : 'Save' }}
+      </button>
     </div>
-
-    <button type="submit" class="btn btn-success">Save</button>
   </form>
 </template>
-  
-  <script>
+
+<script>
 export default {
-  props: ["itemForm", "debug"],
-  emits: ["saveItem"],
-  methods: {
-    onClickSubmit() {
-      this.$emit("saveItem", this.itemForm);
+  props: {
+    itemForm: {
+      type: Object,
+      default: () => ({
+        filmId: '',
+        evaluation: 0,
+        content: '',
+        userId: null
+      })
     },
+    films: Array,
+    username: String
   },
+  data() {
+    return {
+      isSubmitting: false
+    }
+  },
+  computed: {
+    fullStars() {
+      return Math.floor(this.itemForm.evaluation);
+    },
+    hasHalfStar() {
+      return this.itemForm.evaluation % 1 >= 0.5;
+    }
+  },
+  methods: {
+    getStarClass(starIndex) {
+      return {
+        'bi-star-fill': starIndex <= this.fullStars,
+        'bi-star-half': starIndex === this.fullStars + 1 && this.hasHalfStar,
+        'bi-star': starIndex > this.fullStars + (this.hasHalfStar ? 0.5 : 0)
+      };
+    },
+    setRating(starIndex, event) {
+      const rect = event.target.getBoundingClientRect();
+      const isHalfStar = event.clientX - rect.left < rect.width / 2;
+      this.itemForm.evaluation = isHalfStar ? starIndex - 0.5 : starIndex;
+    },
+    onClickSubmit() {
+      if (!this.validateForm()) return;
+      this.isSubmitting = true;
+      this.$emit('saveItem', this.itemForm);
+    },
+    validateForm() {
+      return this.itemForm.filmId && this.itemForm.evaluation > 0;
+    }
+  }
 };
 </script>
-  
-  <style>
+
+<style scoped>
+/* Reuse your existing styles from guest-review-form */
+.review-form {
+  padding: 1rem;
+}
+.star-icon {
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+/* ... other existing styles ... */
 </style>
-  
