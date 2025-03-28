@@ -84,24 +84,19 @@ export default {
       this.itemForm.evaluation = isHalfStar ? starIndex - 0.5 : starIndex;
     },
     onClickSubmit() {
-      if (this.isSubmitting) return; // Prevent double submits
+      if (this.isSubmitting) return;
 
       if (!this.validateForm()) {
-        alert("Please complete all required fields");
+        this.$emit("error", "Please complete all required fields");
         return;
       }
 
       this.isSubmitting = true;
-      try {
-        this.$emit("saveItem", {
-          ...this.itemForm,
-          evaluation: Number(this.itemForm.evaluation), // Ensure number type
-        });
-      } catch (e) {
-        console.error("Submission error:", e);
-      } finally {
-        this.isSubmitting = false;
-      }
+      this.$emit("saveItem", {
+        ...this.itemForm,
+        evaluation: Number(this.itemForm.evaluation),
+      });
+      this.isSubmitting = false;
     },
     validateForm() {
       return this.itemForm.filmId && this.itemForm.evaluation > 0;

@@ -9,3 +9,11 @@ div.container-fluid {
 body {
   background: url('bg.png') fixed;
 }
+
+body.modal-open {
+  overflow: auto !important;
+  padding-right: 0 !important;
+}
+.modal-backdrop.fade.show {
+  display: none !important;
+}

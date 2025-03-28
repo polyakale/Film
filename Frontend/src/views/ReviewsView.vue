@@ -138,6 +138,7 @@
         </div>
       </div>
       <Modal
+        ref="modalRef"
         :title="title"
         :yes="yes"
         :no="no"
@@ -176,7 +177,7 @@ export default {
       films: [], // List of films for the dropdown
       authStore: useAuthStore(),
       currentPage: 1,
-      itemsPerPage: 12,
+      itemsPerPage: 10,
       selectedRowId: null, // ID of the selected review for deletion/update
       errorMessages: null,
       loading: false,
@@ -241,6 +242,7 @@ export default {
     },
   },
   mounted() {
+    this.modal = this.$refs.modalRef;
     this.fetchFavourites();
     this.fetchFilms();
   },
@@ -270,30 +272,30 @@ export default {
         this.loading = false;
       }
     },
-    async fetchAllReviews() {
-      try {
-        this.loading = true;
-        const token = this.authStore.token;
-        const response = await axios.get(`${BASE_URL}/favourites`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        if (response.data?.data) {
-          this.publicReviews = response.data.data
-            .filter((review) => review.isPublic) // Filter for public reviews
-            .map((review) => ({
-              ...review,
-              userName: review.userName || "Anonymous",
-              filmTitle: review.filmTitle || "Unknown Film",
-              evaluation: Number(review.evaluation) || 0, // Ensure evaluation is a number
-            }));
-        }
-      } catch (error) {
-        console.error("Error fetching public reviews:", error);
-        this.errorMessages = "Error fetching data from the server.";
-      } finally {
-        this.loading = false;
-      }
-    },
+    // async fetchAllReviews() {
+    //   try {
+    //     this.loading = true;
+    //     const token = this.authStore.token;
+    //     const response = await axios.get(`${BASE_URL}/favourites`, {
+    //       headers: token ? { Authorization: `Bearer ${token}` } : {},
+    //     });
+    //     if (response.data?.data) {
+    //       this.publicReviews = response.data.data
+    //         .filter((review) => review.isPublic) // Filter for public reviews
+    //         .map((review) => ({
+    //           ...review,
+    //           userName: review.userName || "Anonymous",
+    //           filmTitle: review.filmTitle || "Unknown Film",
+    //           evaluation: Number(review.evaluation) || 0, // Ensure evaluation is a number
+    //         }));
+    //     }
+    //   } catch (error) {
+    //     console.error("Error fetching public reviews:", error);
+    //     this.errorMessages = "Error fetching data from the server.";
+    //   } finally {
+    //     this.loading = false;
+    //   }
+    // },
     async fetchFilms() {
       // Fetch the list of films
       try {
@@ -309,35 +311,42 @@ export default {
       this.loading = true;
       const token = this.authStore.token;
       const headers = {
-        /*...*/
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       };
 
       try {
-        // Check for existing review before creation
         if (this.state === "Create") {
           const exists = this.favourites.some(
             (fav) =>
               fav.filmId === formData.filmId && fav.userId === this.authStore.id
           );
-
           if (exists) {
             this.errorMessages = "You've already reviewed this film";
             return;
           }
         }
 
-        // Proceed with API call
         if (this.state === "Create") {
           await this.createReview(formData, headers);
         } else if (this.state === "Update") {
           await this.updateReview(formData, headers);
         }
-        this.fetchFavourites();
+
+        await this.fetchFavourites();
+
+        if (
+          this.$refs.modalRef &&
+          typeof this.$refs.modalRef.hide === "function"
+        ) {
+          this.$refs.modalRef.hide();
+        }
       } catch (error) {
-        console.error("Error details:", error.response?.data); // Log server response
+        console.error("Operation failed:", error.response?.data || error);
         this.errorMessages =
           error.response?.data?.message ||
-          "Review operation failed. Please try again.";
+          "Operation failed. Please try again.";
       } finally {
         this.loading = false;
         this.state = "Read";
@@ -347,10 +356,16 @@ export default {
       const id = this.selectedRowId;
       try {
         await axios.delete(`${BASE_URL}/favourites/${id}`, {
-          /* ... */
+          headers: {
+            Authorization: `Bearer ${this.authStore.token}`,
+          },
         });
-        this.fetchFavourites();
+        await this.fetchFavourites(); // Wait for refresh
+        if (this.modal) {
+          this.modal.hide();
+        }
       } catch (error) {
+        console.error("Delete error:", error);
         this.errorMessages = "The review cannot be deleted.";
       }
     },
@@ -367,13 +382,26 @@ export default {
       return response.data;
     },
     async updateReview(data, headers) {
-      const response = await axios.patch(
-        `${BASE_URL}/favourites/${this.selectedRowId}`,
-        { evaluation: data.evaluation, filmId: data.filmId },
-        { headers }
-      );
-      this.modal.hide();
-      return response.data;
+      try {
+        const response = await axios.patch(
+          `${BASE_URL}/favourites/${this.selectedRowId}`,
+          { evaluation: data.evaluation, filmId: data.filmId },
+          { headers }
+        );
+
+        // Close modal safely
+        if (
+          this.$refs.modalRef &&
+          typeof this.$refs.modalRef.hide === "function"
+        ) {
+          this.$refs.modalRef.hide();
+        }
+
+        return response.data;
+      } catch (error) {
+        console.error("Update error:", error);
+        throw error;
+      }
     },
     // non-async methods
     yesEventHandler() {
