@@ -1,8 +1,6 @@
 <template>
   <form @submit.prevent="onClickSubmit" class="review-form">
     <div class="user-info">
-      <span class="username">{{ username }}</span>
-
       <!-- Star Rating -->
       <div class="star-input">
         <span

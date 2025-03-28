@@ -2,17 +2,7 @@
   <div>
     <button
       type="button"
-      class="btn btn-outline-danger btn-sm"
-      data-bs-toggle="modal"
-      data-bs-target="#modal"
-      @click="onClickDelete(data)"
-    >
-      <i class="bi bi-trash3"></i>
-    </button>
-
-    <button
-      type="button"
-      class="btn btn-outline-primary btn-sm ms-2"
+      class="btn btn-outline-primary btn-sm"
       data-bs-toggle="modal"
       data-bs-target="#modal"
       @click="onClickUpdate(data)"
@@ -22,12 +12,12 @@
 
     <button
       type="button"
-      class="btn btn-outline-success btn-sm ms-2"
+      class="btn btn-outline-danger btn-sm ms-2"
       data-bs-toggle="modal"
       data-bs-target="#modal"
-      @click="onClickCreate()"
+      @click="onClickDelete(data)"
     >
-      <i class="bi bi-plus-lg"></i>
+      <i class="bi bi-trash3"></i>
     </button>
   </div>
 </template>
@@ -35,7 +25,7 @@
 <script>
 export default {
   props: ["data"],
-  emits: ["onClickDelete", "onClickUpdate", "onClickCreate"],
+  emits: ["onClickDelete", "onClickUpdate"],
   methods: {
     onClickDelete(data) {
       // Renamed from onClickDeleteButton
@@ -43,9 +33,6 @@ export default {
     },
     onClickUpdate(data) {
       this.$emit("onClickUpdate", data);
-    },
-    onClickCreate() {
-      this.$emit("onClickCreate");
     },
   },
 };

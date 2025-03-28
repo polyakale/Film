@@ -1,7 +1,10 @@
 <template>
   <div class="film-reviews">
-    <div class="header-container">
-      <h3 class="text-center my-4 title-text">Reviews</h3>
+    <div
+      class="header-container d-flex align-items-center justify-content-between px-3 py-2"
+    >
+      <h3 class="title-text m-0">My Reviews</h3>
+      <h3 class="title-text m-0">All Reviews</h3>
     </div>
 
     <div v-if="loading" class="loading-overlay">
@@ -28,14 +31,20 @@
                   <th class="text-center">Evaluation</th>
                   <th>Date</th>
                   <th class="text-center">
-                    Operations
-                    <button
-                      type="button"
-                      class="btn btn-outline-success"
-                      @click="onClickCreate"
+                    <div
+                      class="d-flex align-items-center justify-content-center gap-2"
                     >
-                      <i class="bi bi-plus-lg"></i>
-                    </button>
+                      <span>Operations</span>
+                      <button
+                        type="button"
+                        class="btn btn-outline-warning btn-sm"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modal"
+                        @click="onClickCreate"
+                      >
+                        <i class="bi bi-plus-lg"></i>
+                      </button>
+                    </div>
                   </th>
                 </tr>
               </thead>
@@ -77,7 +86,6 @@
                     <OperationsCrud
                       @onClickDelete="onClickDelete"
                       @onClickUpdate="onClickUpdate"
-                      @onClickCreate="onClickCreate"
                       :data="favourite"
                     />
                   </td>
@@ -411,7 +419,7 @@ export default {
       } else if (this.state === "Update") {
         this.updateReview(this.item, this.headers);
       } else if (this.state === "Create") {
-        this.createReview(this.item, this.headers);
+        this.createReview(this.item);
       }
     },
     getEvaluation(item) {
@@ -512,16 +520,17 @@ export default {
 
 /* Header Styles */
 .header-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding: 0 1rem;
+  background: #1a1a1a; /* Match your dark theme */
+  border-bottom: 2px solid #ffd700; /* Gold accent */
+  width: 100%;
 }
 
 .title-text {
-  color: var(--text-light);
-  margin: 0;
+  color: #ffd700; /* Gold text */
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0; /* Remove default margins */
+  padding: 0.5rem 0;
 }
 
 /* Loading Overlay Styles */
@@ -704,6 +713,21 @@ export default {
   background: var(--primary-color) !important;
   color: var(--secondary-color) !important;
 }
+
+.th-header-wrapper {
+  gap: 0.5rem;
+}
+
+/* Style the create button
+.btn-outline-success {
+  border-color: var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.btn-outline-success:hover {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+} */
 
 /* Responsive Styles */
 @media (max-width: 768px) {

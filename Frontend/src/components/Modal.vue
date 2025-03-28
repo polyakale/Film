@@ -55,15 +55,13 @@ export default {
     onClickYesButton() {
       this.$emit("yesEvent");
     },
-    hide() {
-      if (this.$el && this.$el.classList.contains("show")) {
-        const modal = bootstrap.Modal.getInstance(this.$el);
-        if (modal) modal.hide();
-      }
+    showModal() {
+      this.$emit("show");
+      this.isVisible = true;
     },
-    show() {
-      const modal = new bootstrap.Modal(this.$el);
-      modal.show();
+    hideModal() {
+      this.$emit("hide");
+      this.isVisible = false;
     },
   },
 };
