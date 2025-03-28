@@ -56,14 +56,12 @@ export default {
       this.$emit("yesEvent");
     },
     hide() {
-      // Bootstrap 5 modal hide
       if (this.$el && this.$el.classList.contains("show")) {
         const modal = bootstrap.Modal.getInstance(this.$el);
         if (modal) modal.hide();
       }
     },
     show() {
-      // Bootstrap 5 modal show
       const modal = new bootstrap.Modal(this.$el);
       modal.show();
     },

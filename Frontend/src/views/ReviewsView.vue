@@ -15,7 +15,7 @@
 
     <div v-else>
       <div class="container">
-        <div class="admin-view">
+        <div>
           <div
             v-if="favourites.length >= 0"
             class="col-12 col-lg-10 tabla-container"
@@ -498,11 +498,8 @@ export default {
 /* Root Variables */
 :root {
   --primary-color: #8b0000;
-  /* Dark Red */
   --secondary-color: #ffd700;
-  /* Gold */
   --accent-color: #000000;
-  /* Black */
   --background-dark: #1a1a1a;
   --text-light: #ffffff;
   --text-muted: #cccccc;
@@ -525,30 +522,6 @@ export default {
 .title-text {
   color: var(--text-light);
   margin: 0;
-}
-
-.toggle-container {
-  color: #ffd700;
-}
-
-.btn-toggle {
-  background: var(--primary-color);
-  color: var(--secondary-color);
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.btn-toggle:hover {
-  background: var(--secondary-color);
-  color: var(--accent-color);
-}
-
-.toggle-text {
-  margin-left: 0.5rem;
-  font-weight: bold;
 }
 
 /* Loading Overlay Styles */
@@ -601,35 +574,47 @@ export default {
   filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.4));
 }
 
-/* Table Styles */
+/* Updated Table Styles */
 .custom-table {
   width: 120%;
-  border-collapse: separate;
-  border-spacing: 0 0.5rem;
-  background: #ffffff;
-  border: 2px solid var(--primary-color);
+  border-collapse: collapse;
+  background: #383838;
+  border: 2px solid #1f1f1f;
+  color: #ffd700;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  font-size: 0.95rem;
 }
 
 .custom-table thead {
-  background: var(--primary-color);
-  border-bottom: 3px solid var(--secondary-color);
+  background: #1a1a1a;
+  border-bottom: 3px solid #ffd700;
 }
 
 .custom-table th {
-  font-weight: 700;
-  letter-spacing: 1px;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
+  color: #ffd700;
+}
+
+.custom-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #2a2a2a;
 }
 
 .custom-table tbody tr {
-  transition: background 0.3s;
-  color: #000000;
+  transition: background-color 0.2s ease;
 }
 
 .custom-table tbody tr:hover {
-  background: rgba(240, 240, 240, 1);
-  box-shadow: 0 3px 15px rgba(255, 215, 0, 0.2);
+  background: #2a2a2a;
+}
+
+/* Text Center Alignment for Specific Columns */
+.custom-table th.text-center,
+.custom-table td.text-center {
+  text-align: center;
 }
 
 /* Review Card Styles */
@@ -643,6 +628,7 @@ export default {
 /* Star Rating Styles */
 .star-rating {
   font-size: 1.1rem;
+  color: #ffd700;
   line-height: 1;
 }
 
@@ -658,7 +644,8 @@ export default {
   margin-top: 2rem;
   display: flex;
   justify-content: center;
-  background: rgba(105, 91, 91, 0.9);
+  background: #1a1a1a;
+  border: 1px solid #ffd700;
   padding: 1rem;
   border-radius: 8px;
   z-index: 100;
@@ -717,154 +704,21 @@ export default {
   background: var(--primary-color) !important;
   color: var(--secondary-color) !important;
 }
-/* Guest Review Form Styles */
-.guest-review-form {
-  background: #383838;
-  border: 3px solid #1f1f1f;
-  padding: 1rem;
-  border-radius: 0px;
-  max-width: 1256px;
-  min-width: 230px;
-  margin: 0px auto;
-  color: #ffd700;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-
-.username {
-  font-weight: bold;
-  color: #ffd700;
-  margin-right: 1rem;
-}
-
-.star-input {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  margin-left: 0;
-}
-
-.star-icon {
-  font-size: 1.5rem;
-  color: #ffd700;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.star-icon:hover {
-  transform: scale(1.2);
-}
-
-.rating-display {
-  font-weight: bold;
-  margin-left: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.film-select {
-  width: 100%;
-  padding: 0.5rem;
-  background: #383838;
-  border: 3px solid #1f1f1f;
-  border-radius: 0;
-  font-size: 0.9rem;
-  color: #b0b0b0;
-}
-
-.review-input {
-  width: 100%;
-  height: 100px;
-  resize: vertical;
-  background: #383838;
-  border: 2px solid #1f1f1f;
-  border-radius: 0;
-  padding: 0.5rem;
-  font-size: 0.9rem;
-  color: #b0b0b0;
-  margin-top: 1rem;
-}
-
-.review-input:focus {
-  border-color: #ffd700;
-  color: #fff;
-  box-shadow: none;
-}
-
-.form-actions {
-  margin-top: 1rem;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.btn-submit {
-  background: #cc181e;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1.5rem;
-  border-radius: 60px;
-  font-weight: bold;
-  transition: background 0.3s;
-}
-
-.btn-submit:hover {
-  background: #b10d12;
-}
-
-.btn-submit:disabled {
-  background: #666;
-  cursor: not-allowed;
-}
-
-.error-message {
-  color: #cc181e;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
-}
 
 /* Responsive Styles */
 @media (max-width: 768px) {
+  .custom-table {
+    font-size: 0.85rem;
+  }
+
   .custom-table th,
   .custom-table td {
     padding: 0.5rem;
-    font-size: 0.9rem;
   }
   .pagination .page-item .page-link {
     min-width: 30px;
     padding: 0.4rem 0.6rem;
     font-size: 0.85rem;
-  }
-  .input-group {
-    flex-direction: column;
-    align-items: flex-end;
-  }
-
-  .review-input {
-    margin-right: 0;
-    margin-bottom: 15px;
-    width: 100%;
-  }
-  .film-and-stars {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .user-info {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .film-select {
-    width: 100%;
-  }
-
-  .star-input {
-    width: 100%;
-    justify-content: space-between;
   }
 }
 </style>
