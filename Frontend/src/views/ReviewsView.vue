@@ -1,8 +1,6 @@
 <template>
   <div class="film-reviews">
-    <div
-      class="header-container d-flex align-items-center justify-content-between px-3 py-2"
-    >
+    <div class="header-container d-flex align-items-center justify-content-between px-3 py-2">
       <h3 class="title-text m-0">My Reviews</h3>
       <h3 class="title-text m-0">All Reviews</h3>
     </div>
@@ -19,10 +17,7 @@
     <div v-else>
       <div class="container">
         <div>
-          <div
-            v-if="favourites.length >= 0"
-            class="col-12 col-lg-10 tabla-container"
-          >
+          <div v-if="favourites.length >= 0" class="col-12 col-lg-10 tabla-container">
             <table class="custom-table">
               <thead>
                 <tr>
@@ -31,17 +26,10 @@
                   <th class="text-center">Evaluation</th>
                   <th>Date</th>
                   <th class="text-center">
-                    <div
-                      class="d-flex align-items-center justify-content-center gap-2"
-                    >
+                    <div class="d-flex align-items-center justify-content-center gap-2">
                       <span>Operations</span>
-                      <button
-                        type="button"
-                        class="btn btn-outline-warning btn-sm"
-                        data-bs-toggle="modal"
-                        data-bs-target="#modal"
-                        @click="onClickCreate"
-                      >
+                      <button type="button" class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#modal" @click="onClickCreate">
                         <i class="bi bi-plus-lg"></i>
                       </button>
                     </div>
@@ -49,11 +37,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="favourite in paginatedFavourites"
-                  :key="favourite.id"
-                  class="review-card"
-                >
+                <tr v-for="favourite in paginatedFavourites" :key="favourite.id" class="review-card">
                   <td data-label="User" class="user">
                     {{ favourite.userName || "Unknown User" }}
                   </td>
@@ -62,18 +46,13 @@
                   </td>
                   <td data-label="Evaluation" class="text-center">
                     <div class="star-rating d-inline-flex align-items-center">
-                      <i
-                        v-for="starIndex in 5"
-                        :key="starIndex"
-                        class="bi mx-1 text-warning"
-                        :class="{
-                          'bi-star-fill': getEvaluation(favourite) >= starIndex,
-                          'bi-star-half':
-                            getEvaluation(favourite) + 0.5 >= starIndex &&
-                            getEvaluation(favourite) < starIndex,
-                          'bi-star': getEvaluation(favourite) + 0.5 < starIndex,
-                        }"
-                      ></i>
+                      <i v-for="starIndex in 5" :key="starIndex" class="bi mx-1 text-warning" :class="{
+                        'bi-star-fill': getEvaluation(favourite) >= starIndex,
+                        'bi-star-half':
+                          getEvaluation(favourite) + 0.5 >= starIndex &&
+                          getEvaluation(favourite) < starIndex,
+                        'bi-star': getEvaluation(favourite) + 0.5 < starIndex,
+                      }"></i>
                       <small class="text-muted ms-2">
                         ({{ formatEvaluation(favourite.evaluation) }})
                       </small>
@@ -83,26 +62,15 @@
                     {{ formatDate(favourite.created_at) }}
                   </td>
                   <td class="text-nowrap text-center">
-                    <OperationsCrud
-                      @onClickDelete="onClickDelete"
-                      @onClickUpdate="onClickUpdate"
-                      :data="favourite"
-                    />
+                    <OperationsCrud @onClickDelete="onClickDelete" @onClickUpdate="onClickUpdate" :data="favourite" />
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div
-            class="pagination-container"
-            v-if="favourites.length >= itemsPerPage"
-          >
-            <Paginator
-              :pageNumber="currentPage"
-              :numberOfPages="totalPages"
-              :pagesArray="pagesArray"
-              @paging="handlePageChange"
-            />
+          <div class="pagination-container" v-if="favourites.length >= itemsPerPage">
+            <Paginator :pageNumber="currentPage" :numberOfPages="totalPages" :pagesArray="pagesArray"
+              @paging="handlePageChange" />
           </div>
           <!-- For an all reviews part later... -->
           <!-- <div class="public-reviews" v-if="publicReviews.length > 0">
@@ -145,22 +113,10 @@
           </div> -->
         </div>
       </div>
-      <Modal
-        ref="modalRef"
-        :title="title"
-        :yes="yes"
-        :no="no"
-        :size="size"
-        @yesEvent="yesEventHandler"
-      >
+      <Modal ref="modalRef" :title="title" :yes="yes" :no="no" :size="size" @yesEvent="yesEventHandler">
         <div v-if="state === 'Delete'">{{ messageYesNo }}</div>
-        <ReviewForm
-          v-if="state === 'Create' || state === 'Update'"
-          :itemForm="item"
-          :films="films"
-          :username="username"
-          @saveItem="saveItemHandler"
-        />
+        <ReviewForm v-if="state === 'Create' || state === 'Update'" :itemForm="item" :films="films" :username="username"
+          @saveItem="saveItemHandler" />
       </Modal>
     </div>
   </div>
@@ -280,30 +236,30 @@ export default {
         this.loading = false;
       }
     },
-    // async fetchAllReviews() {
-    //   try {
-    //     this.loading = true;
-    //     const token = this.authStore.token;
-    //     const response = await axios.get(`${BASE_URL}/favourites`, {
-    //       headers: token ? { Authorization: `Bearer ${token}` } : {},
-    //     });
-    //     if (response.data?.data) {
-    //       this.publicReviews = response.data.data
-    //         .filter((review) => review.isPublic) // Filter for public reviews
-    //         .map((review) => ({
-    //           ...review,
-    //           userName: review.userName || "Anonymous",
-    //           filmTitle: review.filmTitle || "Unknown Film",
-    //           evaluation: Number(review.evaluation) || 0, // Ensure evaluation is a number
-    //         }));
-    //     }
-    //   } catch (error) {
-    //     console.error("Error fetching public reviews:", error);
-    //     this.errorMessages = "Error fetching data from the server.";
-    //   } finally {
-    //     this.loading = false;
-    //   }
-    // },
+    async fetchAllReviews() {
+      try {
+        this.loading = true;
+        const token = this.authStore.token;
+        const response = await axios.get(`${BASE_URL}/favourites`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (response.data?.data) {
+          this.publicReviews = response.data.data
+            .filter((review) => review.isPublic) // Filter for public reviews
+            .map((review) => ({
+              ...review,
+              userName: review.userName || "Anonymous",
+              filmTitle: review.filmTitle || "Unknown Film",
+              evaluation: Number(review.evaluation) || 0, // Ensure evaluation is a number
+            }));
+        }
+      } catch (error) {
+        console.error("Error fetching public reviews:", error);
+        this.errorMessages = "Error fetching data from the server.";
+      } finally {
+        this.loading = false;
+      }
+    },
     async fetchFilms() {
       // Fetch the list of films
       try {
@@ -520,16 +476,20 @@ export default {
 
 /* Header Styles */
 .header-container {
-  background: #1a1a1a; /* Match your dark theme */
-  border-bottom: 2px solid #ffd700; /* Gold accent */
+  background: #1a1a1a;
+  /* Match your dark theme */
+  border-bottom: 2px solid #ffd700;
+  /* Gold accent */
   width: 100%;
 }
 
 .title-text {
-  color: #ffd700; /* Gold text */
+  color: #ffd700;
+  /* Gold text */
   font-size: 1.5rem;
   font-weight: 600;
-  margin: 0; /* Remove default margins */
+  margin: 0;
+  /* Remove default margins */
   padding: 0.5rem 0;
 }
 
@@ -565,10 +525,12 @@ export default {
     opacity: 0.6;
     transform: scale(0.95);
   }
+
   50% {
     opacity: 1;
     transform: scale(1);
   }
+
   100% {
     opacity: 0.6;
     transform: scale(0.95);
@@ -718,17 +680,6 @@ export default {
   gap: 0.5rem;
 }
 
-/* Style the create button
-.btn-outline-success {
-  border-color: var(--secondary-color);
-  color: var(--secondary-color);
-}
-
-.btn-outline-success:hover {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
-} */
-
 /* Responsive Styles */
 @media (max-width: 768px) {
   .custom-table {
@@ -739,6 +690,7 @@ export default {
   .custom-table td {
     padding: 0.5rem;
   }
+
   .pagination .page-item .page-link {
     min-width: 30px;
     padding: 0.4rem 0.6rem;
