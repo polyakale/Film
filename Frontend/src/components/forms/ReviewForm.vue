@@ -18,8 +18,14 @@
       <!-- Film Selection -->
       <select v-model="itemForm.filmId" class="film-select" required>
         <option value="" disabled>Select Film</option>
-        <option v-for="film in films" :key="film.id" :value="film.id">
+        <option
+          v-for="film in availableFilms"
+          :key="film.id"
+          :value="film.id"
+          :disabled="isFilmReviewed(film.id)"
+        >
           {{ film.title }}
+          <span v-if="isFilmReviewed(film.id)"> (Already Reviewed)</span>
         </option>
       </select>
     </div>
@@ -33,7 +39,11 @@
     ></textarea>
 
     <div class="form-actions">
-      <button type="submit" class="btn-submit" :disabled="isSubmitting">
+      <button
+        type="submit"
+        class="btn-submit"
+        :disabled="isSubmitting || !validateForm()"
+      >
         {{ isSubmitting ? "Saving..." : "Save" }}
       </button>
     </div>
@@ -45,14 +55,26 @@ export default {
   props: {
     itemForm: {
       type: Object,
+      required: true,
       default: () => ({
         filmId: "",
         evaluation: 0,
         userId: null,
+        content: "",
       }),
     },
-    films: Array,
-    username: String,
+    films: {
+      type: Array,
+      default: () => [],
+    },
+    favourites: {
+      type: Array,
+      default: () => [],
+    },
+    username: {
+      type: String,
+      default: "",
+    },
   },
   data() {
     return {
@@ -60,20 +82,27 @@ export default {
     };
   },
   computed: {
-    fullStars() {
-      return Math.floor(this.itemForm.evaluation);
-    },
-    hasHalfStar() {
-      return this.itemForm.evaluation % 1 >= 0.5;
+    availableFilms() {
+      if (!Array.isArray(this.films) || !Array.isArray(this.favourites)) {
+        return [];
+      }
+
+      return this.films.filter((film) => !this.isFilmReviewed(film.id));
     },
   },
   methods: {
+    isFilmReviewed(filmId) {
+      return this.favourites.some(
+        (fav) => fav.filmId === filmId && fav.userId === this.itemForm.userId
+      );
+    },
     getStarClass(starIndex) {
-      const evalValue = this.itemForm.evaluation;
+      const evalValue = this.itemForm.evaluation || 0;
       return {
         "bi-star-fill": evalValue >= starIndex,
         "bi-star-half": evalValue >= starIndex - 0.5 && evalValue < starIndex,
         "bi-star": evalValue < starIndex - 0.5,
+        "text-warning": true,
       };
     },
     setRating(starIndex, event) {
@@ -82,22 +111,20 @@ export default {
       this.itemForm.evaluation = isHalfStar ? starIndex - 0.5 : starIndex;
     },
     onClickSubmit() {
-      if (this.isSubmitting) return;
-
-      if (!this.validateForm()) {
-        this.$emit("error", "Please complete all required fields");
-        return;
-      }
+      if (this.isSubmitting || !this.validateForm()) return;
 
       this.isSubmitting = true;
       this.$emit("saveItem", {
         ...this.itemForm,
         evaluation: Number(this.itemForm.evaluation),
       });
-      this.isSubmitting = false;
     },
     validateForm() {
-      return this.itemForm.filmId && this.itemForm.evaluation > 0;
+      return (
+        this.itemForm.filmId &&
+        this.itemForm.evaluation > 0 &&
+        this.itemForm.content?.trim().length > 0
+      );
     },
   },
 };
@@ -117,12 +144,6 @@ export default {
   gap: 1rem;
   margin-bottom: 1rem;
   flex-wrap: wrap;
-}
-
-.username {
-  font-weight: bold;
-  color: #ffd700;
-  margin-right: 1rem;
 }
 
 .star-input {
@@ -150,7 +171,8 @@ export default {
 }
 
 .film-select {
-  width: 100%;
+  flex-grow: 1;
+  min-width: 200px;
   padding: 0.5rem;
   background: #383838;
   border: 3px solid #1f1f1f;
@@ -162,6 +184,11 @@ export default {
 .film-select:focus {
   border-color: #ffd700;
   box-shadow: 0 0 0 0.25rem rgba(255, 215, 0, 0.25);
+}
+
+.film-select option:disabled {
+  color: #666;
+  background-color: #2a2a2a;
 }
 
 .review-input {
@@ -199,12 +226,13 @@ export default {
   transition: background 0.3s;
 }
 
-.btn-submit:hover {
+.btn-submit:hover:not(:disabled) {
   background: #b10d12;
 }
 
 .btn-submit:disabled {
   background: #666;
   cursor: not-allowed;
+  opacity: 0.7;
 }
 </style>

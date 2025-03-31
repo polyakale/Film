@@ -8,11 +8,11 @@ div.container-fluid {
 
 body {
   background: url('bg.png') fixed;
+  padding-right: 0px!important;
 }
 
 body.modal-open {
   overflow: auto !important;
-  padding-right: 0 !important;
 }
 .modal-backdrop.fade.show {
   display: none !important;
