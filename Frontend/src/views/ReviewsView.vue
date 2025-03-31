@@ -4,7 +4,6 @@
       class="header-container d-flex align-items-center justify-content-between px-3 py-2"
     >
       <h3 class="title-text m-0">My Reviews</h3>
-      <h3 class="title-text m-0">All Reviews</h3>
     </div>
 
     <div v-if="loading" class="loading-overlay">
