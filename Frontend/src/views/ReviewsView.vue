@@ -822,23 +822,37 @@ export default {
   flex: 1;
   overflow: hidden;
   display: flex;
-  flex-direction: column;
   padding: 0;
   margin: 0;
 }
 
-/* Table Container Styles */
-.table-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 300px;
+/* Column Width Adjustments */
+.custom-table th:nth-child(1),
+.custom-table td:nth-child(1) {
+  /* Film column */
+  width: 30%;
+  min-width: 200px;
 }
 
-.table-wrapper::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-  background: transparent;
+.custom-table th:nth-child(2),
+.custom-table td:nth-child(2) {
+  /* Evaluation column */
+  width: 25%;
+  min-width: 150px;
+}
+
+.custom-table th:nth-child(3),
+.custom-table td:nth-child(3) {
+  /* Date column */
+  width: 25%;
+  min-width: 150px;
+}
+
+.custom-table th:nth-child(4),
+.custom-table td:nth-child(4) {
+  /* Operations column */
+  width: 20%;
+  min-width: 120px;
 }
 
 /* Updated Table Styles */
