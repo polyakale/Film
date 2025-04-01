@@ -14,10 +14,10 @@ class RolesSeeder extends Seeder
     public function run(): void
     {
         $data=[
-            ['id' => 1, 'role' => 'színész'],
-            ['id' => 2, 'role' => 'operatőr'],
-            ['id' => 3, 'role' => 'rendező'],
-            ['id' => 4, 'role' => 'forgatókönyvíró'],
+            ['id' => 1, 'role' => 'Actor'],
+            ['id' => 2, 'role' => 'Cameraman'],
+            ['id' => 3, 'role' => 'Director'],
+            ['id' => 4, 'role' => 'Screenwriter'],
         ];
     
         if (Role::count() === 0) {
