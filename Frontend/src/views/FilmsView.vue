@@ -23,9 +23,14 @@
         Add New Film
       </button>
     </div>
-      <!-- Kártyák -->
+
     <div v-if="films.length" class="films-grid">
-      <div v-for="film in filteredFilms" :key="film.id" class="film-card">
+      <div 
+        v-for="film in filteredFilms" 
+        :key="film.id" 
+        class="film-card"
+        @click="openFilmDetails(film)"
+      >
         <h2 class="film-title">{{ film.title }}</h2>
         <p class="film-info">
           <strong>Production Year:</strong> {{ film.production }}
@@ -35,31 +40,55 @@
           <strong>Presentation:</strong> {{ formatDate(film.presentation) }}
         </p>
         <p class="film-info">
-          <strong>Evaluation:</strong> {{ film.evaluation || "This film hasn't been rated yet." }}
+          <strong>Evaluation:</strong> {{ film.evaluation || "Not rated yet" }}
         </p>
-        <a
-          v-if="film.imdbLink"
-          :href="formatImdbUrl(film.imdbLink)"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="imdb-link"
-        >
-          View on IMDb
-        </a>
-
-        <div v-if="isAdmin" class="film-actions">
-          <button @click="openEditFilmModal(film)" class="edit-button">
-            Edit
-          </button>
-          <button @click="deleteFilm(film.id)" class="delete-button">
-            Delete
-          </button>
-        </div>
       </div>
     </div>
 
     <p v-else>Loading films...</p>
 
+    <!-- Film Details Modal -->
+    <div v-if="showFilmDetailsModal" class="modal">
+      <div class="modal-content">
+        <h2>{{ selectedFilm.title }}</h2>
+        <div class="film-details">
+          <p><strong>Production Year:</strong> {{ selectedFilm.production }}</p>
+          <p><strong>Length:</strong> {{ selectedFilm.length }} min</p>
+          <p><strong>Presentation:</strong> {{ formatDate(selectedFilm.presentation) }}</p>
+          <p><strong>Evaluation:</strong> {{ selectedFilm.evaluation || "Not rated yet" }}</p>
+          
+          <div v-if="selectedFilm.imdbLink" class="imdb-container">
+            <a
+              :href="formatImdbUrl(selectedFilm.imdbLink)"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="imdb-link"
+            >
+              View on IMDb
+            </a>
+          </div>
+
+          <div class="film-roles">
+            <h3>Cast & Crew</h3>
+            <div v-for="role in filmRoles" :key="role.id" class="role-item">
+              <p><strong>{{ role.role_name }}:</strong> {{ role.person_name }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="isAdmin" class="film-actions">
+          <button @click="openEditFilmModal(selectedFilm)" class="edit-button">
+            Edit Film
+          </button>
+          <button @click="deleteFilm(selectedFilm.id)" class="delete-button">
+            Delete Film
+          </button>
+        </div>
+        <button @click="closeFilmDetailsModal" class="close-button">Close</button>
+      </div>
+    </div>
+
+    <!-- Add Film Modal -->
     <div v-if="showAddFilmModal" class="modal">
       <div class="modal-content">
         <h2>Add New Film</h2>
@@ -79,12 +108,26 @@
           <label>IMDb Link:</label>
           <input v-model="newFilm.imdbLink" />
 
-          <button type="submit">Save</button>
-          <button type="button" @click="closeAddFilmModal">Cancel</button>
+          <h3>Add Roles</h3>
+          <div v-for="(role, index) in newFilm.roles" :key="index" class="role-input">
+            <select v-model="role.role_name" required>
+              <option value="">Select Role</option>
+              <option v-for="role in availableRoles" :value="role">{{ role }}</option>
+            </select>
+            <input v-model="role.person_name" placeholder="Person name" required />
+            <button type="button" @click="removeNewFilmRole(index)" class="remove-role-button">×</button>
+          </div>
+          <button type="button" @click="addNewFilmRole" class="add-role-button">Add Role</button>
+
+          <div class="form-actions">
+            <button type="submit">Save</button>
+            <button type="button" @click="closeAddFilmModal">Cancel</button>
+          </div>
         </form>
       </div>
     </div>
 
+    <!-- Edit Film Modal -->
     <div v-if="showEditFilmModal" class="modal">
       <div class="modal-content">
         <h2>Edit Film</h2>
@@ -104,8 +147,21 @@
           <label>IMDb Link:</label>
           <input v-model="editingFilm.imdbLink" />
 
-          <button type="submit">Save</button>
-          <button type="button" @click="closeEditFilmModal">Cancel</button>
+          <h3>Edit Roles</h3>
+          <div v-for="(role, index) in editingFilm.roles" :key="index" class="role-input">
+            <select v-model="role.role_name" required>
+              <option value="">Select Role</option>
+              <option v-for="role in availableRoles" :value="role">{{ role }}</option>
+            </select>
+            <input v-model="role.person_name" placeholder="Person name" required />
+            <button type="button" @click="removeEditingFilmRole(index)" class="remove-role-button">×</button>
+          </div>
+          <button type="button" @click="addEditingFilmRole" class="add-role-button">Add Role</button>
+
+          <div class="form-actions">
+            <button type="submit">Save</button>
+            <button type="button" @click="closeEditFilmModal">Cancel</button>
+          </div>
         </form>
       </div>
     </div>
@@ -129,13 +185,18 @@ export default {
       filteredFilms: [],
       showAddFilmModal: false,
       showEditFilmModal: false,
+      showFilmDetailsModal: false,
+      selectedFilm: null,
+      filmRoles: [],
+      availableRoles: ['Actor', 'Cameraman', 'Director', 'Screenwriter'],
       newFilm: {
         title: "",
         production: "",
         length: "",
         presentation: "",
         imdbLink: "",
-        evaluation: null
+        evaluation: null,
+        roles: []
       },
       editingFilm: null,
     };
@@ -143,6 +204,7 @@ export default {
   async mounted() {
     await this.fetchFilmsFromBackend();
     this.isAdmin = this.stateAuth.positionId === 1;
+    await this.fetchAvailableRoles();
   },
   watch: {
     searchQuery() {
@@ -153,31 +215,57 @@ export default {
     },
   },
   methods: {
-    async queryFilmsWithEvaluation() {
+    async fetchAvailableRoles() {
       try {
-        const response = await axios.get(`${BASE_URL}/films/evaluations`);
-        return response.data.data || [];
+        const token = this.stateAuth.token;
+        const headers = {
+          Authorization: `Bearer ${token}`,
+        };
+        const response = await axios.get(`${BASE_URL}/roles`, { headers });
+        if (response.data?.data) {
+          this.availableRoles = response.data.data.map(role => role.name);
+        }
       } catch (error) {
-        console.error("Error fetching evaluations:", error);
+        console.error("Error fetching role types:", error);
+      }
+    },
+
+    async fetchFilmRoles(filmId) {
+      try {
+        const token = this.stateAuth.token;
+        const headers = {
+          Authorization: `Bearer ${token}`,
+        };
+        const response = await axios.get(`${BASE_URL}/films/${filmId}/roles`, { headers });
+        return response.data?.data || [];
+      } catch (error) {
+        console.error("Error fetching film roles:", error);
         return [];
       }
     },
 
     async fetchFilmsFromBackend() {
       try {
-        // 1. Lekérjük a filmeket
-        const filmsResponse = await axios.get(`${BASE_URL}/queryFilmsWithEvaluation`);
-        this.films = Array.isArray(filmsResponse.data.data) 
-          ? filmsResponse.data.data 
+        const response = await axios.get(`${BASE_URL}/films`);
+        this.films = Array.isArray(response.data?.data) 
+          ? response.data.data 
           : [];
-
-
         this.filteredFilms = [...this.films];
-        console.log("Filmek", this.filteredFilms);
-
       } catch (error) {
         console.error("Error loading films:", error);
       }
+    },
+
+    async openFilmDetails(film) {
+      this.selectedFilm = film;
+      this.filmRoles = await this.fetchFilmRoles(film.id);
+      this.showFilmDetailsModal = true;
+    },
+
+    closeFilmDetailsModal() {
+      this.showFilmDetailsModal = false;
+      this.selectedFilm = null;
+      this.filmRoles = [];
     },
 
     formatDate(dateString) {
@@ -222,6 +310,28 @@ export default {
       }
     },
 
+    addNewFilmRole() {
+      this.newFilm.roles.push({
+        role_name: "",
+        person_name: ""
+      });
+    },
+
+    removeNewFilmRole(index) {
+      this.newFilm.roles.splice(index, 1);
+    },
+
+    addEditingFilmRole() {
+      this.editingFilm.roles.push({
+        role_name: "",
+        person_name: ""
+      });
+    },
+
+    removeEditingFilmRole(index) {
+      this.editingFilm.roles.splice(index, 1);
+    },
+
     openAddFilmModal() {
       this.showAddFilmModal = true;
     },
@@ -234,7 +344,8 @@ export default {
         length: "",
         presentation: "",
         imdbLink: "",
-        evaluation: null
+        evaluation: null,
+        roles: []
       };
     },
 
@@ -245,27 +356,33 @@ export default {
           Authorization: `Bearer ${token}`,
         };
 
-        // 1. Film létrehozása
-        const filmData = {
-          title: this.newFilm.title,
-          production: this.newFilm.production,
-          length: this.newFilm.length,
-          presentation: this.newFilm.presentation,
-          imdbLink: this.newFilm.imdbLink
-        };
+        const filmResponse = await axios.post(
+          this.urlApi,
+          {
+            title: this.newFilm.title,
+            production: this.newFilm.production,
+            length: this.newFilm.length,
+            presentation: this.newFilm.presentation,
+            imdbLink: this.newFilm.imdbLink
+          },
+          { headers }
+        );
 
-        const filmResponse = await axios.post(this.urlApi, filmData, { headers });
-
-        // 2. Értékelés hozzáadása (ha van)
-        if (this.newFilm.evaluation) {
-          await axios.post(
-            `${BASE_URL}/films/${filmResponse.data.data.id}/evaluation`,
-            { value: this.newFilm.evaluation },
-            { headers }
+        if (this.newFilm.roles.length > 0) {
+          await Promise.all(
+            this.newFilm.roles.map(role => 
+              axios.post(
+                `${BASE_URL}/films/${filmResponse.data.data.id}/roles`,
+                {
+                  role_name: role.role_name,
+                  person_name: role.person_name
+                },
+                { headers }
+              )
+            )
           );
         }
 
-        // 3. Frissítjük a listát
         await this.fetchFilmsFromBackend();
         this.closeAddFilmModal();
       } catch (error) {
@@ -273,8 +390,16 @@ export default {
       }
     },
 
-    openEditFilmModal(film) {
-      this.editingFilm = { ...film };
+    async openEditFilmModal(film) {
+      const roles = await this.fetchFilmRoles(film.id);
+      this.editingFilm = { 
+        ...film,
+        roles: roles.map(role => ({
+          role_name: role.role_name,
+          person_name: role.person_name,
+          id: role.id
+        }))
+      };
       this.showEditFilmModal = true;
     },
 
@@ -290,29 +415,57 @@ export default {
           Authorization: `Bearer ${token}`,
         };
 
-        // 1. Film adatainak frissítése
-        const filmData = {
-          title: this.editingFilm.title,
-          production: this.editingFilm.production,
-          length: this.editingFilm.length,
-          presentation: this.editingFilm.presentation,
-          imdbLink: this.editingFilm.imdbLink
-        };
-
         await axios.patch(
           `${this.urlApi}/${this.editingFilm.id}`,
-          filmData,
+          {
+            title: this.editingFilm.title,
+            production: this.editingFilm.production,
+            length: this.editingFilm.length,
+            presentation: this.editingFilm.presentation,
+            imdbLink: this.editingFilm.imdbLink
+          },
           { headers }
         );
 
-        // 2. Értékelés frissítése
-        await axios.patch(
-          `${BASE_URL}/films/${this.editingFilm.id}/evaluation`,
-          { value: this.editingFilm.evaluation || null },
-          { headers }
+        const existingRoles = await this.fetchFilmRoles(this.editingFilm.id);
+        
+        const rolesToDelete = existingRoles.filter(existingRole => 
+          !this.editingFilm.roles.some(role => role.id === existingRole.id)
+        );
+        
+        await Promise.all(
+          rolesToDelete.map(role => 
+            axios.delete(
+              `${BASE_URL}/films/${this.editingFilm.id}/roles/${role.id}`,
+              { headers }
+            )
+          )
         );
 
-        // 3. Frissítjük a listát
+        await Promise.all(
+          this.editingFilm.roles.map(role => {
+            if (role.id) {
+              return axios.patch(
+                `${BASE_URL}/films/${this.editingFilm.id}/roles/${role.id}`,
+                {
+                  role_name: role.role_name,
+                  person_name: role.person_name
+                },
+                { headers }
+              );
+            } else {
+              return axios.post(
+                `${BASE_URL}/films/${this.editingFilm.id}/roles`,
+                {
+                  role_name: role.role_name,
+                  person_name: role.person_name
+                },
+                { headers }
+              );
+            }
+          })
+        );
+
         await this.fetchFilmsFromBackend();
         this.closeEditFilmModal();
       } catch (error) {
@@ -328,22 +481,13 @@ export default {
             Authorization: `Bearer ${token}`,
           };
 
-          // 1. Értékelés törlése (ha van)
-          await axios.delete(
-            `${BASE_URL}/films/${filmId}/evaluation`,
-            { headers }
-          );
-
-          // 2. Film törlése
-          await axios.delete(`${this.urlApi}/${filmId}`, { headers });
-
-          // 3. Frissítjük a listát
+          await axios.delete(`${BASE_URL}/films/${filmId}`, { headers });
           await this.fetchFilmsFromBackend();
         } catch (error) {
           console.error("Error deleting film:", error);
         }
       }
-    },
+    }
   },
 };
 </script>
@@ -390,6 +534,7 @@ export default {
   text-align: center;
   transition: transform 0.2s ease-in-out;
   color: white;
+  cursor: pointer;
 }
 
 .film-card:hover {
@@ -442,12 +587,15 @@ export default {
 
 .film-actions {
   margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }
 
 .edit-button,
-.delete-button {
-  padding: 5px 10px;
-  margin: 0 5px;
+.delete-button,
+.close-button {
+  padding: 8px 15px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -472,6 +620,16 @@ export default {
   background: #e53935;
 }
 
+.close-button {
+  background: #666;
+  color: white;
+  margin-top: 15px;
+}
+
+.close-button:hover {
+  background: #555;
+}
+
 .modal {
   position: fixed;
   top: 0;
@@ -482,32 +640,127 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
 .modal-content {
   background: #1e1e1e;
   padding: 20px;
   border-radius: 10px;
-  width: 300px;
+  width: 80%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
   color: white;
+  position: relative;
 }
 
-.modal-content form {
+.modal-content h2 {
+  color: #f5c518;
+  margin-bottom: 20px;
+}
+
+.film-details {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.film-details p {
+  margin: 8px 0;
+}
+
+.film-roles {
+  margin-top: 20px;
+}
+
+.film-roles h3 {
+  color: #f5c518;
+  margin-bottom: 10px;
+}
+
+.role-item {
+  margin-bottom: 8px;
+  padding: 8px;
+  background: #2a2a2a;
+  border-radius: 5px;
+}
+
+.role-input {
   display: flex;
-  flex-direction: column;
   gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
 }
 
-.modal-content input {
-  padding: 5px;
+.role-input select,
+.role-input input {
+  flex: 1;
+  padding: 8px;
   border-radius: 5px;
   border: 1px solid #ccc;
 }
 
-.modal-content button {
-  padding: 5px 10px;
+.remove-role-button {
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.remove-role-button:hover {
+  background: #e53935;
+}
+
+.add-role-button {
+  background: #4caf50;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+.add-role-button:hover {
+  background: #45a049;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.form-actions button {
+  padding: 8px 15px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+
+.form-actions button[type="submit"] {
+  background: #4caf50;
+  color: white;
+}
+
+.form-actions button[type="submit"]:hover {
+  background: #45a049;
+}
+
+.form-actions button[type="button"] {
+  background: #666;
+  color: white;
+}
+
+.form-actions button[type="button"]:hover {
+  background: #555;
 }
 </style>
