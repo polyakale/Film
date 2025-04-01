@@ -24,7 +24,8 @@
       </button>
     </div>
 
-    <div v-if="films.length" class="films-grid">
+    <div v-if="loading" class="loading-message">Loading films...</div>
+    <div v-else-if="films.length" class="films-grid">
       <div 
         v-for="film in filteredFilms" 
         :key="film.id" 
@@ -44,8 +45,7 @@
         </p>
       </div>
     </div>
-
-    <p v-else>Loading films...</p>
+    <div v-else class="no-films-message">No films found</div>
 
     <!-- Film Details Modal -->
     <div v-if="showFilmDetailsModal" class="modal">
@@ -92,29 +92,43 @@
     <div v-if="showAddFilmModal" class="modal">
       <div class="modal-content">
         <h2>Add New Film</h2>
-        <form @submit.prevent="submitNewFilm">
-          <label>Title:</label>
-          <input v-model="newFilm.title" required />
-
-          <label>Production Year:</label>
-          <input v-model="newFilm.production" type="number" required />
-
-          <label>Length (minutes):</label>
-          <input v-model="newFilm.length" type="number" required />
-
-          <label>Presentation Date:</label>
-          <input v-model="newFilm.presentation" type="date" required />
-
-          <label>IMDb Link:</label>
-          <input v-model="newFilm.imdbLink" />
+        <form @submit.prevent="submitNewFilm" class="film-form">
+          <div class="form-group">
+            <label>Title:</label>
+            <input v-model="newFilm.title" required />
+          </div>
+          
+          <div class="form-group">
+            <label>Production Year:</label>
+            <input v-model="newFilm.production" type="number" required />
+          </div>
+          
+          <div class="form-group">
+            <label>Length (minutes):</label>
+            <input v-model="newFilm.length" type="number" required />
+          </div>
+          
+          <div class="form-group">
+            <label>Presentation Date:</label>
+            <input v-model="newFilm.presentation" type="date" required />
+          </div>
+          
+          <div class="form-group">
+            <label>IMDb Link:</label>
+            <input v-model="newFilm.imdbLink" />
+          </div>
 
           <h3>Add Roles</h3>
           <div v-for="(role, index) in newFilm.roles" :key="index" class="role-input">
-            <select v-model="role.role_name" required>
-              <option value="">Select Role</option>
-              <option v-for="role in availableRoles" :value="role">{{ role }}</option>
-            </select>
-            <input v-model="role.person_name" placeholder="Person name" required />
+            <div class="form-group">
+              <select v-model="roles.role" required>
+                <option value="">Select Role</option>
+                <option v-for="role in roles" :value="role">{{ role }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <input v-model="role.person_name" placeholder="Person name" required />
+            </div>
             <button type="button" @click="removeNewFilmRole(index)" class="remove-role-button">×</button>
           </div>
           <button type="button" @click="addNewFilmRole" class="add-role-button">Add Role</button>
@@ -131,29 +145,43 @@
     <div v-if="showEditFilmModal" class="modal">
       <div class="modal-content">
         <h2>Edit Film</h2>
-        <form @submit.prevent="submitEditedFilm">
-          <label>Title:</label>
-          <input v-model="editingFilm.title" required />
-
-          <label>Production Year:</label>
-          <input v-model="editingFilm.production" type="number" required />
-
-          <label>Length (minutes):</label>
-          <input v-model="editingFilm.length" type="number" required />
-
-          <label>Presentation Date:</label>
-          <input v-model="editingFilm.presentation" type="date" required />
-
-          <label>IMDb Link:</label>
-          <input v-model="editingFilm.imdbLink" />
+        <form @submit.prevent="submitEditedFilm" class="film-form">
+          <div class="form-group">
+            <label>Title:</label>
+            <input v-model="editingFilm.title" required />
+          </div>
+          
+          <div class="form-group">
+            <label>Production Year:</label>
+            <input v-model="editingFilm.production" type="number" required />
+          </div>
+          
+          <div class="form-group">
+            <label>Length (minutes):</label>
+            <input v-model="editingFilm.length" type="number" required />
+          </div>
+          
+          <div class="form-group">
+            <label>Presentation Date:</label>
+            <input v-model="editingFilm.presentation" type="date" required />
+          </div>
+          
+          <div class="form-group">
+            <label>IMDb Link:</label>
+            <input v-model="editingFilm.imdbLink" />
+          </div>
 
           <h3>Edit Roles</h3>
           <div v-for="(role, index) in editingFilm.roles" :key="index" class="role-input">
-            <select v-model="role.role_name" required>
-              <option value="">Select Role</option>
-              <option v-for="role in availableRoles" :value="role">{{ role }}</option>
-            </select>
-            <input v-model="role.person_name" placeholder="Person name" required />
+            <div class="form-group">
+              <select v-model="roles.role" required>
+                <option value="">Select Role</option>
+                <option v-for="role in roles" :value="role">{{ role }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <input v-model="role.person_name" placeholder="Person name" required />
+            </div>
             <button type="button" @click="removeEditingFilmRole(index)" class="remove-role-button">×</button>
           </div>
           <button type="button" @click="addEditingFilmRole" class="add-role-button">Add Role</button>
@@ -179,6 +207,7 @@ export default {
       urlApi: `${BASE_URL}/films`,
       stateAuth: useAuthStore(),
       films: [],
+      loading: true,
       isAdmin: false,
       searchQuery: "",
       sortOption: "abc",
@@ -188,7 +217,7 @@ export default {
       showFilmDetailsModal: false,
       selectedFilm: null,
       filmRoles: [],
-      availableRoles: ['Actor', 'Cameraman', 'Director', 'Screenwriter'],
+      availableRoles:[],
       newFilm: {
         title: "",
         production: "",
@@ -202,9 +231,15 @@ export default {
     };
   },
   async mounted() {
-    await this.fetchFilmsFromBackend();
-    this.isAdmin = this.stateAuth.positionId === 1;
-    await this.fetchAvailableRoles();
+    try {
+      await this.fetchFilmsFromBackend();
+      this.isAdmin = this.stateAuth.positionId === 1;
+      await this.fetchAvailableRoles();
+    } catch (error) {
+      console.error("Initialization error:", error);
+    } finally {
+      this.loading = false;
+    }
   },
   watch: {
     searchQuery() {
@@ -230,13 +265,13 @@ export default {
       }
     },
 
-    async fetchFilmRoles(filmId) {
+    async fetchFilmRoles(role) {
       try {
         const token = this.stateAuth.token;
         const headers = {
           Authorization: `Bearer ${token}`,
         };
-        const response = await axios.get(`${BASE_URL}/films/${filmId}/roles`, { headers });
+        const response = await axios.get(`${BASE_URL}/roles/${role}`, { headers });
         return response.data?.data || [];
       } catch (error) {
         console.error("Error fetching film roles:", error);
@@ -245,6 +280,7 @@ export default {
     },
 
     async fetchFilmsFromBackend() {
+      this.loading = true;
       try {
         const response = await axios.get(`${BASE_URL}/films`);
         this.films = Array.isArray(response.data?.data) 
@@ -253,6 +289,10 @@ export default {
         this.filteredFilms = [...this.films];
       } catch (error) {
         console.error("Error loading films:", error);
+        this.films = [];
+        this.filteredFilms = [];
+      } finally {
+        this.loading = false;
       }
     },
 
@@ -391,7 +431,7 @@ export default {
     },
 
     async openEditFilmModal(film) {
-      const roles = await this.fetchFilmRoles(film.id);
+      const roles = await this.fetchFilmRoles(tasks.filmId);
       this.editingFilm = { 
         ...film,
         roles: roles.map(role => ({
@@ -685,19 +725,34 @@ export default {
   border-radius: 5px;
 }
 
+.film-form .form-group {
+  margin-bottom: 15px;
+}
+
+.film-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.film-form input,
+.film-form select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
 .role-input {
   display: flex;
   gap: 10px;
   margin-bottom: 10px;
-  align-items: center;
+  align-items: flex-end;
 }
 
-.role-input select,
-.role-input input {
+.role-input .form-group {
   flex: 1;
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+  margin-bottom: 0;
 }
 
 .remove-role-button {
@@ -712,6 +767,7 @@ export default {
   justify-content: center;
   cursor: pointer;
   font-size: 14px;
+  margin-bottom: 8px;
 }
 
 .remove-role-button:hover {
@@ -762,5 +818,12 @@ export default {
 
 .form-actions button[type="button"]:hover {
   background: #555;
+}
+
+.loading-message,
+.no-films-message {
+  padding: 20px;
+  font-size: 1.2em;
+  color: #ccc;
 }
 </style>
