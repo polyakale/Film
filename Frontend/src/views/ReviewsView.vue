@@ -1,52 +1,95 @@
 <template>
   <div class="film-reviews">
-    <!-- Header Tabs -->
-    <div
-      class="header-container d-flex align-items-center justify-content-between px-3 py-2"
-    >
-      <h3
-        class="title-text m-0 clickable"
-        :class="{ 'active-tab': activeTab === 'my' }"
-        @click="switchTab('my')"
-        v-if="isLoggedIn"
-      >
-        My Reviews
-      </h3>
-      <!-- Filter for All Reviews (moved up) -->
-      <div
-        v-if="activeTab === 'all' || !isLoggedIn"
-        class="filter-container d-flex justify-content-center py-3"
-      >
-        <div class="filter-wrapper position-relative">
-          <label for="publicFilter" class="filter-label">
-            <i class="bi bi-funnel-fill me-2"></i>Sort by:
-          </label>
-          <select
-            id="publicFilter"
-            v-model="publicReviewFilter"
-            class="custom-filter-select"
+    <div class="header-container">
+      <div class="tabs-wrapper">
+        <!-- Reversed tab order -->
+        <h3
+          class="title-text clickable"
+          :class="{ 'active-tab': activeTab === 'all' || !isLoggedIn }"
+          @click="switchTab('all')"
+        >
+          All Reviews
+        </h3>
+        <h3
+          class="title-text clickable"
+          :class="{ 'active-tab': activeTab === 'my' }"
+          @click="switchTab('my')"
+          v-if="isLoggedIn"
+        >
+          My Reviews
+        </h3>
+      </div>
+
+      <!-- Collapsible controls container -->
+      <div class="controls-container">
+        <!-- Filter toggle buttons -->
+        <div class="control-buttons">
+          <div class="control-item" @click="toggleControl('search')">
+            <i class="bi bi-search"></i>
+          </div>
+          <div
+            class="control-item"
+            @click="
+              toggleControl(activeTab === 'my' ? 'tableFilter' : 'publicFilter')
+            "
           >
-            <option value="ABC">Film Title (A–Z)</option>
-            <option value="highToLow">Evaluation: High to Low</option>
-            <option value="lowToHigh">Evaluation: Low to High</option>
-          </select>
-          <div class="select-arrow">
-            <svg width="12" height="7" viewBox="0 0 12 7" fill="none">
-              <path d="M1 1L6 6L11 1" stroke="#ffd700" stroke-width="2" />
-            </svg>
+            <i class="bi bi-funnel"></i>
+          </div>
+        </div>
+
+        <!-- Collapsible search -->
+        <div v-if="showSearch" class="search-container">
+          <div class="search-wrapper">
+            <input
+              type="text"
+              v-model="searchQuery"
+              placeholder="Search reviews..."
+              class="search-input"
+              @input="handleSearch"
+            />
+          </div>
+        </div>
+
+        <!-- Collapsible public filter -->
+        <div
+          v-if="showPublicFilter && (activeTab === 'all' || !isLoggedIn)"
+          class="filter-container"
+        >
+          <div class="filter-wrapper position-relative">
+            <select
+              id="publicFilter"
+              v-model="publicReviewFilter"
+              class="custom-filter-select"
+            >
+              <option value="ABC">Film Title (A-Z)</option>
+              <option value="highToLow">Evaluation: High to Low</option>
+              <option value="lowToHigh">Evaluation: Low to High</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Collapsible table filter -->
+        <div
+          v-if="showTableFilter && isLoggedIn && activeTab === 'my'"
+          class="filter-container"
+        >
+          <div class="filter-wrapper position-relative">
+            <select
+              id="tableFilter"
+              v-model="tableReviewFilter"
+              class="custom-filter-select"
+            >
+              <option value="ABC">Film Title (A-Z)</option>
+              <option value="highToLow">Evaluation: High to Low</option>
+              <option value="lowToHigh">Evaluation: Low to High</option>
+              <option value="newest">Date: Newest First</option>
+              <option value="oldest">Date: Oldest First</option>
+            </select>
           </div>
         </div>
       </div>
-      <h3
-        class="title-text m-0 clickable"
-        :class="{ 'active-tab': activeTab === 'all' || !isLoggedIn }"
-        @click="switchTab('all')"
-      >
-        All Reviews
-      </h3>
     </div>
 
-    <!-- Loading State -->
     <div v-if="loading" class="loading-overlay">
       <div class="loading-content">
         <div class="spinner-border" role="status">
@@ -58,7 +101,6 @@
 
     <div v-else>
       <div class="container">
-        <!-- My Reviews Table -->
         <div v-show="isLoggedIn && activeTab === 'my'" class="table-container">
           <div class="table-wrapper" :style="{ height: tableHeight + 'px' }">
             <table class="custom-table">
@@ -72,13 +114,6 @@
                       class="d-flex align-items-center justify-content-center gap-2"
                     >
                       <span>Operations</span>
-                      <button
-                        type="button"
-                        class="btn btn-outline-warning btn-sm"
-                        @click="onClickCreate"
-                      >
-                        <i class="bi bi-plus-lg"></i>
-                      </button>
                     </div>
                   </th>
                 </tr>
@@ -104,10 +139,11 @@
                             getEvaluation(favourite) < starIndex,
                           'bi-star': getEvaluation(favourite) + 0.5 < starIndex,
                         }"
-                      ></i>
-                      <small class="text-muted ms-2">
-                        ({{ formatEvaluation(favourite.evaluation) }})
-                      </small>
+                      >
+                      </i>
+                      <small class="text-muted ms-2"
+                        >({{ formatEvaluation(favourite.evaluation) }})</small
+                      >
                     </div>
                   </td>
                   <td data-label="Date" class="date">
@@ -126,7 +162,7 @@
           </div>
           <div
             class="pagination-container"
-            v-if="favourites.length >= dynamicItemsPerPage"
+            v-if="filteredFavourites.length >= dynamicItemsPerPage"
           >
             <Paginator
               :pageNumber="currentPage"
@@ -137,7 +173,6 @@
           </div>
         </div>
 
-        <!-- All Reviews Section -->
         <div
           v-if="activeTab === 'all' || !isLoggedIn"
           class="public-reviews-container"
@@ -146,46 +181,48 @@
             class="reviews-wrapper"
             :style="{ height: reviewsHeight + 'px' }"
           >
-            <div v-if="filteredPublicReviews.length > 0" class="public-reviews">
-              <div class="reviews-container">
-                <div
-                  v-for="review in paginatedPublicReviews"
-                  :key="review.id"
-                  class="review-card"
-                >
-                  <div class="review-header">
-                    <div class="review-meta">
-                      <span class="review-author">{{
-                        review.userName || "Anonymous"
-                      }}</span>
-                      <span class="review-date">{{
-                        formatDate(review.created_at)
-                      }}</span>
-                    </div>
+            <div
+              v-if="filteredPublicReviews.length > 0"
+              class="reviews-container"
+            >
+              <div
+                v-for="review in paginatedPublicReviews"
+                :key="review.id"
+                class="review-card"
+              >
+                <div class="review-header">
+                  <div class="review-meta">
+                    <span class="review-author">{{
+                      review.userName || "Anonymous"
+                    }}</span>
+                    <span class="review-date">{{
+                      formatDate(review.created_at)
+                    }}</span>
                   </div>
-                  <div class="review-film-title">
-                    {{ review.filmTitle || "Unknown Film" }}
-                  </div>
-                  <div class="review-content">
-                    {{ review.content || randomDefaultReview() }}
-                  </div>
-                  <div class="star-rating d-inline-flex align-items-center">
-                    <i
-                      v-for="starIndex in 5"
-                      :key="`star-${review.id}-${starIndex}`"
-                      class="bi mx-1 text-warning"
-                      :class="{
-                        'bi-star-fill': getEvaluation(review) >= starIndex,
-                        'bi-star-half':
-                          getEvaluation(review) + 0.5 >= starIndex &&
-                          getEvaluation(review) < starIndex,
-                        'bi-star': getEvaluation(review) + 0.5 < starIndex,
-                      }"
-                    ></i>
-                    <small class="text-muted ms-2">
-                      ({{ formatEvaluation(review.evaluation) }})
-                    </small>
-                  </div>
+                </div>
+                <div class="review-film-title">
+                  {{ review.filmTitle || "Unknown Film" }}
+                </div>
+                <div class="review-content">
+                  {{ review.content || randomDefaultReview() }}
+                </div>
+                <div class="star-rating d-inline-flex align-items-center">
+                  <i
+                    v-for="starIndex in 5"
+                    :key="`star-${review.id}-${starIndex}`"
+                    class="bi mx-1 text-warning"
+                    :class="{
+                      'bi-star-fill': getEvaluation(review) >= starIndex,
+                      'bi-star-half':
+                        getEvaluation(review) + 0.5 >= starIndex &&
+                        getEvaluation(review) < starIndex,
+                      'bi-star': getEvaluation(review) + 0.5 < starIndex,
+                    }"
+                  >
+                  </i>
+                  <small class="text-muted ms-2"
+                    >({{ formatEvaluation(review.evaluation) }})</small
+                  >
                 </div>
               </div>
             </div>
@@ -207,7 +244,6 @@
         </div>
       </div>
 
-      <!-- Modal for Create / Update / Delete -->
       <Modal
         ref="modalRef"
         :title="title"
@@ -218,11 +254,10 @@
       >
         <div v-if="state === 'Delete'">{{ messageYesNo }}</div>
         <ReviewForm
-          v-if="state === 'Create' || state === 'Update'"
+          v-if="state === 'Update'"
           :itemForm="item"
           :films="films"
-          :favourites="favourites"
-          :username="username"
+          :isUpdate="true"
           @saveItem="saveItemHandler"
         />
       </Modal>
@@ -250,7 +285,7 @@ export default {
       authStore: useAuthStore(),
       currentPage: 1,
       currentPublicPage: 1,
-      dynamicItemsPerPage: null,
+      dynamicItemsPerPage: 14,
       selectedRowId: null,
       errorMessages: null,
       loading: false,
@@ -278,18 +313,63 @@ export default {
         "Would definitely watch again",
       ],
       publicReviewFilter: "ABC",
+      tableReviewFilter: "ABC",
+      searchQuery: "",
+      debounceTimer: null,
+      showSearch: false,
+      showTableFilter: false,
+      showPublicFilter: false,
     };
   },
   computed: {
     isLoggedIn() {
       return this.authStore.id && this.authStore.id !== 0;
     },
+    filteredFavourites() {
+      let favourites = [...this.favourites];
+
+      // Apply search filter
+      if (this.searchQuery) {
+        const query = this.searchQuery.toLowerCase();
+        favourites = favourites.filter(
+          (fav) =>
+            (fav.filmTitle || "").toLowerCase().includes(query) ||
+            (fav.content || "").toLowerCase().includes(query)
+        );
+      }
+
+      // Apply sorting
+      if (this.tableReviewFilter === "ABC") {
+        favourites.sort((a, b) =>
+          (a.filmTitle || "").localeCompare(b.filmTitle || "")
+        );
+      } else if (this.tableReviewFilter === "highToLow") {
+        favourites.sort((a, b) => b.evaluation - a.evaluation);
+      } else if (this.tableReviewFilter === "lowToHigh") {
+        favourites.sort((a, b) => a.evaluation - b.evaluation);
+      } else if (this.tableReviewFilter === "newest") {
+        favourites.sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
+      } else if (this.tableReviewFilter === "oldest") {
+        favourites.sort(
+          (a, b) => new Date(a.created_at) - new Date(b.created_at)
+        );
+      }
+
+      return favourites;
+    },
     paginatedFavourites() {
       const start = (this.currentPage - 1) * this.dynamicItemsPerPage;
-      return this.favourites.slice(start, start + this.dynamicItemsPerPage);
+      return this.filteredFavourites.slice(
+        start,
+        start + this.dynamicItemsPerPage
+      );
     },
     totalPages() {
-      return Math.ceil(this.favourites.length / this.dynamicItemsPerPage);
+      return Math.ceil(
+        this.filteredFavourites.length / this.dynamicItemsPerPage
+      );
     },
     pagesArray() {
       if (this.totalPages <= 5) {
@@ -317,6 +397,19 @@ export default {
     },
     filteredPublicReviews() {
       let reviews = [...this.publicReviews];
+
+      // Apply search filter
+      if (this.searchQuery) {
+        const query = this.searchQuery.toLowerCase();
+        reviews = reviews.filter(
+          (review) =>
+            (review.filmTitle || "").toLowerCase().includes(query) ||
+            (review.content || "").toLowerCase().includes(query) ||
+            (review.userName || "").toLowerCase().includes(query)
+        );
+      }
+
+      // Apply sorting
       if (this.publicReviewFilter === "ABC") {
         reviews.sort((a, b) =>
           (a.filmTitle || "").localeCompare(b.filmTitle || "")
@@ -380,6 +473,12 @@ export default {
         this.calculateDimensions();
       });
     },
+    tableReviewFilter() {
+      this.currentPage = 1;
+    },
+    publicReviewFilter() {
+      this.currentPublicPage = 1;
+    },
   },
   mounted() {
     this.modal = this.$refs.modalRef;
@@ -398,11 +497,12 @@ export default {
   },
   methods: {
     calculateDimensions() {
-      // Calculate available height
       const headerHeight =
         document.querySelector(".header-container")?.offsetHeight || 60;
       const filterHeight =
         this.activeTab === "all" || !this.isLoggedIn ? 60 : 0;
+      const tableFilterHeight =
+        this.activeTab === "my" && this.isLoggedIn ? 60 : 0;
       const paginationHeight = 80;
       const margins = 40;
 
@@ -410,14 +510,13 @@ export default {
         window.innerHeight -
         headerHeight -
         filterHeight -
+        tableFilterHeight -
         paginationHeight -
         margins;
 
-      // Set container heights
       this.tableHeight = Math.max(300, availableHeight);
       this.reviewsHeight = Math.max(300, availableHeight);
 
-      // Calculate dynamic items per page
       const rowHeight = this.activeTab === "my" ? 60 : 120;
       this.dynamicItemsPerPage = Math.max(
         1,
@@ -433,6 +532,26 @@ export default {
         this.fetchAllReviews();
       }
       this.calculateDimensions();
+    },
+    handleSearch() {
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = setTimeout(() => {
+        this.currentPage = 1;
+        this.currentPublicPage = 1;
+      }, 300);
+    },
+    toggleControl(type) {
+      this.showSearch = type === "search" ? !this.showSearch : false;
+      this.showTableFilter =
+        type === "tableFilter" ? !this.showTableFilter : false;
+      this.showPublicFilter =
+        type === "publicFilter" ? !this.showPublicFilter : false;
+
+      // Close other controls when opening a new one
+      if (type === "search" && !this.showSearch) {
+        this.showTableFilter = false;
+        this.showPublicFilter = false;
+      }
     },
     async fetchFavourites() {
       try {
@@ -497,19 +616,7 @@ export default {
         Authorization: `Bearer ${token}`,
       };
       try {
-        if (this.state === "Create") {
-          const exists = this.favourites.some(
-            (fav) =>
-              fav.filmId === formData.filmId && fav.userId === this.authStore.id
-          );
-          if (exists) {
-            this.errorMessages = "You've already reviewed this film";
-            return;
-          }
-        }
-        if (this.state === "Create") {
-          await this.createReview(formData, headers);
-        } else if (this.state === "Update") {
+        if (this.state === "Update") {
           await this.updateReview(formData, headers);
         }
         await this.fetchFavourites();
@@ -545,18 +652,6 @@ export default {
         this.errorMessages = "The review cannot be deleted.";
       }
     },
-    async createReview(data, headers) {
-      const response = await axios.post(
-        `${BASE_URL}/favourites`,
-        {
-          filmId: data.filmId,
-          evaluation: data.evaluation,
-          userId: data.userId,
-        },
-        { headers }
-      );
-      return response.data;
-    },
     async updateReview(data, headers) {
       try {
         const response = await axios.patch(
@@ -581,8 +676,6 @@ export default {
         this.deleteReview();
       } else if (this.state === "Update") {
         this.updateReview(this.item, this.headers);
-      } else if (this.state === "Create") {
-        this.createReview(this.item);
       }
     },
     getEvaluation(item) {
@@ -595,19 +688,6 @@ export default {
     randomDefaultReview() {
       const index = Math.floor(Math.random() * this.defaultReviews.length);
       return this.defaultReviews[index];
-    },
-    showCreateModal() {
-      this.state = "Create";
-      this.item = {
-        filmId: "",
-        evaluation: 0,
-        userId: this.authStore.id,
-      };
-      this.title = "Add New Review";
-      this.yes = null;
-      this.no = "Cancel";
-      this.size = "lg";
-      this.modal.show();
     },
     formatDate(date) {
       try {
@@ -644,32 +724,18 @@ export default {
       this.no = "Cancel";
       this.size = "lg";
     },
-    onClickCreate() {
-      this.state = "Create";
-      this.title = "New Review";
-      this.yes = null;
-      this.no = "Cancel";
-      this.size = "lg";
-      this.item = { filmId: "", evaluation: 0, userId: this.authStore.id };
-    },
   },
 };
 </script>
 
 <style scoped>
-/* Root Variables */
-:root {
-  --primary-color: #8b0000;
-  --secondary-color: #ffd700;
-  --accent-color: #000000;
-  --background-dark: #1a1a1a;
-  --text-light: #ffffff;
-  --text-muted: #cccccc;
-}
-
 /* General Styles */
 .film-reviews {
-  color: var(--text-light);
+  color: white;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* Header Styles */
@@ -677,15 +743,35 @@ export default {
   background: #1a1a1a;
   border-bottom: 2px solid #ffd700;
   width: 100%;
-  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  gap: 1rem;
 }
 
+.tabs-wrapper {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+/*Style for tabs (My Reviews / All Reviews) */
 .title-text {
-  color: #ffd700;
-  font-size: 1.5rem;
+  color: #ffd700; /* Gold color for inactive tabs */
+  font-size: 1.1rem;
   font-weight: 600;
   margin: 0;
-  padding: 0.5rem 0;
+  padding: 0.5rem 1rem;
+  white-space: nowrap;
+  text-align: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  flex: 1;
 }
 
 .clickable {
@@ -698,17 +784,113 @@ export default {
 }
 
 .active-tab {
-  border-bottom: 3px solid #ffd700;
-  padding-bottom: 0.25rem;
+  background: #ffd700;
+  color: #1a1a1a !important; /* Dark color for text on gold background */
+  font-weight: 700;
+}
+
+/* Controls container */
+.controls-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.control-item {
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2a2a2a;
+  transition: all 0.3s ease;
+}
+
+.control-item:hover {
+  background: #ffd700;
+  color: #1a1a1a;
+}
+
+.control-item i {
+  font-size: 1.1rem;
+}
+
+/* Collapsible containers */
+.search-container,
+.filter-container {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 100;
+  background: #1a1a1a;
+  border: 1px solid #ffd70033;
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-wrapper {
+  min-width: 250px;
+}
+
+.filter-wrapper {
+  min-width: 200px;
+}
+
+/* Search Container */
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #2a2a2a;
+  border-radius: 25px;
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.search-wrapper:hover {
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.15);
+}
+
+.search-input {
+  background: transparent;
+  border: none;
+  color: #ffd700;
+  width: 100%;
+  padding: 0.25rem 0;
+  font-size: 0.95rem;
+}
+
+.search-input::placeholder {
+  color: #ffd70099;
+}
+
+.search-input:focus {
+  outline: none;
 }
 
 /* Filter Styles */
-.filter-container {
-  background: #1a1a1a;
-  border-bottom: 1px solid #2a2a2a;
-  flex-shrink: 0;
-}
-
 .filter-wrapper {
   position: relative;
   display: inline-flex;
@@ -822,54 +1004,38 @@ export default {
   flex: 1;
   overflow: hidden;
   display: flex;
+  flex-direction: column;
   padding: 0;
   margin: 0;
 }
 
-/* Column Width Adjustments */
-.custom-table th:nth-child(1),
-.custom-table td:nth-child(1) {
-  /* Film column */
-  width: 30%;
-  min-width: 200px;
+/* Table Container Styles */
+.table-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
 }
 
-.custom-table th:nth-child(2),
-.custom-table td:nth-child(2) {
-  /* Evaluation column */
-  width: 25%;
-  min-width: 150px;
+.table-wrapper::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  background: transparent;
 }
 
-.custom-table th:nth-child(3),
-.custom-table td:nth-child(3) {
-  /* Date column */
-  width: 25%;
-  min-width: 150px;
-}
-
-.custom-table th:nth-child(4),
-.custom-table td:nth-child(4) {
-  /* Operations column */
-  width: 20%;
-  min-width: 120px;
-}
-
-/* Updated Table Styles */
+/* Custom Table Styling */
 .custom-table {
-  /* display: flex; */
-  justify-content: center;
+  width: 65vw;
+  border-collapse: collapse;
   background: #1a1a1a;
   border: 1px solid #ffd700;
-  width: fit-content;
-  margin: 0 auto; /*Centers horizontally*/ /* Add these for fixed positioning */
-  position: fixed;
-  top: 18vh; /* Adjust distance from bottom as needed */
-  left: 50%;
-  transform: translateX(-50%); /* Ensures true centering */
-  flex-shrink: 0; /* Already present, but good to keep */
   color: #c9ab00;
-  width: 66vw;
+  margin: 0 auto;
+  position: fixed;
+  top: 18vh;
+  left: 50%;
+  transform: translateX(-50%);
+  flex-shrink: 0;
 }
 
 .custom-table thead {
@@ -900,23 +1066,33 @@ export default {
   background: #2a2a2a;
 }
 
+/* Public Reviews (Grid) Container */
 .public-reviews-container {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 300px;
   width: 100%;
-  max-width: 1500px; /* Add reasonable max-width */
-  margin: 0 auto; /* Center the container */
-  padding: 0 15px; /* Add horizontal padding */
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0 15px;
+  box-sizing: border-box;
 }
 
-.table-container,
-.public-reviews-container {
-  padding-bottom: 5px; /* Adjust this value based on paginator height */
+.reviews-wrapper {
+  overflow: hidden;
+  overflow-y: auto;
+  flex: 1;
+  margin: 0.5rem 0;
 }
 
-/* Reviews Grid Container */
+.reviews-wrapper::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+/* Grid Layout for Reviews */
 .reviews-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -925,21 +1101,21 @@ export default {
   width: 95%;
   max-width: 1600px;
   margin: 0 auto;
-  padding: 15px 10px 80px; /* Extra bottom padding for paginator */
+  padding: 15px 10px 80px;
   box-sizing: border-box;
+  color: #c9ab00;
 }
 
-/* Review Card Styling */
+/* Review Card Styles */
 .review-card {
-  background: #2a2a2a;
   border: 1px solid #ffd70033;
   border-radius: 8px;
   padding: 18px;
-  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
   height: 100%;
   box-sizing: border-box;
+  transition: transform 0.3s ease;
 }
 
 .review-card:hover {
@@ -948,58 +1124,30 @@ export default {
   border-color: #ffd70066;
 }
 
-/* Scrollable Wrapper */
-.reviews-wrapper {
-  overflow-y: auto;
-  flex: 1;
-  scrollbar-width: thin;
-  scrollbar-color: #ffd700 #2a2a2a;
-}
-
-.reviews-wrapper::-webkit-scrollbar {
-  width: 6px;
-}
-
-.reviews-wrapper::-webkit-scrollbar-track {
-  background: #2a2a2a;
-}
-
-.reviews-wrapper::-webkit-scrollbar-thumb {
-  background-color: #ffd700;
-  border-radius: 3px;
-}
-
-/* Content Area Styling */
+/* Review Content Styles */
 .review-header {
-  margin-bottom: 12px;
+  margin-bottom: 0.75rem;
 }
 
 .review-meta {
   display: flex;
-  gap: 1rem;
-}
-
-.review-author {
-  font-weight: bold;
-}
-
-.review-date {
+  justify-content: space-between;
+  font-size: 0.85rem;
   color: var(--text-muted);
-  font-size: 13px;
 }
 
 .review-film-title {
-  color: #ffd700;
-  font-size: 1.2rem;
-  margin: 8px 0;
   font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--secondary-color);
 }
 
 .review-content {
-  flex-grow: 1;
-  margin: 10px 0;
+  flex: 1;
+  margin-bottom: 1rem;
   line-height: 1.5;
   overflow: hidden;
+  text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
@@ -1019,23 +1167,19 @@ export default {
 
 /* Paginator Styles */
 .pagination-container {
-  /* Keep existing styles for centering and appearance */
+  flex-shrink: 0;
   display: flex;
   justify-content: center;
   background: #1a1a1a;
   border: 1px solid #ffd700;
   padding: 1rem;
   border-radius: 8px;
-  width: fit-content; /* Or set a specific max-width */
-  margin: 0 auto; /* Centers horizontally */
-  z-index: 100;
-
-  /* Add these for fixed positioning */
+  width: fit-content;
+  margin: 0 auto 1rem auto;
   position: fixed;
-  bottom: 1rem; /* Adjust distance from bottom as needed */
+  bottom: 1rem;
   left: 50%;
-  transform: translateX(-50%); /* Ensures true centering */
-  flex-shrink: 0; /* Already present, but good to keep */
+  transform: translateX(-50%);
 }
 
 .pagination {
@@ -1091,8 +1235,34 @@ export default {
 
 /* Responsive Styles */
 @media (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .tabs-wrapper {
+    order: 2;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .controls-container {
+    order: 1;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .search-container,
+  .filter-container {
+    right: auto;
+    left: 0;
+    width: 100%;
+  }
+
   .custom-table {
+    width: 95vw;
     font-size: 0.85rem;
+    top: 22vh;
   }
 
   .custom-table th,
@@ -1106,14 +1276,9 @@ export default {
     font-size: 0.85rem;
   }
 
-  .header-container {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
   .title-text {
-    font-size: 1.2rem;
+    font-size: 1rem;
+    padding: 0.5rem;
   }
 
   .filter-wrapper {
@@ -1131,6 +1296,106 @@ export default {
 
   .filter-label {
     font-size: 0.9rem;
+  }
+
+  .review-card {
+    padding: 12px;
+  }
+
+  .review-film-title {
+    font-size: 1rem;
+  }
+
+  .review-content {
+    font-size: 0.9rem;
+    -webkit-line-clamp: 3;
+  }
+
+  .star-rating {
+    font-size: 1rem;
+  }
+}
+
+/* Additional animations for better UX */
+.control-item {
+  transition: transform 0.2s ease;
+}
+
+.control-item:active {
+  transform: scale(0.95);
+}
+
+.search-input,
+.custom-filter-select {
+  transition: all 0.3s ease;
+}
+
+.search-input:focus,
+.custom-filter-select:focus {
+  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.3);
+}
+
+/* Accessibility improvements */
+.search-input,
+.custom-filter-select {
+  font-size: 1rem;
+}
+
+.search-input::placeholder {
+  opacity: 0.7;
+}
+
+/* Dark mode compatibility */
+@media (prefers-color-scheme: dark) {
+  .film-reviews {
+    background-color: #121212;
+  }
+
+  .custom-table {
+    background: #121212;
+  }
+
+  .review-card {
+    background: #1e1e1e;
+  }
+}
+
+/* Print styles */
+@media print {
+  .header-container,
+  .controls-container,
+  .pagination-container {
+    display: none;
+  }
+
+  .film-reviews {
+    height: auto;
+    color: #000;
+  }
+
+  .custom-table {
+    width: 100%;
+    position: static;
+    transform: none;
+    border: 1px solid #ddd;
+    color: #000;
+    background: #fff;
+  }
+
+  .custom-table th {
+    background: #f5f5f5;
+    color: #000;
+  }
+
+  .review-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    color: #000;
+    page-break-inside: avoid;
+  }
+
+  .star-rating {
+    color: #ffc107;
   }
 }
 </style>
