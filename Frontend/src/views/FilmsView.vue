@@ -1,6 +1,7 @@
 <template>
   <div class="container">
     <h1>Films</h1>
+    <p v-if="debug">{{ stateAuth }}</p>
 
     <div class="search-sort-container">
       <input
@@ -25,7 +26,9 @@
     </div>
     <!-- Kártyák -->
     <div v-if="films.length" class="films-grid">
-      <div v-for="film in filteredFilms" :key="film.id" class="film-card">
+      <div v-for="(film, index) in filteredFilms" :key="film.id" class="film-card"
+      :class="{'film-card-rated': rated(index, stateAuth.id)}"
+      >
         <h2 class="film-title">{{ film.title }}</h2>
         <p class="film-info">
           <strong>Production Year:</strong> {{ film.production }}
@@ -116,11 +119,13 @@
 <script>
 import axios from "axios";
 import { BASE_URL } from "../helpers/baseUrls";
+import { DEBUG } from "../helpers/baseUrls";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 export default {
   data() {
     return {
+      debug: DEBUG,
       urlApi: `${BASE_URL}/films`,
       stateAuth: useAuthStore(),
       films: [],
@@ -345,6 +350,16 @@ export default {
         }
       }
     },
+    rated(index, id){
+      if ( this.filteredFilms[index].usersId){
+        const usersId = this.filteredFilms[index].usersId.split(",");
+        return usersId.includes(id.toString());
+      }
+
+      
+      return false;
+      
+    }
   },
 };
 </script>
@@ -391,6 +406,11 @@ export default {
   text-align: center;
   transition: transform 0.2s ease-in-out;
   color: white;
+}
+
+.film-card-rated {
+  background: #473939;
+  
 }
 
 .film-card:hover {
