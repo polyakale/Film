@@ -242,7 +242,7 @@
       :yes="modalYes"
       :no="modalNo"
       :size="modalSize"
-      v-model:visible="isModalVisible"
+      :v-model:visible="isModalVisible"
       @yesEvent="yesEventHandler"
       @close="closeModal"
     >
