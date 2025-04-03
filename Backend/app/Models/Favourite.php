@@ -11,7 +11,7 @@ class Favourite extends Model
     /** @use HasFactory<\Database\Factories\FavouriteFactory> */
     use HasFactory, Notifiable;
     public $timestamps = true;
-    protected $fillable = ['id', 'userId', 'filmId', 'evaluation'];
+    protected $fillable = ['id', 'userId', 'filmId', 'evaluation', 'content'];
 
     // Define the relationship to the user
     public function user()

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Favourite;
 use App\Http\Requests\StoreFavouriteRequest;
 use App\Http\Requests\UpdateFavouriteRequest;
-use Illuminate\Http\Request; // ✅ Correct import
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -50,8 +50,8 @@ class FavouriteController extends Controller
             $validated = $request->validate([
                 'userId' => 'required|exists:users,id',
                 'filmId' => 'required|exists:films,id',
-                'evaluation' => 'required|numeric|min:0.5|max:5'
-                // Removed content validation
+                'evaluation' => 'required|numeric|min:0.5|max:5',
+                'content' => 'required|string|min:3|max:240',
             ]);
 
             // Check for existing review
@@ -68,7 +68,8 @@ class FavouriteController extends Controller
             $favourite = Favourite::create([
                 'userId' => $validated['userId'],
                 'filmId' => $validated['filmId'],
-                'evaluation' => $validated['evaluation']
+                'evaluation' => $validated['evaluation'],
+                'content' => $validated['content']
             ]);
 
             return response()->json([
@@ -103,7 +104,7 @@ class FavouriteController extends Controller
     {
         $row = Favourite::find($id);
         if ($row) {
-            $row->update($request->validated()); // ✅ Only validated data
+            $row->update($request->validated());
             return response()->json([
                 'message' => 'ok',
                 'data'    => $row

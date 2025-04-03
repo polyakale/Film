@@ -132,7 +132,7 @@
                 <tr>
                   <th>Film</th>
                   <th class="text-center">Evaluation</th>
-                  <th>Date</th>
+                  <th>Created</th>
                   <th class="text-center">Operations</th>
                 </tr>
               </thead>
@@ -304,8 +304,8 @@ export default {
       modalSize: null, // Modal size (e.g., 'lg')
       selectedRowId: null, // ID of the item being acted upon
 
-      // Placeholder default reviews (can be removed if API provides content)
-      defaultReviews: ["Great movie!", "Interesting plot.", "Not bad.", "Could be better.", "Amazing cinematography!"],
+      // // Placeholder default reviews (can be removed if API provides content)
+      // defaultReviews: ["Great movie!", "Interesting plot.", "Not bad.", "Could be better.", "Amazing cinematography!"],
     };
   },
   computed: {
@@ -1147,7 +1147,7 @@ export default {
 }
 
 .custom-table tbody tr:last-child td {
-  border-bottom: none; /* Remove border from last row */
+  border-bottom: none;
 }
 
 .custom-table tbody tr {
@@ -1165,13 +1165,11 @@ export default {
 .star-rating .bi { transition: color 0.2s ease; } /* Smooth color transition */
 .star-rating .text-muted { font-size: 0.9em; }
 
-/* Public Reviews Card Styles - UPDATED */
+/* Public Reviews Card Styles */
 .reviews-grid {
     display: grid;
-    /* Match grid layout from Films.vue */
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px; /* Use gap from Films.vue */
-    /* Removed justify-content: center; */
+    gap: 20px;
 }
 
 .review-card {
@@ -1181,14 +1179,14 @@ export default {
   padding: 15px; /* Match film-card padding */
   display: flex;
   flex-direction: column;
-  gap: 0.75rem; /* Keep original gap for review content */
+  gap: 0.75rem;
   transition: transform 0.2s ease-in-out; /* Match film-card transition */
   color: white; /* Match film-card color */
-  border: none; /* Remove previous border */
+  border: none; 
   text-align: left; /* Keep text left-aligned for reviews */
 }
 .review-card:hover {
-    transform: scale(1.05); /* Match film-card hover */
+    transform: scale(1.02); /* Match film-card hover */
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Slightly enhance shadow on hover */
 }
 

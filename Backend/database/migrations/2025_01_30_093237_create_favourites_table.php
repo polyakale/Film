@@ -19,6 +19,7 @@ return new class extends Migration
             $table->Integer('filmId')->nullable();
             $table->foreign('filmId')->references('id')->on('films');
             $table->decimal('evaluation', 2, 1)->comment('0.5 to 5.0')->nullable();
+            $table->string('content')->nullable();
             $table->timestamps();
         });
     }
