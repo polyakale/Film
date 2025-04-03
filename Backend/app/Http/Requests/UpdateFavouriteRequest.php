@@ -25,6 +25,7 @@ class UpdateFavouriteRequest extends FormRequest
             'userId' => 'nullable|int',
             'filmId' => 'nullable|int',
             'evaluation' => 'nullable',
+            'content' => 'nullable',
         ];
     }
 }

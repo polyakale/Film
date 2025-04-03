@@ -33,7 +33,8 @@ class StoreFavouriteRequest extends FormRequest
                         $fail('The evaluation must be in 0.5 increments (0.5, 1.0, 1.5, etc.)');
                     }
                 }
-            ]
+            ],
+            'content' => 'required|string',
         ];
     }
 }
