@@ -99,6 +99,7 @@ class FilmController extends Controller
         }
         return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
+
     public function destroy(int $id)
     {
         $row = Film::find($id);
@@ -122,4 +123,6 @@ class FilmController extends Controller
         //visszaküldjük a módosított rekordot
         return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
+
+   
 }

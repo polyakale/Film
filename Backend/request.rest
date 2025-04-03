@@ -88,15 +88,14 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "title": "Cica GQ",
+    "title": "1AAA",
     "production": 1951,
     "length": 87,
     "presentation": "1951-09-22",
     "imdbLink": "https://oiiaoiia.org/"
 }
 ### patch films
-PATCH {{host}}/api/films/610
-Accept: application/json
+PATCH {{host}}/api/films/619
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -110,8 +109,7 @@ Authorization: Bearer {{token}}
 
 
 ### delete films by id
-DELETE {{host}}/api/films/611
-
+DELETE {{host}}/api/films/618
 Accept: application/json
 Content-Type: application/json
 Authorization: Bearer {{token}}
@@ -167,10 +165,10 @@ Authorization: Bearer {{token}}
 {
     "filmId": 20,
     "link": "https://www.imdb.com/title/tt27814427/",
-    "embedLink": "https://www.imdb.com/title/tt27814427/",
+    "embedLink": "https://www.imdb.com/title/tt27814427/"
 }
 ### patch videos
-PATCH {{host}}/api/videos/1
+PATCH {{host}}/api/videos/2
 Accept: application/json
 Content-Type: application/json
 Authorization: Bearer {{token}}
@@ -178,10 +176,10 @@ Authorization: Bearer {{token}}
 {
     "filmId": 31,
     "link": "https://www.imdb.com/title/tt27814427/",
-    "embedLink": "https://www.imdb.com/title/tt27814427/",
+    "embedLink": "https://www.imdb.com/title/tt27814427/"
 }
 ### delete videos by id
-DELETE {{host}}/api/videos/1
+DELETE {{host}}/api/videos/2
 Accept: application/json
 Content-Type: application/json
 Authorization: Bearer {{token}}

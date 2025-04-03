@@ -54,7 +54,7 @@ Route::post('films', [FilmController::class, 'store'])
 Route::patch('films/{id}', [FilmController::class, 'update'])
     ->middleware('auth:sanctum');
 Route::delete('films/{id}', [FilmController::class, 'destroy'])
-    ->middleware('auth:sanctum');
+->middleware('auth:sanctum');
 // videos
 Route::get('videos', [VideoController::class, 'index']);
 Route::get('videos/{id}', [VideoController::class, 'show']);
