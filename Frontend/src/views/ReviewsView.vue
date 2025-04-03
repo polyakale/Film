@@ -574,6 +574,7 @@ export default {
         const payload = {
             evaluation: formData.evaluation,
             filmId: formData.filmId,
+            content: formData.content,
         };
 
         const result = await this._fetchApi(
@@ -820,16 +821,6 @@ export default {
      */
     publicReviewFilter() {
         this.currentPublicPage = 1;
-        this.$nextTick(this.calculateDimensions);
-    },
-
-    /**
-     * Watches the length of the filtered lists.
-     */
-    'filteredFavourites.length': function() {
-        this.$nextTick(this.calculateDimensions);
-    },
-    'filteredPublicReviews.length': function() {
         this.$nextTick(this.calculateDimensions);
     },
   },

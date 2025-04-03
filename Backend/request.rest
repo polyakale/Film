@@ -261,7 +261,7 @@ Authorization: Bearer {{token}}
 get {{host}}/api/favourites
 
 ### get favourites by id
-get {{host}}/api/favourites/1
+get {{host}}/api/favourites/3
 
 ### get favourites by id
 get {{host}}/api/favouritesByUserId/3
