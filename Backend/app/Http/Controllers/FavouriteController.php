@@ -30,6 +30,88 @@ class FavouriteController extends Controller
         ]);
     }
 
+    public function showFavouriteByUserIdAndFilmId($userId, $filmId)
+    {
+        // $sql = "
+        // select id, userId, filmId, evaluation from favourites
+        // WHERE userId = ? 
+        // AND filmId = ?";
+        // $favourites = DB::select($sql, [$userId, $filmId]);
+        // return response()->json([
+        //     'message' => 'ok',
+        //     'data' => $favourites,
+        // ]);
+        $row = Favourite::where('userId', $userId)
+        ->where('filmId', $filmId)
+        ->select('id', 'userId', 'filmId', 'evaluation', 'content') 
+        ->first();
+
+    if ($row) {
+       
+        return response()->json([
+            'message' => 'ok',
+            'data'    => $row
+        ]);
+    } else {
+        return response()->json([
+            'message' => 'Not found: userId: ' . $userId . ' filmId: ' . $filmId,
+            'data'    => $row
+        ]);
+    }
+    }
+
+    public function patchFavouriteByUserIdAndFilmId(UpdateFavouriteRequest $request, $userId, $filmId)
+    {
+
+        $row = Favourite::where('userId', $userId)
+            ->where('filmId', $filmId)
+            ->first();
+
+        if ($row) {
+            $row->update($request->all());
+            return response()->json([
+                'message' => 'ok',
+                'data'    => $row
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Not found',
+                'data'    => ['userId' => $userId, 'filmId' =>  $filmId]
+            ]);
+        }
+    }
+    public function storeFavouriteByUserIdAndFilmId(StoreFavouriteRequest $request, $userId, $filmId)
+    {
+
+        $row = Favourite::create($request->all());
+        $data = [
+            'message' => 'ok',
+            'data' => $row
+        ];
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
+    }
+
+    public function destroyFavouriteByUserIdAndFilmId($id ,$userId, $filmId){
+        $row = Favourite::where('userId', $userId, 'filmId', $filmId);
+        if ($row) {
+            $row->delete();
+            $data = [
+                'message' => 'ok',
+                'data' => [
+                    'id' => $id
+                ]
+            ];
+        } else {
+            $data = [
+                'message' => 'Not found',
+                'data' => [
+                    'id' => $id
+                ]
+            ];
+        };
+    }
+
+
     public function index()
     {
         $favourites = DB::table('favourites as fa')

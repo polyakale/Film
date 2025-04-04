@@ -4,13 +4,8 @@
     <p v-if="debug">{{ stateAuth }}</p>
 
     <div class="search-sort-container">
-      <input
-        type="text"
-        v-model="searchQuery"
-        @input="searchFilms"
-        placeholder="Search films..."
-        class="search-input"
-      />
+      <input type="text" v-model="searchQuery" @input="searchFilms" placeholder="Search films..."
+        class="search-input" />
       <select v-model="sortOption" @change="sortFilms" class="sort-select">
         <option value="abc">ABC</option>
         <option value="production">Production Year</option>
@@ -27,8 +22,8 @@
     <!-- Kártyák -->
     <div v-if="films.length" class="films-grid">
       <div v-for="(film, index) in filteredFilms" :key="film.id" class="film-card"
-      :class="{'film-card-rated': rated(index, stateAuth.id)}"
-      >
+        :class="{'film-card-rated': rated(index, stateAuth.id)}">
+        <span class="star-icon" @click="openRatingModal(film)">★</span>
         <h2 class="film-title">{{ film.title }}</h2>
         <p class="film-info">
           <strong>Production Year:</strong> {{ film.production }}
@@ -41,13 +36,8 @@
           <strong>Evaluation:</strong>
           {{ film.evaluation || "This film hasn't been rated yet." }}
         </p>
-        <a
-          v-if="film.imdbLink"
-          :href="formatImdbUrl(film.imdbLink)"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="imdb-link"
-        >
+        <a v-if="film.imdbLink" :href="formatImdbUrl(film.imdbLink)" target="_blank" rel="noopener noreferrer"
+          class="imdb-link">
           View on IMDb
         </a>
 
@@ -113,6 +103,25 @@
         </form>
       </div>
     </div>
+
+    <div v-if="showRatingModal" class="modal">
+      <div class="modal-content">
+        <h2 class="film-title">Please rate the movie</h2>
+        <div class="rating-stars">
+          <span v-for="n in 5" :key="n" @click="setRating(n)" @mousemove="handleHover(n, $event)"
+            @mouseleave="hoverRating = null" :class="{
+              'star-filled': (hoverRating || currentRating) >= n,
+              'star-half': (hoverRating || currentRating) >= n - 0.5 && (hoverRating || currentRating) < n
+            }">
+            ★
+          </span>
+        </div>
+        <div class="rating-actions">
+          <button @click="submitRating" class="submit-button">Submit</button>
+          <button @click="closeRatingModal" class="cancel-button">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -123,6 +132,7 @@ import { DEBUG } from "../helpers/baseUrls";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 export default {
+  
   data() {
     return {
       debug: DEBUG,
@@ -135,15 +145,18 @@ export default {
       filteredFilms: [],
       showAddFilmModal: false,
       showEditFilmModal: false,
+      showRatingModal: false,
       newFilm: {
         title: "",
         production: "",
         length: "",
         presentation: "",
         imdbLink: "",
-        evaluation: null,
       },
       editingFilm: null,
+      currentFilm: null,
+      currentRating: 0,
+      hoverRating: null,
     };
   },
   async mounted() {
@@ -171,7 +184,6 @@ export default {
 
     async fetchFilmsFromBackend() {
       try {
-        // 1. Lekérjük a filmeket
         const filmsResponse = await axios.get(
           `${BASE_URL}/queryFilmsWithEvaluation`
         );
@@ -180,7 +192,6 @@ export default {
           : [];
 
         this.filteredFilms = [...this.films];
-        console.log("Filmek", this.filteredFilms);
       } catch (error) {
         console.error("Error loading films:", error);
       }
@@ -240,7 +251,6 @@ export default {
         length: "",
         presentation: "",
         imdbLink: "",
-        evaluation: null,
       };
     },
 
@@ -251,7 +261,6 @@ export default {
           Authorization: `Bearer ${token}`,
         };
 
-        // 1. Film létrehozása
         const filmData = {
           title: this.newFilm.title,
           production: this.newFilm.production,
@@ -260,20 +269,7 @@ export default {
           imdbLink: this.newFilm.imdbLink,
         };
 
-        const filmResponse = await axios.post(this.urlApi, filmData, {
-          headers,
-        });
-
-        // 2. Értékelés hozzáadása (ha van)
-        if (this.newFilm.evaluation) {
-          await axios.post(
-            `${BASE_URL}/films/${filmResponse.data.data.id}/evaluation`,
-            { value: this.newFilm.evaluation },
-            { headers }
-          );
-        }
-
-        // 3. Frissítjük a listát
+        await axios.post(BASE_URL, filmData, { headers });
         await this.fetchFilmsFromBackend();
         this.closeAddFilmModal();
       } catch (error) {
@@ -300,7 +296,6 @@ export default {
           Authorization: `Bearer ${token}`,
         };
 
-        // 1. Film adatainak frissítése
         const filmData = {
           title: this.editingFilm.title,
           production: this.editingFilm.production,
@@ -309,17 +304,7 @@ export default {
           imdbLink: this.editingFilm.imdbLink,
         };
 
-        const url = `${this.urlApi}/${this.editingFilm.id}`;
         await axios.patch(url, filmData, {headers});
-
-        // // 2. Értékelés frissítése
-        // await axios.patch(
-        //   `${BASE_URL}/films/${this.editingFilm.id}/evaluation`,
-        //   { value: this.editingFilm.evaluation || null },
-        //   { headers }
-        // );
-
-        // 3. Frissítjük a listát
         await this.fetchFilmsFromBackend();
         this.closeEditFilmModal();
       } catch (error) {
@@ -337,13 +322,8 @@ export default {
             Authorization: `Bearer ${token}`,
           };
 
-          const url = `${this.urlApi}/${filmId}`;
-          // 1. Film törlése
-          console.log("törlés", url, headers);
-
+          const url = `${BASE_URL}/${filmId}`;
           await axios.delete(url, { headers });
-
-          // 3. Frissítjük a listát
           await this.fetchFilmsFromBackend();
         } catch (error) {
           console.error("Error deleting film:", error);
@@ -355,10 +335,47 @@ export default {
         const usersId = this.filteredFilms[index].usersId.split(",");
         return usersId.includes(id.toString());
       }
-
-      
       return false;
-      
+    },
+    openRatingModal(film) {
+      this.currentFilm = film;
+      this.showRatingModal = true;
+      this.currentRating = film.evaluation || 0;
+    },
+    closeRatingModal() {
+      this.showRatingModal = false;
+      this.currentFilm = null;
+      this.currentRating = 0;
+    },
+    handleHover(n, event) {
+      const star = event.target;
+      const rect = star.getBoundingClientRect();
+      const posX = event.clientX - rect.left;
+      this.hoverRating = posX < rect.width / 2 ? n - 0.5 : n;
+    },
+    setRating(n) {
+      this.currentRating = this.currentRating === n ? n - 0.5 : n;
+    },
+    async submitRating() {
+      try {
+        const token = this.stateAuth.token;
+        const headers = {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+
+        await axios.post(
+          `${BASE_URL}/evaluation/${this.currentFilm.id}`,
+          { value: this.currentRating },
+          { headers }
+        );
+
+        await this.fetchFilmsFromBackend();
+        this.closeRatingModal();
+      } catch (error) {
+        console.error("Error submitting rating:", error);
+      }
     }
   },
 };
@@ -376,6 +393,17 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
+}
+
+.submit-button{
+  background: #4caf50;
+  color: white;
+}
+
+.cancel-button
+{
+  background: #f44336;
+  color: white;
 }
 
 .search-input {
@@ -406,11 +434,11 @@ export default {
   text-align: center;
   transition: transform 0.2s ease-in-out;
   color: white;
+  position: relative;
 }
 
 .film-card-rated {
-  background: #473939;
-  
+  background: #313131;
 }
 
 .film-card:hover {
@@ -530,5 +558,52 @@ export default {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+
+.star-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.5em;
+  color: #f5c518;
+  cursor: pointer;
+}
+
+.rating-stars {
+  font-size: 2em;
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.rating-stars span {
+  cursor: pointer;
+  color: #666;
+  position: relative;
+}
+
+.rating-stars .star-filled {
+  color: #f5c518;
+}
+
+.rating-stars .star-half::before {
+  content: '★';
+  position: absolute;
+  left: 0;
+  width: 50%;
+  overflow: hidden;
+  color: #f5c518;
+}
+
+.rating-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.rating-actions button {
+  padding: 5px 15px;
 }
 </style>

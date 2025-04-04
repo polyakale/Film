@@ -67,11 +67,15 @@ Route::delete('videos/{id}', [VideoController::class, 'destroy'])
 // favourites
 Route::get('favourites', [FavouriteController::class, 'index']);
 Route::get('favourites/{id}', [FavouriteController::class, 'show']);
+Route::get('favourites/{userId}/{filmId}', [FavouriteController::class, 'showFavouriteByUserIdAndFilmId']);
 Route::post('favourites', [FavouriteController::class, 'store']);
+Route::post('favourites/{userId}/{filmId}', [FavouriteController::class, 'storeFavouriteByUserIdAndFilmId']);
     // ->middleware('auth:sanctum');
 Route::patch('favourites/{id}', [FavouriteController::class, 'update']);
+Route::patch('favourites/{userId}/{filmId}', [FavouriteController::class, 'patchFavouriteByUserIdAndFilmId']);
     // ->middleware('auth:sanctum');
 Route::delete('favourites/{id}', [FavouriteController::class, 'destroy']);
+Route::delete('favourites/{userId}/{filmId}', [FavouriteController::class, 'destroyFavouriteByUserIdAndFilmId']);
     // ->middleware('auth:sanctum');
 // roles
 Route::get('roles', [RoleController::class, 'index']);
