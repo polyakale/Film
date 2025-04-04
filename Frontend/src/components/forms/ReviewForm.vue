@@ -117,6 +117,7 @@ export default {
       this.$emit("saveItem", {
         ...this.itemForm,
         evaluation: Number(this.itemForm.evaluation),
+        content: this.itemForm.content,
       });
     },
     validateForm() {

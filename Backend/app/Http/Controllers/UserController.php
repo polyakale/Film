@@ -25,10 +25,10 @@ class UserController extends Controller
 
         $user->tokens()->delete();
         if ($user->positionId == 1) {
-           //admin küldünk tokent
+            //admin küldünk tokent
 
-           $token = $user->createToken('access')->plainTextToken;
-        }else {
+            $token = $user->createToken('access')->plainTextToken;
+        } else {
             //user nem küldünk tokent
             $token = "";
         }
@@ -44,25 +44,23 @@ class UserController extends Controller
 
     public function changePassword(Request $request)
     {
-        // Validate the input
         $request->validate([
             'current_password' => 'required',
-            'new_password' => 'required|min:6|confirmed',
+            'new_password' => 'required|min:8|max:16|confirmed',
         ]);
 
-        $user = $request->user(); // Get the authenticated user
+        $user = $request->user(); // Get the logged-in user
 
-        // Check if the current password is correct
         if (!Hash::check($request->current_password, $user->password)) {
             return response()->json(['message' => 'Current password is incorrect'], 422);
         }
 
-        // Update the password
         $user->password = Hash::make($request->new_password);
         $user->save();
 
         return response()->json(['message' => 'Password changed successfully'], 200);
     }
+
 
     public function logout(Request $request)
     {
@@ -156,5 +154,13 @@ class UserController extends Controller
         $user->delete();
 
         return response()->json(['message' => 'User deleted successfully'], 200);
+    }
+
+    public function deleteAccount(Request $request)
+    {
+        $user = $request->user(); // Get the authenticated user
+        $user->delete();
+
+        return response()->json(['message' => 'Account deleted successfully'], 200);
     }
 }
