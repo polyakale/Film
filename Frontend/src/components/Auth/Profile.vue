@@ -136,9 +136,13 @@ const passwordVisible = ref({
 // Computed properties
 const user = computed(() => store.user);
 const email = computed(() => store.email || "N/A");
-const roleName = computed(() =>
-  store.positionId === 1 ? "Administrator" : "Guest"
-);
+const roleName = computed(() => {
+  return store.positionId
+    ? store.positionId === 1
+      ? "Administrator"
+      : "Guest"
+    : "Guest";
+});
 
 // Toggle visibility for a specific field
 const toggleVisibility = (field) => {
@@ -190,16 +194,11 @@ const changePassword = async () => {
 
 // Handle account deletion
 const deleteAccount = async () => {
-  if (
-    window.confirm(
-      "Are you sure you want to delete your account? This action cannot be undone."
-    )
-  ) {
+  console.log("Deleting account for:", store.id); // Debugging log
+  if (window.confirm("Are you sure you want to delete your account?")) {
     try {
       await axios.delete(`${BASE_URL}/users/${store.id}`, {
-        headers: {
-          Authorization: `Bearer ${store.token}`,
-        },
+        headers: { Authorization: `Bearer ${store.token}` },
       });
       store.clearStoredData();
       router.push("/login");
