@@ -2,49 +2,26 @@
   <div class="film-reviews">
     <div class="header-container" ref="headerContainerRef">
       <div class="tabs-wrapper">
-        <h3
-          class="title-text clickable"
-          :class="{ 'active-tab': activeTab === 'all' || !isLoggedIn }"
-          @click="switchTab('all')"
-          role="tab"
-          :aria-selected="activeTab === 'all' || !isLoggedIn"
-        >
+        <h3 class="title-text clickable" :class="{ 'active-tab': activeTab === 'all' || !isLoggedIn }"
+          @click="switchTab('all')" role="tab" :aria-selected="activeTab === 'all' || !isLoggedIn">
           All Reviews
         </h3>
-        <h3
-          v-if="isLoggedIn"
-          class="title-text clickable"
-          :class="{ 'active-tab': activeTab === 'my' }"
-          @click="switchTab('my')"
-          role="tab"
-          :aria-selected="activeTab === 'my'"
-        >
+        <h3 v-if="isLoggedIn" class="title-text clickable" :class="{ 'active-tab': activeTab === 'my' }"
+          @click="switchTab('my')" role="tab" :aria-selected="activeTab === 'my'">
           My Reviews
         </h3>
       </div>
 
       <div class="controls-container">
         <div class="control-buttons">
-          <div
-            class="control-item"
-            @click="toggleControl('search')"
-            title="Search Reviews"
-            aria-label="Toggle Search Input"
-            :aria-expanded="showSearch"
-          >
+          <div class="control-item" @click="toggleControl('search')" title="Search Reviews"
+            aria-label="Toggle Search Input" :aria-expanded="showSearch">
             <i class="bi bi-search"></i>
           </div>
-          <div
-            class="control-item"
-            @click="
-              toggleControl(activeTab === 'my' ? 'tableFilter' : 'publicFilter')
-            "
-            title="Filter Reviews"
-            aria-label="Toggle Filter Options"
-            :aria-expanded="
-              activeTab === 'my' ? showTableFilter : showPublicFilter
-            "
-          >
+          <div class="control-item" @click="
+            toggleControl(activeTab === 'my' ? 'tableFilter' : 'publicFilter')
+            " title="Filter Reviews" aria-label="Toggle Filter Options" :aria-expanded="activeTab === 'my' ? showTableFilter : showPublicFilter
+              ">
             <i class="bi bi-funnel"></i>
           </div>
         </div>
@@ -52,30 +29,17 @@
         <transition name="fade-slide">
           <div v-if="showSearch" class="search-container">
             <div class="search-wrapper">
-              <input
-                type="text"
-                v-model="searchQuery"
-                placeholder="Search reviews..."
-                class="search-input"
-                @input="handleSearch"
-                aria-label="Search Reviews Input"
-              />
+              <input type="text" v-model="searchQuery" placeholder="Search reviews..." class="search-input"
+                @input="handleSearch" aria-label="Search Reviews Input" />
             </div>
           </div>
         </transition>
 
         <transition name="fade-slide">
-          <div
-            v-if="showTableFilter && isLoggedIn && activeTab === 'my'"
-            class="filter-container"
-          >
+          <div v-if="showTableFilter && isLoggedIn && activeTab === 'my'" class="filter-container">
             <div class="filter-wrapper position-relative">
-              <select
-                id="tableFilter"
-                v-model="tableReviewFilter"
-                class="custom-filter-select"
-                aria-label="Sort My Reviews"
-              >
+              <select id="tableFilter" v-model="tableReviewFilter" class="custom-filter-select"
+                aria-label="Sort My Reviews">
                 <option value="ABC">Film Title (A-Z)</option>
                 <option value="highToLow">Evaluation: High to Low</option>
                 <option value="lowToHigh">Evaluation: Low to High</option>
@@ -87,17 +51,10 @@
         </transition>
 
         <transition name="fade-slide">
-          <div
-            v-if="showPublicFilter && (activeTab === 'all' || !isLoggedIn)"
-            class="filter-container"
-          >
+          <div v-if="showPublicFilter && (activeTab === 'all' || !isLoggedIn)" class="filter-container">
             <div class="filter-wrapper position-relative">
-              <select
-                id="publicFilter"
-                v-model="publicReviewFilter"
-                class="custom-filter-select"
-                aria-label="Sort All Reviews"
-              >
+              <select id="publicFilter" v-model="publicReviewFilter" class="custom-filter-select"
+                aria-label="Sort All Reviews">
                 <option value="ABC">Film Title (A-Z)</option>
                 <option value="highToLow">Evaluation: High to Low</option>
                 <option value="lowToHigh">Evaluation: Low to High</option>
@@ -120,31 +77,21 @@
     </div>
 
     <div v-else class="content-area">
-      <div
-        v-if="errorMessages"
-        class="error-message alert alert-danger"
-        role="alert"
-      >
+      <div v-if="errorMessages" class="error-message alert alert-danger" role="alert">
         {{ errorMessages }}
       </div>
 
       <div class="data-container">
         <div v-show="isLoggedIn && activeTab === 'my'" class="table-section">
           <div class="table-wrapper" ref="tableWrapperRef">
-            <div
-              v-if="
-                !paginatedFavourites.length &&
-                filteredFavourites.length === 0 &&
-                !searchQuery
-              "
-              class="no-data-message"
-            >
+            <div v-if="
+              !paginatedFavourites.length &&
+              filteredFavourites.length === 0 &&
+              !searchQuery
+            " class="no-data-message">
               You haven't added any reviews yet.
             </div>
-            <div
-              v-else-if="!paginatedFavourites.length && searchQuery"
-              class="no-data-message"
-            >
+            <div v-else-if="!paginatedFavourites.length && searchQuery" class="no-data-message">
               No reviews found matching your search criteria.
             </div>
             <table v-else class="custom-table">
@@ -158,22 +105,14 @@
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="favourite in paginatedFavourites"
-                  :key="favourite.id"
-                >
+                <tr v-for="favourite in paginatedFavourites" :key="favourite.id">
                   <td data-label="Film" class="film">
                     {{ favourite.filmTitle || "Unknown Film" }}
                   </td>
                   <td data-label="Evaluation" class="text-center">
                     <div class="star-rating d-inline-flex align-items-center">
-                      <i
-                        v-for="starIndex in 5"
-                        :key="starIndex"
-                        class="bi mx-1 text-warning"
-                        :class="getStarClass(favourite, starIndex)"
-                        :aria-label="`Star ${starIndex}`"
-                      ></i>
+                      <i v-for="starIndex in 5" :key="starIndex" class="bi mx-1 text-warning"
+                        :class="getStarClass(favourite, starIndex)" :aria-label="`Star ${starIndex}`"></i>
                       <small class="text-muted ms-2">
                         ({{ formatEvaluation(favourite.evaluation) }})
                       </small>
@@ -186,57 +125,34 @@
                     {{ formatDate(favourite.updated_at) }}
                   </td>
                   <td class="text-nowrap text-center">
-                    <OperationsCrud
-                      @onClickDelete="onClickDelete(favourite)"
-                      @onClickUpdate="onClickUpdate(favourite)"
-                      :data="favourite"
-                    />
+                    <OperationsCrud @onClickDelete="onClickDelete(favourite)" @onClickUpdate="onClickUpdate(favourite)"
+                      :data="favourite" />
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div
-            class="pagination-container"
-            ref="tablePaginationRef"
-            v-if="filteredFavourites.length > dynamicItemsPerPage"
-          >
-            <Paginator
-              :pageNumber="currentPage"
-              :numberOfPages="totalFavPages"
-              :pagesArray="favPagesArray"
-              @paging="handlePageChange"
-            />
+          <div class="pagination-container" ref="tablePaginationRef"
+            v-if="filteredFavourites.length > dynamicItemsPerPage">
+            <Paginator :pageNumber="currentPage" :numberOfPages="totalFavPages" :pagesArray="favPagesArray"
+              @paging="handlePageChange" />
           </div>
         </div>
 
-        <div
-          v-show="activeTab === 'all' || !isLoggedIn"
-          class="public-reviews-section"
-        >
+        <div v-show="activeTab === 'all' || !isLoggedIn" class="public-reviews-section">
           <div class="reviews-wrapper" ref="reviewsWrapperRef">
-            <div
-              v-if="
-                !paginatedPublicReviews.length &&
-                filteredPublicReviews.length === 0 &&
-                !searchQuery
-              "
-              class="no-data-message"
-            >
+            <div v-if="
+              !paginatedPublicReviews.length &&
+              filteredPublicReviews.length === 0 &&
+              !searchQuery
+            " class="no-data-message">
               No public reviews available yet.
             </div>
-            <div
-              v-else-if="!paginatedPublicReviews.length && searchQuery"
-              class="no-data-message"
-            >
+            <div v-else-if="!paginatedPublicReviews.length && searchQuery" class="no-data-message">
               No reviews found matching your search criteria.
             </div>
             <div v-else class="reviews-grid">
-              <div
-                v-for="review in paginatedPublicReviews"
-                :key="review.id"
-                class="review-card"
-              >
+              <div v-for="review in paginatedPublicReviews" :key="review.id" class="review-card">
                 <div class="review-header">
                   <div class="review-meta">
                     <span class="review-author">{{
@@ -261,13 +177,8 @@
                   {{ review.content }}
                 </div>
                 <div class="star-rating d-inline-flex align-items-center">
-                  <i
-                    v-for="starIndex in 5"
-                    :key="`star-${review.id}-${starIndex}`"
-                    class="bi mx-1 text-warning"
-                    :class="getStarClass(review, starIndex)"
-                    :aria-label="`Star ${starIndex}`"
-                  ></i>
+                  <i v-for="starIndex in 5" :key="`star-${review.id}-${starIndex}`" class="bi mx-1 text-warning"
+                    :class="getStarClass(review, starIndex)" :aria-label="`Star ${starIndex}`"></i>
                   <small class="text-muted ms-2">
                     ({{ formatEvaluation(review.evaluation) }})
                   </small>
@@ -275,40 +186,21 @@
               </div>
             </div>
           </div>
-          <div
-            class="pagination-container"
-            ref="publicPaginationRef"
-            v-if="filteredPublicReviews.length > dynamicItemsPerPage"
-          >
-            <Paginator
-              :pageNumber="currentPublicPage"
-              :numberOfPages="totalPublicPages"
-              :pagesArray="publicPagesArray"
-              @paging="handlePublicPageChange"
-            />
+          <div class="pagination-container" ref="publicPaginationRef"
+            v-if="filteredPublicReviews.length > dynamicItemsPerPage">
+            <Paginator :pageNumber="currentPublicPage" :numberOfPages="totalPublicPages" :pagesArray="publicPagesArray"
+              @paging="handlePublicPageChange" />
           </div>
         </div>
       </div>
     </div>
 
     <div v-show="isModalVisible">
-      <Modal
-        ref="modalRef"
-        :title="modalTitle"
-        :yes="modalYes"
-        :no="modalNo"
-        :size="modalSize"
-        @yesEvent="yesEventHandler"
-        @close="closeModal"
-      >
+      <Modal ref="modalRef" :title="modalTitle" :yes="modalYes" :no="modalNo" :size="modalSize"
+        @yesEvent="yesEventHandler" @close="closeModal">
         <div v-if="modalState === 'Delete'">{{ modalMessageYesNo }}</div>
-        <ReviewForm
-          v-if="modalState === 'Update'"
-          :itemForm="modalItem"
-          :films="films"
-          :isUpdate="true"
-          @saveItem="saveItemHandler"
-        />
+        <ReviewForm v-if="modalState === 'Update'" :itemForm="modalItem" :films="films" :isUpdate="true"
+          @saveItem="saveItemHandler" />
       </Modal>
     </div>
   </div>
@@ -481,11 +373,10 @@ export default {
           `API Error (${method.toUpperCase()} ${url}):`,
           error.response || error
         );
-        this.errorMessages = `Operation failed: ${
-          error.response?.data?.message ||
+        this.errorMessages = `Operation failed: ${error.response?.data?.message ||
           error.message ||
           "An unknown error occurred."
-        }`;
+          }`;
         return null;
       } finally {
         this.loading = false;
@@ -597,20 +488,20 @@ export default {
         type === "search"
           ? !this.showSearch
           : isOpening
-          ? false
-          : this.showSearch;
+            ? false
+            : this.showSearch;
       this.showTableFilter =
         type === "tableFilter"
           ? !this.showTableFilter
           : isOpening
-          ? false
-          : this.showTableFilter;
+            ? false
+            : this.showTableFilter;
       this.showPublicFilter =
         type === "publicFilter"
           ? !this.showPublicFilter
           : isOpening
-          ? false
-          : this.showPublicFilter;
+            ? false
+            : this.showPublicFilter;
     },
 
     // --- CRUD Methods ---
@@ -621,9 +512,8 @@ export default {
     onClickDelete(item) {
       this.modalState = "Delete";
       this.modalTitle = "Confirm Deletion";
-      this.modalMessageYesNo = `Are you sure you want to delete your review for "${
-        item.filmTitle || "this film"
-      }"? This action cannot be undone.`;
+      this.modalMessageYesNo = `Are you sure you want to delete your review for "${item.filmTitle || "this film"
+        }"? This action cannot be undone.`;
       this.modalYes = "Yes, Delete";
       this.modalNo = "No, Cancel";
       this.modalSize = null;
@@ -642,9 +532,8 @@ export default {
         evaluation: Number(item.evaluation) || 0,
         filmId: item.filmId,
       };
-      this.modalTitle = `Update Review for "${
-        item.filmTitle || "Unknown Film"
-      }"`;
+      this.modalTitle = `Update Review for "${item.filmTitle || "Unknown Film"
+        }"`;
       this.modalYes = null;
       this.modalNo = "Cancel";
       this.modalSize = "lg";
@@ -985,39 +874,49 @@ export default {
 <style scoped>
 /* General Styles */
 .film-reviews {
-  color: white; /* Assuming a dark theme */
-  height: 90vh; /* Example height, adjust as needed */
+  color: white;
+  /* Assuming a dark theme */
+  height: 90vh;
+  /* Example height, adjust as needed */
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Prevent whole page scroll */
-  background-color: #121212; /* Dark background */
+  overflow: hidden;
+  /* Prevent whole page scroll */
+  background-color: #121212;
+  /* Dark background */
 }
 
 /* Header Styles */
 .header-container {
   background: #1a1a1a;
-  border-bottom: 2px solid #ffd700; /* Gold accent */
+  border-bottom: 2px solid #ffd700;
+  /* Gold accent */
   width: 100%;
   display: flex;
-  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  flex-wrap: wrap;
+  /* Allow wrapping on smaller screens */
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 1rem;
   gap: 1rem;
-  flex-shrink: 0; /* Prevent header from shrinking */
+  flex-shrink: 0;
+  /* Prevent header from shrinking */
 }
 
 .tabs-wrapper {
   display: flex;
   gap: 1rem;
   align-items: center;
-  flex-grow: 1; /* Allow tabs to take space */
+  flex-grow: 1;
+  /* Allow tabs to take space */
   min-width: 0;
-  justify-content: flex-start; /* Align tabs left */
+  justify-content: flex-start;
+  /* Align tabs left */
 }
 
 .title-text {
-  color: #bdbdbd; /* Lighter grey for inactive tabs */
+  color: #bdbdbd;
+  /* Lighter grey for inactive tabs */
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0;
@@ -1026,25 +925,28 @@ export default {
   text-align: center;
   border-radius: 4px;
   transition: all 0.2s ease;
-  border: 1px solid transparent; /* Placeholder for border */
+  border: 1px solid transparent;
+  /* Placeholder for border */
 }
 
 .clickable {
   cursor: pointer;
 }
+
 .clickable:hover {
-  color: #ffffff; /* Brighter on hover */
-  background-color: rgba(
-    255,
-    215,
-    0,
-    0.1
-  ); /* Subtle gold background on hover */
+  color: #ffffff;
+  /* Brighter on hover */
+  background-color: rgba(255,
+      215,
+      0,
+      0.1);
+  /* Subtle gold background on hover */
 }
 
 .active-tab {
   background: #ffd700;
-  color: #1a1a1a !important; /* Dark text on active tab */
+  color: #1a1a1a !important;
+  /* Dark text on active tab */
   font-weight: 700;
   border-color: #ffd700;
 }
@@ -1053,9 +955,12 @@ export default {
 .controls-container {
   display: flex;
   align-items: center;
-  gap: 0.5rem; /* Reduced gap */
-  position: relative; /* For positioning dropdowns */
-  flex-shrink: 0; /* Prevent shrinking */
+  gap: 0.5rem;
+  /* Reduced gap */
+  position: relative;
+  /* For positioning dropdowns */
+  flex-shrink: 0;
+  /* Prevent shrinking */
 }
 
 .control-buttons {
@@ -1067,7 +972,8 @@ export default {
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 50%;
-  width: 38px; /* Slightly larger */
+  width: 38px;
+  /* Slightly larger */
   height: 38px;
   display: flex;
   align-items: center;
@@ -1075,17 +981,21 @@ export default {
   background: #2a2a2a;
   color: #bdbdbd;
   transition: all 0.3s ease;
-  border: 1px solid #444; /* Subtle border */
+  border: 1px solid #444;
+  /* Subtle border */
 }
+
 .control-item:hover {
   background: #ffd700;
   color: #1a1a1a;
   border-color: #ffd700;
 }
+
 .control-item i {
   font-size: 1.1rem;
   transition: transform 0.2s ease;
 }
+
 .control-item:active i {
   transform: scale(0.95);
 }
@@ -1095,12 +1005,15 @@ export default {
 .filter-container {
   position: absolute;
   right: 0;
-  top: calc(100% + 8px); /* Position below the controls */
+  top: calc(100% + 8px);
+  /* Position below the controls */
   z-index: 100;
-  background: #2a2a2a; /* Slightly lighter than header */
+  background: #2a2a2a;
+  /* Slightly lighter than header */
   border: 1px solid #444;
   border-radius: 8px;
-  padding: 0.75rem; /* More padding */
+  padding: 0.75rem;
+  /* More padding */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
@@ -1109,6 +1022,7 @@ export default {
 .fade-slide-leave-active {
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
+
 .fade-slide-enter-from,
 .fade-slide-leave-to {
   opacity: 0;
@@ -1118,6 +1032,7 @@ export default {
 .search-wrapper {
   min-width: 250px;
 }
+
 .filter-wrapper {
   min-width: 200px;
 }
@@ -1126,7 +1041,8 @@ export default {
 .search-input {
   width: 100%;
   padding: 0.6rem 1rem;
-  border-radius: 20px; /* Pill shape */
+  border-radius: 20px;
+  /* Pill shape */
   border: 1px solid #555;
   background-color: #333;
   color: white;
@@ -1134,9 +1050,11 @@ export default {
   outline: none;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
+
 .search-input::placeholder {
   color: #aaa;
 }
+
 .search-input:focus {
   border-color: #ffd700;
   box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
@@ -1146,20 +1064,24 @@ export default {
 .custom-filter-select {
   width: 100%;
   padding: 0.6rem 1rem;
-  border-radius: 8px; /* Consistent rounding */
+  border-radius: 8px;
+  /* Consistent rounding */
   border: 1px solid #555;
   background-color: #333;
   color: white;
   font-size: 1rem;
   cursor: pointer;
   outline: none;
-  appearance: none; /* Remove default arrow */
+  appearance: none;
+  /* Remove default arrow */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23bdbdbd' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   background-size: 1em 1em;
-  padding-right: 2.5rem; /* Space for custom arrow */
+  padding-right: 2.5rem;
+  /* Space for custom arrow */
 }
+
 .custom-filter-select:focus {
   border-color: #ffd700;
   box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
@@ -1173,8 +1095,10 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 150; /* Above content, below modal */
+  z-index: 150;
+  /* Above content, below modal */
 }
+
 .loading-content {
   display: flex;
   flex-direction: column;
@@ -1182,28 +1106,36 @@ export default {
   color: white;
   gap: 1rem;
 }
+
 .spinner-border {
   width: 3rem;
   height: 3rem;
-  color: #ffd700; /* Gold spinner */
+  color: #ffd700;
+  /* Gold spinner */
 }
+
 .loading-text {
   font-size: 1.1rem;
 }
 
 /* Content Area */
 .content-area {
-  flex-grow: 1; /* Allow content to take remaining space */
+  flex-grow: 1;
+  /* Allow content to take remaining space */
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Important: Prevents content scroll from affecting page */
+  overflow: hidden;
+  /* Important: Prevents content scroll from affecting page */
   padding: 1rem;
-  gap: 1rem; /* Space between error message and data */
+  gap: 1rem;
+  /* Space between error message and data */
 }
 
 .error-message {
-  flex-shrink: 0; /* Prevent error message from shrinking */
-  background-color: #dc3545; /* Bootstrap danger red */
+  flex-shrink: 0;
+  /* Prevent error message from shrinking */
+  background-color: #dc3545;
+  /* Bootstrap danger red */
   color: white;
   padding: 0.75rem 1.25rem;
   border-radius: 0.25rem;
@@ -1211,41 +1143,54 @@ export default {
 }
 
 .data-container {
-  flex-grow: 1; /* Takes up remaining space in content-area */
-  display: flex; /* Use flex to manage visibility */
-  flex-direction: column; /* Stack sections vertically */
-  overflow: hidden; /* Contains the scrolling areas */
+  flex-grow: 1;
+  /* Takes up remaining space in content-area */
+  display: flex;
+  /* Use flex to manage visibility */
+  flex-direction: column;
+  /* Stack sections vertically */
+  overflow: hidden;
+  /* Contains the scrolling areas */
 }
 
 /* Sections for Table and Cards */
 .table-section,
 .public-reviews-section {
-  flex-grow: 1; /* Allow section to fill data-container */
+  flex-grow: 1;
+  /* Allow section to fill data-container */
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Important */
-  height: 100%; /* Ensure it takes full height of parent */
+  overflow: hidden;
+  /* Important */
+  height: 100%;
+  /* Ensure it takes full height of parent */
 }
 
 /* Wrapper for scrollable content */
 .table-wrapper,
 .reviews-wrapper {
-  flex-grow: 1; /* Allow this area to scroll */
-  overflow-y: auto; /* Enable vertical scrolling */
-  padding-right: 5px; /* Space for scrollbar */
+  flex-grow: 1;
+  /* Allow this area to scroll */
+  overflow-y: auto;
+  /* Enable vertical scrolling */
+  padding-right: 5px;
+  /* Space for scrollbar */
   /* Custom scrollbar styling (optional) */
   scrollbar-width: thin;
   scrollbar-color: #555 #333;
 }
+
 .table-wrapper::-webkit-scrollbar,
 .reviews-wrapper::-webkit-scrollbar {
   width: 8px;
 }
+
 .table-wrapper::-webkit-scrollbar-track,
 .reviews-wrapper::-webkit-scrollbar-track {
   background: #333;
   border-radius: 4px;
 }
+
 .table-wrapper::-webkit-scrollbar-thumb,
 .reviews-wrapper::-webkit-scrollbar-thumb {
   background-color: #555;
@@ -1256,24 +1201,31 @@ export default {
 /* Table Styles */
 .custom-table {
   width: 100%;
-  border-collapse: separate; /* Use separate for border-radius */
+  border-collapse: separate;
+  /* Use separate for border-radius */
   border-spacing: 0;
-  background: #1e1e1e; /* Slightly lighter dark */
+  background: #1e1e1e;
+  /* Slightly lighter dark */
   border-radius: 8px;
-  overflow: hidden; /* Clip content to rounded corners */
+  overflow: hidden;
+  /* Clip content to rounded corners */
 }
 
 .custom-table th,
 .custom-table td {
-  padding: 0.9rem 1rem; /* Increased padding */
+  padding: 0.9rem 1rem;
+  /* Increased padding */
   text-align: left;
-  border-bottom: 1px solid #3a3a3a; /* Darker border */
+  border-bottom: 1px solid #3a3a3a;
+  /* Darker border */
   vertical-align: middle;
 }
 
 .custom-table th {
-  background-color: #2a2a2a; /* Header background */
-  color: #ffd700; /* Gold header text */
+  background-color: #2a2a2a;
+  /* Header background */
+  color: #ffd700;
+  /* Gold header text */
   font-weight: 600;
   font-size: 0.9rem;
   text-transform: uppercase;
@@ -1287,13 +1239,16 @@ export default {
 .custom-table tbody tr {
   transition: background-color 0.2s ease;
 }
+
 .custom-table tbody tr:hover {
-  background-color: #2f2f2f; /* Hover effect */
+  background-color: #2f2f2f;
+  /* Hover effect */
 }
 
 .custom-table .film {
   font-weight: 500;
 }
+
 .custom-table .date {
   font-size: 0.9em;
   color: #aaa;
@@ -1302,10 +1257,14 @@ export default {
 /* Star Rating Styles */
 .star-rating {
   font-size: 1.1rem;
-} /* Adjust size */
+}
+
+/* Adjust size */
 .star-rating .bi {
   transition: color 0.2s ease;
-} /* Smooth color transition */
+}
+
+/* Smooth color transition */
 .star-rating .text-muted {
   font-size: 0.9em;
 }
@@ -1318,21 +1277,31 @@ export default {
 }
 
 .review-card {
-  background: #1e1e1e; /* Match film-card background */
-  border-radius: 10px; /* Match film-card radius */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Match film-card shadow */
-  padding: 15px; /* Match film-card padding */
+  background: #1e1e1e;
+  /* Match film-card background */
+  border-radius: 10px;
+  /* Match film-card radius */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  /* Match film-card shadow */
+  padding: 15px;
+  /* Match film-card padding */
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  transition: transform 0.2s ease-in-out; /* Match film-card transition */
-  color: white; /* Match film-card color */
+  transition: transform 0.2s ease-in-out;
+  /* Match film-card transition */
+  color: white;
+  /* Match film-card color */
   border: none;
-  text-align: left; /* Keep text left-aligned for reviews */
+  text-align: left;
+  /* Keep text left-aligned for reviews */
 }
+
 .review-card:hover {
-  transform: scale(1.02); /* Match film-card hover */
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Slightly enhance shadow on hover */
+  transform: scale(1.02);
+  /* Match film-card hover */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+  /* Slightly enhance shadow on hover */
 }
 
 /* Keep specific review card content styles */
@@ -1341,6 +1310,7 @@ export default {
   justify-content: space-between;
   align-items: center;
 }
+
 .review-meta {
   display: flex;
   flex-direction: column;
@@ -1348,15 +1318,19 @@ export default {
   font-size: 0.85rem;
   color: #aaa;
 }
+
 .review-author {
   font-weight: 600;
   color: #ccc;
 }
+
 .review-film-title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #ffd700; /* Gold title */
+  color: #ffd700;
+  /* Gold title */
 }
+
 .review-content {
   font-size: 0.95rem;
   color: #ddd;
@@ -1374,7 +1348,8 @@ export default {
   padding: 3rem 1rem;
   color: #aaa;
   font-size: 1.1rem;
-  flex-grow: 1; /* Center vertically */
+  flex-grow: 1;
+  /* Center vertically */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1382,59 +1357,79 @@ export default {
 
 /* Pagination Container */
 .pagination-container {
-  padding: 1rem 0 0 0; /* Padding top */
+  padding: 1rem 0 0 0;
+  /* Padding top */
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-shrink: 0; /* Prevent shrinking */
-  border-top: 1px solid #3a3a3a; /* Separator line */
-  margin-top: auto; /* Push to bottom if content is short */
+  flex-shrink: 0;
+  /* Prevent shrinking */
+  border-top: 1px solid #3a3a3a;
+  /* Separator line */
+  margin-top: auto;
+  /* Push to bottom if content is short */
 }
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .header-container {
     flex-direction: column;
-    align-items: stretch; /* Stretch items full width */
+    align-items: stretch;
+    /* Stretch items full width */
   }
+
   .tabs-wrapper {
-    justify-content: center; /* Center tabs on small screens */
+    justify-content: center;
+    /* Center tabs on small screens */
     width: 100%;
   }
+
   .controls-container {
     width: 100%;
-    justify-content: center; /* Center controls */
+    justify-content: center;
+    /* Center controls */
   }
+
   .search-container,
   .filter-container {
-    width: calc(100% - 2rem); /* Make dropdowns wider */
+    width: calc(100% - 2rem);
+    /* Make dropdowns wider */
     left: 1rem;
     right: 1rem;
   }
 
   .custom-table thead {
-    display: none; /* Hide table header on small screens */
+    display: none;
+    /* Hide table header on small screens */
   }
+
   .custom-table tbody,
   .custom-table tr,
   .custom-table td {
     display: block;
     width: 100%;
   }
+
   .custom-table tr {
     border: 1px solid #3a3a3a;
     border-radius: 6px;
     margin-bottom: 1rem;
     padding: 0.5rem;
   }
+
   .custom-table td {
-    text-align: right; /* Align content to the right */
-    padding-left: 50%; /* Make space for the label */
+    text-align: right;
+    /* Align content to the right */
+    padding-left: 50%;
+    /* Make space for the label */
     position: relative;
-    border-bottom: none; /* Remove inner borders */
+    border-bottom: none;
+    /* Remove inner borders */
   }
+
   .custom-table td::before {
-    content: attr(data-label); /* Use data-label for pseudo-header */
+    content: attr(data-label);
+    /* Use data-label for pseudo-header */
     position: absolute;
     left: 10px;
     width: calc(50% - 20px);
@@ -1442,18 +1437,25 @@ export default {
     white-space: nowrap;
     text-align: left;
     font-weight: bold;
-    color: #ffd700; /* Gold label */
+    color: #ffd700;
+    /* Gold label */
   }
+
   .custom-table td.text-center {
     text-align: right;
-  } /* Override center alignment */
+  }
+
+  /* Override center alignment */
   .custom-table td.text-center::before {
     text-align: left;
-  } /* Keep label left */
+  }
+
+  /* Keep label left */
 
   .reviews-grid {
     /* Adjust grid columns for smaller screens if needed, auto-fit might be sufficient */
-    grid-template-columns: 1fr; /* Stack cards vertically */
+    grid-template-columns: 1fr;
+    /* Stack cards vertically */
   }
 }
 </style>
