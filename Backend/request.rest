@@ -75,6 +75,41 @@ get {{host}}/api/
 ### get queryFilmsWithEvaluation
 get {{host}}/api/queryFilmsWithEvaluation
 
+### patch rateing/userId/filmId
+PATCH {{host}}/api/favourites/6/2
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+    "evaluation": 3.5 
+}
+
+
+### post rateing/userId/filmId
+post {{host}}/api/favourites/6/2
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+    "userId": 6,
+    "filmId": 4,
+    "evaluation": "3.5",
+    "content": "Honestly, the soundtrack was captivating from start to finish. Not sure I'd recommend it."
+}
+
+### delete films by id
+DELETE {{host}}/api/favourites/80
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### get rateing/userId/filmId
+get {{host}}/api/favourites/6/2
+Accept: application/json
+
+
 ### get films
 get {{host}}/api/films
 

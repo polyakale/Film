@@ -24,4 +24,12 @@ class Favourite extends Model
     {
         return $this->belongsTo(Film::class, 'filmId');
     }
+
+    // protected function casts(): array
+    // {
+    //     return [
+    //         'evaluation' => 'double'
+           
+    //     ];
+    // }
 }
