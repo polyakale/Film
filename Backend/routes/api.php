@@ -65,7 +65,7 @@ Route::get('favourites/{id}', [FavouriteController::class, 'show']);
 Route::get('favourites/{userId}/{filmId}', [FavouriteController::class, 'showFavouriteByUserIdAndFilmId']);
 Route::post('favourites', [FavouriteController::class, 'store']);
 Route::post('favourites/{userId}/{filmId}', [FavouriteController::class, 'storeFavouriteByUserIdAndFilmId']);
-// ->middleware('auth:sanctum');
+    // ->middleware('auth:sanctum');
 Route::patch('favourites/{id}', [FavouriteController::class, 'update']);
 Route::patch('favourites/{userId}/{filmId}', [FavouriteController::class, 'patchFavouriteByUserIdAndFilmId']);
 // ->middleware('auth:sanctum');

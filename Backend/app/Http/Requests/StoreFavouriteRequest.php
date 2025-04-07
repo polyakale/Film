@@ -26,7 +26,7 @@ class StoreFavouriteRequest extends FormRequest
             'evaluation' => [
                 'required',
                 'numeric',
-                'min:0.5',
+                'min:0',
                 'max:5',
                 function ($attribute, $value, $fail) {
                     if (fmod($value * 2, 1) !== 0.0) {
@@ -34,7 +34,7 @@ class StoreFavouriteRequest extends FormRequest
                     }
                 }
             ],
-            'content' => 'required|string',
+            // 'content' => 'string',
         ];
     }
 }
