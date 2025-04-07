@@ -32,7 +32,7 @@ Accept: application/json
 Authorization: Bearer {{token}}
 
 ### get user by id
-GET  {{host}}/api/users/3
+GET  {{host}}/api/users/8
 Accept: application/json
 Authorization: Bearer {{token}}
 
@@ -44,23 +44,23 @@ Authorization: Bearer {{token}}
 
 {
     "positionId": 2,
-    "name":  "test2",
-    "email": "test2@example.com",
-    "password": "12355555"
+    "name":  "Ben",
+    "email": "guest7@example.com",
+    "password": "guest123"
 }
 
 ### patch user
-PATCH {{host}}/api/users/3
+PATCH {{host}}/api/users/7
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}
 
 {
-    "password": "1234"
+    "password": "guest123"
 }
 
 ### delete user
-DELETE {{host}}/api/users/4
+DELETE {{host}}/api/users/10
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}
@@ -82,21 +82,21 @@ Accept: application/json
 Authorization: Bearer {{token}}
 
 {
-    "evaluation": 3.5 
+    "evaluation": 3.5
 }
 
 
 ### post rateing/userId/filmId
-post {{host}}/api/favourites/6/2
+post {{host}}/api/favouriteFilmByUser
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}
 
 {
-    "userId": 6,
-    "filmId": 4,
-    "evaluation": "3.5",
-    "content": "Honestly, the soundtrack was captivating from start to finish. Not sure I'd recommend it."
+    "userId": 1,
+    "filmId": 6,
+    "evaluation": "0",
+    "content": ""
 }
 
 ### delete films by id

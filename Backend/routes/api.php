@@ -17,9 +17,9 @@ Route::get('favouritesByUserId/{userId}', [FavouriteController::class, 'getByUse
 // Route::post('/favourites', [FavouriteController::class, 'store'])->withoutMiddleware('auth:api');
 // users
 Route::post('users/login', [UserController::class, 'login']);
-Route::patch('users/change-password', [UserController::class, 'changePassword'])
-    ->middleware('auth:sanctum');
 Route::post('users/logout', [UserController::class, 'logout']);
+Route::patch('users/change-password', [UserController::class, 'changePassword']);
+    // ->middleware('auth:sanctum');
 Route::get('users', [UserController::class, 'index'])
     ->middleware('auth:sanctum');
 
@@ -29,12 +29,7 @@ Route::post('users', [UserController::class, 'store']);
 
 Route::patch('users/{id}', [UserController::class, 'update'])
     ->middleware('auth:sanctum');
-Route::delete('users/{id}', [UserController::class, 'destroy'])
-    ->middleware('auth:sanctum');
-Route::middleware('auth:sanctum')->group(function () {
-    Route::delete('users/{id}', [UserController::class, 'destroy']);
-});
-
+Route::delete('users/{id}', [UserController::class, 'destroy']);
 
 // positions
 Route::get('positions', [PositionController::class, 'index']);
@@ -54,7 +49,7 @@ Route::post('films', [FilmController::class, 'store'])
 Route::patch('films/{id}', [FilmController::class, 'update'])
     ->middleware('auth:sanctum');
 Route::delete('films/{id}', [FilmController::class, 'destroy'])
-->middleware('auth:sanctum');
+    ->middleware('auth:sanctum');
 // videos
 Route::get('videos', [VideoController::class, 'index']);
 Route::get('videos/{id}', [VideoController::class, 'show']);
@@ -73,10 +68,10 @@ Route::post('favourites/{userId}/{filmId}', [FavouriteController::class, 'storeF
     // ->middleware('auth:sanctum');
 Route::patch('favourites/{id}', [FavouriteController::class, 'update']);
 Route::patch('favourites/{userId}/{filmId}', [FavouriteController::class, 'patchFavouriteByUserIdAndFilmId']);
-    // ->middleware('auth:sanctum');
+// ->middleware('auth:sanctum');
 Route::delete('favourites/{id}', [FavouriteController::class, 'destroy']);
 Route::delete('favourites/{userId}/{filmId}', [FavouriteController::class, 'destroyFavouriteByUserIdAndFilmId']);
-    // ->middleware('auth:sanctum');
+// ->middleware('auth:sanctum');
 // roles
 Route::get('roles', [RoleController::class, 'index']);
 Route::get('roles/{id}', [RoleController::class, 'show']);

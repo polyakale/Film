@@ -4,8 +4,13 @@
     <p v-if="debug">{{ stateAuth }}</p>
 
     <div class="search-sort-container">
-      <input type="text" v-model="searchQuery" @input="searchFilms" placeholder="Search films..."
-        class="search-input" />
+      <input
+        type="text"
+        v-model="searchQuery"
+        @input="searchFilms"
+        placeholder="Search films..."
+        class="search-input"
+      />
       <select v-model="sortOption" @change="sortFilms" class="sort-select">
         <option value="abc">ABC</option>
         <option value="production">Production Year</option>
@@ -21,8 +26,12 @@
     </div>
     <!-- Kártyák -->
     <div v-if="films.length" class="films-grid">
-      <div v-for="(film, index) in filteredFilms" :key="film.id" class="film-card"
-        :class="{'film-card-rated': rated(index, stateAuth.id)}">
+      <div
+        v-for="film in filteredFilms"
+        :key="film.id"
+        class="film-card"
+        :class="{ 'film-card-rated': rated(film, stateAuth.id) }"
+      >
         <span class="star-icon" @click="openRatingModal(film)">★</span>
         <h2 class="film-title">{{ film.title }}</h2>
         <p class="film-info">
@@ -36,8 +45,13 @@
           <strong>Evaluation:</strong>
           {{ film.evaluation || "This film hasn't been rated yet." }}
         </p>
-        <a v-if="film.imdbLink" :href="formatImdbUrl(film.imdbLink)" target="_blank" rel="noopener noreferrer"
-          class="imdb-link">
+        <a
+          v-if="film.imdbLink"
+          :href="formatImdbUrl(film.imdbLink)"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="imdb-link"
+        >
           View on IMDb
         </a>
 
@@ -108,17 +122,27 @@
       <div class="modal-content">
         <h2 class="film-title">Please rate the movie</h2>
         <div class="rating-stars">
-          <span v-for="n in 5" :key="n" @click="setRating(n)" @mousemove="handleHover(n, $event)"
-            @mouseleave="hoverRating = null" :class="{
+          <span
+            v-for="n in 5"
+            :key="n"
+            @click="setRating(n)"
+            @mousemove="handleHover(n, $event)"
+            @mouseleave="hoverRating = null"
+            :class="{
               'star-filled': (hoverRating || currentRating) >= n,
-              'star-half': (hoverRating || currentRating) >= n - 0.5 && (hoverRating || currentRating) < n
-            }">
+              'star-half':
+                (hoverRating || currentRating) >= n - 0.5 &&
+                (hoverRating || currentRating) < n,
+            }"
+          >
             ★
           </span>
         </div>
         <div class="rating-actions">
           <button @click="submitRating" class="submit-button">Submit</button>
-          <button @click="closeRatingModal" class="cancel-button">Cancel</button>
+          <button @click="closeRatingModal" class="cancel-button">
+            Cancel
+          </button>
         </div>
       </div>
     </div>
@@ -132,7 +156,6 @@ import { DEBUG } from "../helpers/baseUrls";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 export default {
-  
   data() {
     return {
       debug: DEBUG,
@@ -157,6 +180,8 @@ export default {
       currentFilm: null,
       currentRating: 0,
       hoverRating: null,
+      ifRated: null,
+      selectedEvaulatedFilm: null,
     };
   },
   async mounted() {
@@ -304,7 +329,7 @@ export default {
           imdbLink: this.editingFilm.imdbLink,
         };
 
-        await axios.patch(url, filmData, {headers});
+        await axios.patch(url, filmData, { headers });
         await this.fetchFilmsFromBackend();
         this.closeEditFilmModal();
       } catch (error) {
@@ -330,17 +355,26 @@ export default {
         }
       }
     },
-    rated(index, id){
-      if ( this.filteredFilms[index].usersId){
-        const usersId = this.filteredFilms[index].usersId.split(",");
+    rated(film, id) {
+      if (film.usersId) {
+        const usersId = film.usersId.split(",");
         return usersId.includes(id.toString());
       }
       return false;
     },
     openRatingModal(film) {
+      this.selectedEvaulatedFilm = film;
+      const id = this.stateAuth.id;
+      if (film.usersId) {
+        const usersId = film.usersId.split(",");
+        this.ifRated = usersId.includes(id.toString());
+        console.log("Valami", this.ifRated, id);
+      } else {
+        this.ifRated = false;
+      }
       this.currentFilm = film;
       this.showRatingModal = true;
-      this.currentRating = film.evaluation || 0;
+      this.currentRating = this.ifRated ? film.evaluation || 0 : 0;
     },
     closeRatingModal() {
       this.showRatingModal = false;
@@ -357,26 +391,44 @@ export default {
       this.currentRating = this.currentRating === n ? n - 0.5 : n;
     },
     async submitRating() {
+      const token = this.stateAuth.token;
+      const headers = {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+      console.log("valami",this.currentRating);
+      this.currentRating = this.currentRating ? this.currentRating : 0;
       try {
-        const token = this.stateAuth.token;
-        const headers = {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        };
-
-        await axios.post(
-          `${BASE_URL}/evaluation/${this.currentFilm.id}`,
-          { value: this.currentRating },
-          { headers }
-        );
+        if (this.ifRated) {
+          //Patch
+          const data = {
+            
+            evaluation: this.currentRating,
+            
+          };
+          const url = `${BASE_URL}/favourites/${this.stateAuth.id}/${this.selectedEvaulatedFilm.id}`;
+          await axios.patch(url, data, { headers });
+        } else {
+          
+          //Post
+          const data = {
+            userId: this.stateAuth.id,
+            filmId: this.selectedEvaulatedFilm.id,
+            evaluation: this.currentRating,
+            content: "",
+          };
+          const url = `${BASE_URL}/favouriteFilmByUser`;
+          console.log("post", url, data, headers);
+          await axios.post(url, data, { headers });
+        }
 
         await this.fetchFilmsFromBackend();
         this.closeRatingModal();
       } catch (error) {
         console.error("Error submitting rating:", error);
       }
-    }
+    },
   },
 };
 </script>
@@ -395,13 +447,12 @@ export default {
   margin-bottom: 20px;
 }
 
-.submit-button{
+.submit-button {
   background: #4caf50;
   color: white;
 }
 
-.cancel-button
-{
+.cancel-button {
   background: #f44336;
   color: white;
 }
@@ -588,7 +639,7 @@ export default {
 }
 
 .rating-stars .star-half::before {
-  content: '★';
+  content: "★";
   position: absolute;
   left: 0;
   width: 50%;

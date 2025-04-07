@@ -40,7 +40,7 @@
 
             <!-- New Password -->
             <div class="form-group">
-              <label>New Password</label>
+              <label>New Password (8-16 characters)</label>
               <div class="input-container">
                 <input
                   :type="passwordVisible.new ? 'text' : 'password'"
@@ -106,110 +106,124 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted } from "vue";
-import { useRouter } from "vue-router";
+<script>
+import { mapState, mapActions } from "pinia";
 import { useAuthStore } from "@/stores/useAuthStore";
 import axios from "axios";
 import { BASE_URL } from "@/helpers/baseUrls";
 
-const store = useAuthStore();
-const router = useRouter();
-
-// Reactive state for password form
-const password = ref({
-  current: "",
-  new: "",
-  confirm: "",
-});
-const loading = ref(false);
-const message = ref("");
-const messageClass = ref("");
-
-// Reactive state for toggling password visibility
-const passwordVisible = ref({
-  current: false,
-  new: false,
-  confirm: false,
-});
-
-// Computed properties
-const user = computed(() => store.user);
-const email = computed(() => store.email || "N/A");
-const roleName = computed(() => {
-  return store.positionId
-    ? store.positionId === 1
-      ? "Administrator"
-      : "Guest"
-    : "Guest";
-});
-
-// Toggle visibility for a specific field
-const toggleVisibility = (field) => {
-  passwordVisible.value[field] = !passwordVisible.value[field];
-};
-
-// Show message temporarily
-const showMessage = (text, style) => {
-  message.value = text;
-  messageClass.value = style;
-  setTimeout(() => {
-    message.value = "";
-    messageClass.value = "";
-  }, 5000);
-};
-
-// Handle password change
-const changePassword = async () => {
-  if (password.value.new !== password.value.confirm) {
-    showMessage("New passwords do not match", "error-message");
-    return;
-  }
-  loading.value = true;
-  try {
-    await axios.patch(
-      `${BASE_URL}/users/change-password`,
-      {
-        current_password: password.value.current,
-        new_password: password.value.new,
-        new_password_confirmation: password.value.confirm,
+export default {
+  data() {
+    return {
+      password: {
+        current: "",
+        new: "",
+        confirm: "",
       },
-      {
-        headers: {
-          Authorization: `Bearer ${store.token}`,
-          "Content-Type": "application/json",
-        },
+      loading: false,
+      message: "",
+      messageClass: "",
+      passwordVisible: {
+        current: false,
+        new: false,
+        confirm: false,
+      },
+    };
+  },
+  computed: {
+    ...mapState(useAuthStore, ["user", "email", "positionId", "token", "id"]),
+    roleName() {
+      return this.positionId === 1 ? "Administrator" : "Guest";
+    },
+    passwordStrength() {
+      if (!this.password.new) return 0;
+      let strength = 0;
+      if (this.password.new.length >= 8) strength++;
+      if (/[A-Z]/.test(this.password.new)) strength++;
+      if (/[0-9]/.test(this.password.new)) strength++;
+      if (/[@$!%*#?&]/.test(this.password.new)) strength++;
+      return strength;
+    },
+  },
+  methods: {
+    toggleVisibility(field) {
+      this.passwordVisible[field] = !this.passwordVisible[field];
+    },
+    showMessage(text, style) {
+      this.message = text;
+      this.messageClass = style;
+      setTimeout(() => {
+        this.message = "";
+        this.messageClass = "";
+      }, 5000);
+    },
+    async changePassword() {
+      if (this.password.new !== this.password.confirm) {
+        this.showMessage("New passwords do not match", "error-message");
+        return;
       }
-    );
-    showMessage("Password changed successfully!", "success-message");
-    password.value = { current: "", new: "", confirm: "" }; // Reset form
-  } catch (error) {
-    console.error("Password change error:", error);
-    const errorMsg = error.response?.data?.message || "Password change failed";
-    showMessage(errorMsg, "error-message");
-  } finally {
-    loading.value = false;
-  }
-};
 
-// Handle account deletion
-const deleteAccount = async () => {
-  console.log("Deleting account for:", store.id); // Debugging log
-  if (window.confirm("Are you sure you want to delete your account?")) {
-    try {
-      await axios.delete(`${BASE_URL}/users/${store.id}`, {
-        headers: { Authorization: `Bearer ${store.token}` },
-      });
-      store.clearStoredData();
-      router.push("/login");
-    } catch (error) {
-      console.error("Error deleting account:", error);
-      showMessage("Failed to delete account", "error-message");
-    }
-  }
+      this.loading = true;
+      try {
+        const requestData = {
+          current_password: this.password.current,
+          new_password: this.password.new,
+          new_password_confirmation: this.password.confirm,
+        };
+
+        // Add email for guest users (no token)
+        if (!this.token) {
+          requestData.email = this.email; // Get email from your store
+        }
+
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+
+        // Add token only if available
+        if (this.token) {
+          config.headers.Authorization = `Bearer ${this.token}`;
+        }
+
+        await axios.patch(
+          `${BASE_URL}/users/change-password`,
+          requestData,
+          config
+        );
+
+        this.showMessage("Password changed successfully!", "success-message");
+        this.password = { current: "", new: "", confirm: "" };
+      } catch (error) {
+        console.error("Password change error:", error);
+        const errorMsg =
+          error.response?.data?.message || "Password change failed";
+        this.showMessage(errorMsg, "error-message");
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async deleteAccount() {
+      console.log("Deleting account for:", this.id);
+      if (window.confirm("Are you sure you want to delete your account?")) {
+        try {
+          await axios.delete(`${BASE_URL}/users/${this.id}`, {
+            headers: { Authorization: `Bearer ${this.token}` },
+          });
+          this.clearStoredData();
+          this.$router.push("/login");
+        } catch (error) {
+          console.error("Error deleting account:", error);
+          this.showMessage("Failed to delete account", "error-message");
+        }
+      }
+    },
+    ...mapActions(useAuthStore, ["clearStoredData"]),
+  },
 };
 </script>
-
 <style scoped>
 /* === Background & Container === */
 .profile-container {
