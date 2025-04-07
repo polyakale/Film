@@ -32,7 +32,7 @@ Accept: application/json
 Authorization: Bearer {{token}}
 
 ### get user by id
-GET  {{host}}/api/users/3
+GET  {{host}}/api/users/8
 Accept: application/json
 Authorization: Bearer {{token}}
 
@@ -44,23 +44,23 @@ Authorization: Bearer {{token}}
 
 {
     "positionId": 2,
-    "name":  "test2",
-    "email": "test2@example.com",
-    "password": "12355555"
+    "name":  "Ben",
+    "email": "guest7@example.com",
+    "password": "guest123"
 }
 
 ### patch user
-PATCH {{host}}/api/users/3
+PATCH {{host}}/api/users/7
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}
 
 {
-    "password": "1234"
+    "password": "guest123"
 }
 
 ### delete user
-DELETE {{host}}/api/users/4
+DELETE {{host}}/api/users/10
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}

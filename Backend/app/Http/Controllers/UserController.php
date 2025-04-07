@@ -15,31 +15,23 @@ class UserController extends Controller
     public function login(LoginUserRequest $request)
     {
         $user = User::where('email', $request->email)->first();
-
+    
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Invalid credentials',
-                'data' => []
-            ], 401, [], JSON_UNESCAPED_UNICODE);
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
-
+    
         $user->tokens()->delete();
-        if ($user->positionId == 1) {
-            //admin küldünk tokent
-
-            $token = $user->createToken('access')->plainTextToken;
-        } else {
-            //user nem küldünk tokent
-            $token = "";
-        }
-
+    
+        // Issue token to ALL users (including guests)
+        $token = $user->createToken('basic-access', ['change-password'])->plainTextToken;
+    
         return response()->json([
             'message' => 'ok',
             'data' => [
                 'user' => $user,
                 'token' => $token
             ]
-        ], 200, [], JSON_UNESCAPED_UNICODE);
+        ], 200);
     }
 
     public function changePassword(Request $request)
@@ -47,20 +39,27 @@ class UserController extends Controller
         $request->validate([
             'current_password' => 'required',
             'new_password' => 'required|min:8|max:16|confirmed',
+            'email' => 'required_if:token,false|email' // Require email if no token
         ]);
-
-        $user = $request->user(); // Get the logged-in user
-
-        if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json(['message' => 'Current password is incorrect'], 422);
+    
+        // Authenticate via token or email/password
+        if ($request->bearerToken()) {
+            $user = $request->user(); // Token-based auth
+        } else {
+            // Email + password auth for guests
+            $user = User::where('email', $request->email)->first();
+    
+            if (!$user || !Hash::check($request->current_password, $user->password)) {
+                return response()->json(['message' => 'Invalid credentials'], 401);
+            }
         }
-
+    
+        // Update password
         $user->password = Hash::make($request->new_password);
         $user->save();
-
+    
         return response()->json(['message' => 'Password changed successfully'], 200);
     }
-
 
     public function logout(Request $request)
     {
@@ -142,25 +141,25 @@ class UserController extends Controller
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy(int $id)
     {
-        $user = User::findOrFail($id);
-
-        // Allow deletion only if the authenticated user is deleting their own account
-        if ($request->user()->id !== $user->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        $row = User::find($id);
+        if ($row) {
+            $row->delete();
+            $data = [
+                'message' => 'ok',
+                'data' => [
+                    'id' => $id
+                ]
+            ];
+        } else {
+            $data = [
+                'message' => 'Not found',
+                'data' => [
+                    'id' => $id
+                ]
+            ];
         }
-
-        $user->delete();
-
-        return response()->json(['message' => 'User deleted successfully'], 200);
-    }
-
-    public function deleteAccount(Request $request)
-    {
-        $user = $request->user(); // Get the authenticated user
-        $user->delete();
-
-        return response()->json(['message' => 'Account deleted successfully'], 200);
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
 }

@@ -25,7 +25,7 @@ class UpdateUserRequest extends FormRequest
             'positionId' => 'nullable|int',
             'name' => 'nullable|string',
             'email' => 'nullable|string',
-            'password' => 'nullable|string|min:7',
+            'password' => 'nullable|string|min:8|max:16',
         ];
     }
 }
