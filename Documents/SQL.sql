@@ -23,7 +23,7 @@ GROUP BY fi.id,
 ORDER BY evaluation DESC;
 
 #get api/favourites/2/42 
-select * from favourites
+select id, userId, filmId, evaluation from favourites
   WHERE userId = 6 AND filmId = 3
 limit 1;
 
