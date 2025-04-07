@@ -1,76 +1,31 @@
 <script setup>
+
 </script>
 
 <template>
-  <main class="main-container">
-    <p class="text-style text-center">
-      This website is to preserve and collect old Hungarian films from the time
-      between the two world wars.
+  <div>
+    <h1>Hungarian Interwar Film Archive</h1>
+
+    <p>
+      This website is dedicated to preserving and collecting old Hungarian films
+      from the interwar period (1930-1945).
     </p>
-    <div class="image-container">
+
+    <div class="image-container" aria-hidden="true">
       <img
         src="@/assets/filmBgImage.png"
-        class="responsive-image"
-        alt="Film background"
+        alt="Vintage Hungarian film reel and projector"
+        class="hero-image"
+        :class="{ 'image-loaded': isLoaded }"
         loading="lazy"
-        :style="{ opacity: 0.9 }"
+        decoding="async"
+        width="1200"
+        height="800"
       />
+      <div class="image-overlay"></div>
     </div>
-  </main>
+  </div>
 </template>
 
 <style scoped>
-.main-container {
-  width: 100%;
-  overflow: hidden;
-  position: relative;
-}
-
-.text-style {
-  font-size: 1.5rem;
-  margin: 0px;
-}
-
-.image-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  padding: 1rem;
-  box-sizing: border-box;
-}
-
-.responsive-image {
-  max-width: 100%;
-  height: auto;
-  object-fit: contain;
-  pointer-events: none;
-  user-select: none;
-  transition: opacity 0.3s ease;
-}
-
-/* Responsive breakpoints */
-@media (max-width: 768px) {
-  .image-container {
-    padding: 0.5rem;
-  }
-
-  .responsive-image {
-    max-height: 60vh;
-  }
-}
-
-@media (max-width: 480px) {
-  .responsive-image {
-    max-height: 50vh;
-  }
-}
-
-/* Reduced motion preference */
-@media (prefers-reduced-motion) {
-  .responsive-image {
-    transition: none;
-  }
-}
 </style>
