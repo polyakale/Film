@@ -82,21 +82,21 @@ Accept: application/json
 Authorization: Bearer {{token}}
 
 {
-    "evaluation": 3.5 
+    "evaluation": 3.5
 }
 
 
 ### post rateing/userId/filmId
-post {{host}}/api/favourites/6/2
+post {{host}}/api/favouriteFilmByUser
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}
 
 {
-    "userId": 6,
-    "filmId": 4,
-    "evaluation": "3.5",
-    "content": "Honestly, the soundtrack was captivating from start to finish. Not sure I'd recommend it."
+    "userId": 1,
+    "filmId": 6,
+    "evaluation": "0",
+    "content": ""
 }
 
 ### delete films by id

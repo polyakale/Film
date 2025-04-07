@@ -80,7 +80,7 @@ class FavouriteController extends Controller
             ]);
         }
     }
-    public function storeFavouriteByUserIdAndFilmId(StoreFavouriteRequest $request, $userId, $filmId)
+    public function storeFavouriteByUserIdAndFilmId(StoreFavouriteRequest $request)
     {
 
         $row = Favourite::create($request->all());
