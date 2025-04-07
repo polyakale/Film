@@ -614,15 +614,13 @@ export default {
      */
     closeModal() {
       this.isModalVisible = false;
-      // Reset modal state
-      this.modalState = "Read";
-      this.modalItem = {};
-      this.selectedRowId = null;
-      this.modalTitle = null;
-      this.modalMessageYesNo = null;
-      this.modalYes = null;
-      this.modalNo = null;
-      this.modalSize = null;
+      // Reset other states...
+      // Add a small delay to allow Bootstrap cleanup
+      setTimeout(() => {
+        this.modalState = 'Read';
+        this.modalItem = {};
+        this.selectedRowId = null;
+      }, 300);
     },
 
     // --- Helper & Formatting Methods ---
