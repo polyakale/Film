@@ -138,6 +138,10 @@
             ★
           </span>
         </div>
+        <div class="comment-section">
+          <label>Your Comment (optional):</label>
+          <textarea v-model="currentComment" rows=""></textarea>
+        </div>
         <div class="rating-actions">
           <button @click="submitRating" class="submit-button">Submit</button>
           <button @click="closeRatingModal" class="cancel-button">
@@ -182,6 +186,8 @@ export default {
       hoverRating: null,
       ifRated: null,
       selectedEvaulatedFilm: null,
+      currentComment: "",
+      existingCommentId: null,
     };
   },
   async mounted() {
@@ -362,16 +368,36 @@ export default {
       }
       return false;
     },
-    openRatingModal(film) {
+    async openRatingModal(film) {
       this.selectedEvaulatedFilm = film;
       const id = this.stateAuth.id;
+      
+      // Reset comment fields
+      // this.currentComment = "";
+      // this.existingCommentId = null;
+      
+      // Check if user has already rated
       if (film.usersId) {
         const usersId = film.usersId.split(",");
         this.ifRated = usersId.includes(id.toString());
-        console.log("Valami", this.ifRated, id);
       } else {
         this.ifRated = false;
       }
+      
+      // If rated, try to fetch existing comment
+      if (this.ifRated) {
+        try {
+          const url = `${BASE_URL}/favourites/${film.userId}/${film.id}`;
+          const response = await axios.get(url);
+          if (response.data.data && response.data.data.content) {
+            this.currentComment = response.data.data.content;
+            this.existingCommentId = response.data.data.id;
+          }
+        } catch (error) {
+          console.error("Error fetching comment:", error);
+        }
+      }
+      
       this.currentFilm = film;
       this.showRatingModal = true;
       this.currentRating = this.ifRated ? film.evaluation || 0 : 0;
@@ -380,6 +406,8 @@ export default {
       this.showRatingModal = false;
       this.currentFilm = null;
       this.currentRating = 0;
+      this.currentComment = "";
+      this.existingCommentId = null;
     },
     handleHover(n, event) {
       const star = event.target;
@@ -397,29 +425,27 @@ export default {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       };
-      console.log("valami",this.currentRating);
+      
       this.currentRating = this.currentRating ? this.currentRating : 0;
+      
       try {
         if (this.ifRated) {
-          //Patch
+          // Update existing rating and comment
           const data = {
-            
             evaluation: this.currentRating,
-            
+            content: this.currentComment || null
           };
-          const url = `${BASE_URL}/favourites/${this.stateAuth.id}/${this.selectedEvaulatedFilm.id}`;
+          const url = `${BASE_URL}/favourites/${this.existingCommentId || this.stateAuth.id}/${this.selectedEvaulatedFilm.id}`;
           await axios.patch(url, data, { headers });
         } else {
-          
-          //Post
+          // Create new rating with optional comment
           const data = {
             userId: this.stateAuth.id,
             filmId: this.selectedEvaulatedFilm.id,
             evaluation: this.currentRating,
-            content: "",
+            content: this.currentComment || null,
           };
           const url = `${BASE_URL}/favouriteFilmByUser`;
-          console.log("post", url, data, headers);
           await axios.post(url, data, { headers });
         }
 
@@ -656,5 +682,23 @@ export default {
 
 .rating-actions button {
   padding: 5px 15px;
+}
+
+.comment-section {
+  margin: 15px 0;
+}
+
+.comment-section label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.comment-section textarea {
+  width: 100%;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background: #2d2d2d;
+  color: white;
 }
 </style>
