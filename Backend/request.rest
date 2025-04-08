@@ -93,8 +93,8 @@ Accept: application/json
 Authorization: Bearer {{token}}
 
 {
-    "userId": 1,
-    "filmId": 6,
+    "userId": 6,
+    "filmId": 2,
     "evaluation": "0",
     "content": ""
 }
