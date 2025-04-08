@@ -15,9 +15,9 @@ return new class extends Migration
             $table->Integer('id')->autoIncrement();
             $table->Integer('userId')->nullable();
             // $table->foreign('userId')->references('id')->on('users');
-            $table->foreign('userId')->references('id')->on('users')->constrained()->onDelete('cascade');
             $table->Integer('filmId')->nullable();
-            $table->foreign('filmId')->references('id')->on('films');
+            $table->foreign('userId')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('filmId')->references('id')->on('films')->onDelete('cascade');;
             $table->decimal('evaluation', 2, 1)->comment('0.5 to 5.0')->nullable();
             $table->string('content')->nullable();
             $table->timestamps();

@@ -6,7 +6,6 @@ use App\Models\Film;
 use App\Models\User;
 use App\Models\Favourite;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\DB;
 use Faker\Factory as Faker;
 
 class FavouriteFactory extends Factory
@@ -15,32 +14,48 @@ class FavouriteFactory extends Factory
     {
         $faker = Faker::create('en_US');
 
-        static $possibleCombinations;
+        // First ensure we have at least one user and film
+        $user = User::first() ?? User::factory()->create();
+        $film = Film::first() ?? Film::factory()->create();
 
-        if (!isset($possibleCombinations)) {
-            $userIds = User::where('id', '!=', 1)->pluck('id');
-            $filmIds = Film::pluck('id');
+        // Get all possible combinations that don't exist yet
+        $existingPairs = Favourite::select(['userId', 'filmId'])
+            ->get()
+            ->map(fn($item) => $item->userId . '-' . $item->filmId)
+            ->all();
 
-            $possibleCombinations = collect($userIds)
-                ->crossJoin($filmIds)
-                ->shuffle()
-                ->all();
+        $userIds = User::pluck('id')->all();
+        $filmIds = Film::pluck('id')->all();
 
-            $existingPairs = Favourite::select(['userId', 'filmId'])
-                ->get()
-                ->map(fn($item) => [$item->userId, $item->filmId])
-                ->all();
-
-            $possibleCombinations = array_diff($possibleCombinations, $existingPairs);
-        }
+        $possibleCombinations = collect($userIds)
+            ->crossJoin($filmIds)
+            ->map(fn($pair) => $pair[0] . '-' . $pair[1])
+            ->diff($existingPairs)
+            ->map(fn($str) => explode('-', $str))
+            ->all();
 
         if (empty($possibleCombinations)) {
-            throw new \Exception("No more unique user-film combinations available");
+            // Fallback to existing user and film if no combinations left
+            $combination = [$user->id, $film->id];
+        } else {
+            $combination = $faker->randomElement($possibleCombinations);
         }
 
-        $combination = array_pop($possibleCombinations);
         $evaluation = $faker->numberBetween(1, 10) / 2;
 
+        // Review content generation remains the same
+        $content = $this->generateReviewContent($faker, $evaluation);
+
+        return [
+            'userId' => $combination[0],
+            'filmId' => $combination[1],
+            'evaluation' => $evaluation,
+            'content' => $content,
+        ];
+    }
+
+    protected function generateReviewContent($faker, $evaluation): string
+    {
         // More automation: Dynamically generated review sentences
         $openers = [
             "I just watched this and",
@@ -99,20 +114,12 @@ class FavouriteFactory extends Factory
             default => $faker->randomElement($negatives),
         };
 
-        // Generate a more human-like review sentence
-        $content = sprintf(
+        return sprintf(
             "%s %s %s %s",
             $faker->randomElement($openers),
             $faker->randomElement($middleParts),
             $sentiment,
             $faker->randomElement($closers)
         );
-
-        return [
-            'userId' => $combination[0],
-            'filmId' => $combination[1],
-            'evaluation' => $evaluation,
-            'content' => $content,
-        ];
     }
 }
