@@ -17,9 +17,9 @@ Route::get('favouritesByUserId/{userId}', [FavouriteController::class, 'getByUse
 // Route::post('/favourites', [FavouriteController::class, 'store'])->withoutMiddleware('auth:api');
 // users
 Route::post('users/login', [UserController::class, 'login']);
+Route::patch('users/change-password', [UserController::class, 'changePassword'])
+    ->middleware('auth:sanctum');
 Route::post('users/logout', [UserController::class, 'logout']);
-Route::patch('users/change-password', [UserController::class, 'changePassword']);
-    // ->middleware('auth:sanctum');
 Route::get('users', [UserController::class, 'index'])
     ->middleware('auth:sanctum');
 
@@ -29,7 +29,12 @@ Route::post('users', [UserController::class, 'store']);
 
 Route::patch('users/{id}', [UserController::class, 'update'])
     ->middleware('auth:sanctum');
-Route::delete('users/{id}', [UserController::class, 'destroy']);
+Route::delete('users/{id}', [UserController::class, 'destroy'])
+    ->middleware('auth:sanctum');
+Route::middleware('auth:sanctum')->group(function () {
+    Route::delete('users/{id}', [UserController::class, 'destroy']);
+});
+
 
 // positions
 Route::get('positions', [PositionController::class, 'index']);
@@ -64,8 +69,8 @@ Route::get('favourites', [FavouriteController::class, 'index']);
 Route::get('favourites/{id}', [FavouriteController::class, 'show']);
 Route::get('favourites/{userId}/{filmId}', [FavouriteController::class, 'showFavouriteByUserIdAndFilmId']);
 Route::post('favourites', [FavouriteController::class, 'store']);
-Route::post('favourites/{userId}/{filmId}', [FavouriteController::class, 'storeFavouriteByUserIdAndFilmId']);
-    // ->middleware('auth:sanctum');
+Route::post('favouriteFilmByUser', [FavouriteController::class, 'storeFavouriteByUserIdAndFilmId']);
+// ->middleware('auth:sanctum');
 Route::patch('favourites/{id}', [FavouriteController::class, 'update']);
 Route::patch('favourites/{userId}/{filmId}', [FavouriteController::class, 'patchFavouriteByUserIdAndFilmId']);
 // ->middleware('auth:sanctum');
@@ -100,7 +105,7 @@ Route::patch('tasks/{id}', [TaskController::class, 'update'])
 Route::delete('tasks/{id}', [TaskController::class, 'destroy'])
     ->middleware('auth:sanctum');
 
-// 
+//
 Route::get('/', function () {
     return 'API';
 });
