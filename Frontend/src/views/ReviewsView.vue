@@ -2,26 +2,49 @@
   <div class="film-reviews">
     <div class="header-container" ref="headerContainerRef">
       <div class="tabs-wrapper">
-        <h3 class="title-text clickable" :class="{ 'active-tab': activeTab === 'all' || !isLoggedIn }"
-          @click="switchTab('all')" role="tab" :aria-selected="activeTab === 'all' || !isLoggedIn">
+        <h3
+          class="title-text clickable"
+          :class="{ 'active-tab': activeTab === 'all' || !isLoggedIn }"
+          @click="switchTab('all')"
+          role="tab"
+          :aria-selected="activeTab === 'all' || !isLoggedIn"
+        >
           All Reviews
         </h3>
-        <h3 v-if="isLoggedIn" class="title-text clickable" :class="{ 'active-tab': activeTab === 'my' }"
-          @click="switchTab('my')" role="tab" :aria-selected="activeTab === 'my'">
+        <h3
+          v-if="isLoggedIn"
+          class="title-text clickable"
+          :class="{ 'active-tab': activeTab === 'my' }"
+          @click="switchTab('my')"
+          role="tab"
+          :aria-selected="activeTab === 'my'"
+        >
           My Reviews
         </h3>
       </div>
 
       <div class="controls-container">
         <div class="control-buttons">
-          <div class="control-item" @click="toggleControl('search')" title="Search Reviews"
-            aria-label="Toggle Search Input" :aria-expanded="showSearch">
+          <div
+            class="control-item"
+            @click="toggleControl('search')"
+            title="Search Reviews"
+            aria-label="Toggle Search Input"
+            :aria-expanded="showSearch"
+          >
             <i class="bi bi-search"></i>
           </div>
-          <div class="control-item" @click="
-            toggleControl(activeTab === 'my' ? 'tableFilter' : 'publicFilter')
-            " title="Filter Reviews" aria-label="Toggle Filter Options" :aria-expanded="activeTab === 'my' ? showTableFilter : showPublicFilter
-              ">
+          <div
+            class="control-item"
+            @click="
+              toggleControl(activeTab === 'my' ? 'tableFilter' : 'publicFilter')
+            "
+            title="Filter Reviews"
+            aria-label="Toggle Filter Options"
+            :aria-expanded="
+              activeTab === 'my' ? showTableFilter : showPublicFilter
+            "
+          >
             <i class="bi bi-funnel"></i>
           </div>
         </div>
@@ -29,17 +52,30 @@
         <transition name="fade-slide">
           <div v-if="showSearch" class="search-container">
             <div class="search-wrapper">
-              <input type="text" v-model="searchQuery" placeholder="Search reviews..." class="search-input"
-                @input="handleSearch" aria-label="Search Reviews Input" />
+              <input
+                type="text"
+                v-model="searchQuery"
+                placeholder="Search reviews..."
+                class="search-input"
+                @input="handleSearch"
+                aria-label="Search Reviews Input"
+              />
             </div>
           </div>
         </transition>
 
         <transition name="fade-slide">
-          <div v-if="showTableFilter && isLoggedIn && activeTab === 'my'" class="filter-container">
+          <div
+            v-if="showTableFilter && isLoggedIn && activeTab === 'my'"
+            class="filter-container"
+          >
             <div class="filter-wrapper position-relative">
-              <select id="tableFilter" v-model="tableReviewFilter" class="custom-filter-select"
-                aria-label="Sort My Reviews">
+              <select
+                id="tableFilter"
+                v-model="tableReviewFilter"
+                class="custom-filter-select"
+                aria-label="Sort My Reviews"
+              >
                 <option value="ABC">Film Title (A-Z)</option>
                 <option value="highToLow">Evaluation: High to Low</option>
                 <option value="lowToHigh">Evaluation: Low to High</option>
@@ -51,10 +87,17 @@
         </transition>
 
         <transition name="fade-slide">
-          <div v-if="showPublicFilter && (activeTab === 'all' || !isLoggedIn)" class="filter-container">
+          <div
+            v-if="showPublicFilter && (activeTab === 'all' || !isLoggedIn)"
+            class="filter-container"
+          >
             <div class="filter-wrapper position-relative">
-              <select id="publicFilter" v-model="publicReviewFilter" class="custom-filter-select"
-                aria-label="Sort All Reviews">
+              <select
+                id="publicFilter"
+                v-model="publicReviewFilter"
+                class="custom-filter-select"
+                aria-label="Sort All Reviews"
+              >
                 <option value="ABC">Film Title (A-Z)</option>
                 <option value="highToLow">Evaluation: High to Low</option>
                 <option value="lowToHigh">Evaluation: Low to High</option>
@@ -77,21 +120,31 @@
     </div>
 
     <div v-else class="content-area">
-      <div v-if="errorMessages" class="error-message alert alert-danger" role="alert">
+      <div
+        v-if="errorMessages"
+        class="error-message alert alert-danger"
+        role="alert"
+      >
         {{ errorMessages }}
       </div>
 
       <div class="data-container">
         <div v-show="isLoggedIn && activeTab === 'my'" class="table-section">
           <div class="table-wrapper" ref="tableWrapperRef">
-            <div v-if="
-              !paginatedFavourites.length &&
-              filteredFavourites.length === 0 &&
-              !searchQuery
-            " class="no-data-message">
+            <div
+              v-if="
+                !paginatedFavourites.length &&
+                filteredFavourites.length === 0 &&
+                !searchQuery
+              "
+              class="no-data-message"
+            >
               You haven't added any reviews yet.
             </div>
-            <div v-else-if="!paginatedFavourites.length && searchQuery" class="no-data-message">
+            <div
+              v-else-if="!paginatedFavourites.length && searchQuery"
+              class="no-data-message"
+            >
               No reviews found matching your search criteria.
             </div>
             <table v-else class="custom-table">
@@ -105,14 +158,22 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="favourite in paginatedFavourites" :key="favourite.id">
+                <tr
+                  v-for="favourite in paginatedFavourites"
+                  :key="favourite.id"
+                >
                   <td data-label="Film" class="film">
                     {{ favourite.filmTitle || "Unknown Film" }}
                   </td>
                   <td data-label="Evaluation" class="text-center">
                     <div class="star-rating d-inline-flex align-items-center">
-                      <i v-for="starIndex in 5" :key="starIndex" class="bi mx-1 text-warning"
-                        :class="getStarClass(favourite, starIndex)" :aria-label="`Star ${starIndex}`"></i>
+                      <i
+                        v-for="starIndex in 5"
+                        :key="starIndex"
+                        class="bi mx-1 text-warning"
+                        :class="getStarClass(favourite, starIndex)"
+                        :aria-label="`Star ${starIndex}`"
+                      ></i>
                       <small class="text-muted ms-2">
                         ({{ formatEvaluation(favourite.evaluation) }})
                       </small>
@@ -125,34 +186,57 @@
                     {{ formatDate(favourite.updated_at) }}
                   </td>
                   <td class="text-nowrap text-center">
-                    <OperationsCrud @onClickDelete="onClickDelete(favourite)" @onClickUpdate="onClickUpdate(favourite)"
-                      :data="favourite" />
+                    <OperationsCrud
+                      @onClickDelete="onClickDelete(favourite)"
+                      @onClickUpdate="onClickUpdate(favourite)"
+                      :data="favourite"
+                    />
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div class="pagination-container" ref="tablePaginationRef"
-            v-if="filteredFavourites.length > dynamicItemsPerPage">
-            <Paginator :pageNumber="currentPage" :numberOfPages="totalFavPages" :pagesArray="favPagesArray"
-              @paging="handlePageChange" />
+          <div
+            class="pagination-container"
+            ref="tablePaginationRef"
+            v-if="filteredFavourites.length > dynamicItemsPerPage"
+          >
+            <Paginator
+              :pageNumber="currentPage"
+              :numberOfPages="totalFavPages"
+              :pagesArray="favPagesArray"
+              @paging="handlePageChange"
+            />
           </div>
         </div>
 
-        <div v-show="activeTab === 'all' || !isLoggedIn" class="public-reviews-section">
+        <div
+          v-show="activeTab === 'all' || !isLoggedIn"
+          class="public-reviews-section"
+        >
           <div class="reviews-wrapper" ref="reviewsWrapperRef">
-            <div v-if="
-              !paginatedPublicReviews.length &&
-              filteredPublicReviews.length === 0 &&
-              !searchQuery
-            " class="no-data-message">
+            <div
+              v-if="
+                !paginatedPublicReviews.length &&
+                filteredPublicReviews.length === 0 &&
+                !searchQuery
+              "
+              class="no-data-message"
+            >
               No public reviews available yet.
             </div>
-            <div v-else-if="!paginatedPublicReviews.length && searchQuery" class="no-data-message">
+            <div
+              v-else-if="!paginatedPublicReviews.length && searchQuery"
+              class="no-data-message"
+            >
               No reviews found matching your search criteria.
             </div>
             <div v-else class="reviews-grid">
-              <div v-for="review in paginatedPublicReviews" :key="review.id" class="review-card">
+              <div
+                v-for="review in paginatedPublicReviews"
+                :key="review.id"
+                class="review-card"
+              >
                 <div class="review-header">
                   <div class="review-meta">
                     <span class="review-author">{{
@@ -161,7 +245,8 @@
                     <div v-if="review.created_at !== review.updated_at">
                       <span class="review-date">{{
                         formatDate(review.updated_at)
-                      }}</span> (edited)
+                      }}</span>
+                      (edited)
                     </div>
                     <div v-else>
                       <span class="review-date">{{
@@ -173,34 +258,55 @@
                 <div class="review-film-title">
                   {{ review.filmTitle || "Unknown Film" }}
                 </div>
+                <div class="star-rating d-inline-flex align-items-center">
+                  <i
+                    v-for="starIndex in 5"
+                    :key="`star-${review.id}-${starIndex}`"
+                    class="bi mx-1 text-warning"
+                    :class="getStarClass(review, starIndex)"
+                    :aria-label="`Star ${starIndex}`"
+                  ></i>
+                </div>
                 <div class="review-content">
                   {{ review.content }}
-                </div>
-                <div class="star-rating d-inline-flex align-items-center">
-                  <i v-for="starIndex in 5" :key="`star-${review.id}-${starIndex}`" class="bi mx-1 text-warning"
-                    :class="getStarClass(review, starIndex)" :aria-label="`Star ${starIndex}`"></i>
-                  <small class="text-muted ms-2">
-                    ({{ formatEvaluation(review.evaluation) }})
-                  </small>
                 </div>
               </div>
             </div>
           </div>
-          <div class="pagination-container" ref="publicPaginationRef"
-            v-if="filteredPublicReviews.length > dynamicItemsPerPage">
-            <Paginator :pageNumber="currentPublicPage" :numberOfPages="totalPublicPages" :pagesArray="publicPagesArray"
-              @paging="handlePublicPageChange" />
+          <div
+            class="pagination-container"
+            ref="publicPaginationRef"
+            v-if="filteredPublicReviews.length > dynamicItemsPerPage"
+          >
+            <Paginator
+              :pageNumber="currentPublicPage"
+              :numberOfPages="totalPublicPages"
+              :pagesArray="publicPagesArray"
+              @paging="handlePublicPageChange"
+            />
           </div>
         </div>
       </div>
     </div>
 
     <div v-show="isModalVisible">
-      <Modal ref="modalRef" :title="modalTitle" :yes="modalYes" :no="modalNo" :size="modalSize"
-        @yesEvent="yesEventHandler" @close="closeModal">
+      <Modal
+        ref="modalRef"
+        :title="modalTitle"
+        :yes="modalYes"
+        :no="modalNo"
+        :size="modalSize"
+        @yesEvent="yesEventHandler"
+        @close="closeModal"
+      >
         <div v-if="modalState === 'Delete'">{{ modalMessageYesNo }}</div>
-        <ReviewForm v-if="modalState === 'Update'" :itemForm="modalItem" :films="films" :isUpdate="true"
-          @saveItem="saveItemHandler" />
+        <ReviewForm
+          v-if="modalState === 'Update'"
+          :itemForm="modalItem"
+          :films="films"
+          :isUpdate="true"
+          @saveItem="saveItemHandler"
+        />
       </Modal>
     </div>
   </div>
@@ -373,10 +479,11 @@ export default {
           `API Error (${method.toUpperCase()} ${url}):`,
           error.response || error
         );
-        this.errorMessages = `Operation failed: ${error.response?.data?.message ||
+        this.errorMessages = `Operation failed: ${
+          error.response?.data?.message ||
           error.message ||
           "An unknown error occurred."
-          }`;
+        }`;
         return null;
       } finally {
         this.loading = false;
@@ -414,7 +521,7 @@ export default {
           userName: review.userName || "Anonymous",
           filmTitle: review.filmTitle || "Unknown Film",
           evaluation: Number(review.evaluation) || 0,
-          content: review.content || this.randomDefaultReview(),
+          content: review.content,
         }));
       } else {
         this.publicReviews = [];
@@ -488,20 +595,20 @@ export default {
         type === "search"
           ? !this.showSearch
           : isOpening
-            ? false
-            : this.showSearch;
+          ? false
+          : this.showSearch;
       this.showTableFilter =
         type === "tableFilter"
           ? !this.showTableFilter
           : isOpening
-            ? false
-            : this.showTableFilter;
+          ? false
+          : this.showTableFilter;
       this.showPublicFilter =
         type === "publicFilter"
           ? !this.showPublicFilter
           : isOpening
-            ? false
-            : this.showPublicFilter;
+          ? false
+          : this.showPublicFilter;
     },
 
     // --- CRUD Methods ---
@@ -512,8 +619,9 @@ export default {
     onClickDelete(item) {
       this.modalState = "Delete";
       this.modalTitle = "Confirm Deletion";
-      this.modalMessageYesNo = `Are you sure you want to delete your review for "${item.filmTitle || "this film"
-        }"? This action cannot be undone.`;
+      this.modalMessageYesNo = `Are you sure you want to delete your review for "${
+        item.filmTitle || "this film"
+      }"? This action cannot be undone.`;
       this.modalYes = "Yes, Delete";
       this.modalNo = "No, Cancel";
       this.modalSize = null;
@@ -531,9 +639,11 @@ export default {
         ...item,
         evaluation: Number(item.evaluation) || 0,
         filmId: item.filmId,
+        content: item.content,
       };
-      this.modalTitle = `Update Review for "${item.filmTitle || "Unknown Film"
-        }"`;
+      this.modalTitle = `Update Review for "${
+        item.filmTitle || "Unknown Film"
+      }"`;
       this.modalYes = null;
       this.modalNo = "Cancel";
       this.modalSize = "lg";
@@ -617,7 +727,7 @@ export default {
       // Reset other states...
       // Add a small delay to allow Bootstrap cleanup
       setTimeout(() => {
-        this.modalState = 'Read';
+        this.modalState = "Read";
         this.modalItem = {};
         this.selectedRowId = null;
       }, 300);
@@ -742,14 +852,6 @@ export default {
         console.warn("Error formatting date:", dateString, e);
         return "N/A";
       }
-    },
-
-    /**
-     * Returns a random default review string (placeholder).
-     */
-    randomDefaultReview() {
-      const index = Math.floor(Math.random() * this.defaultReviews.length);
-      return this.defaultReviews[index];
     },
 
     // --- Pagination Event Handlers ---
@@ -934,10 +1036,7 @@ export default {
 .clickable:hover {
   color: #ffffff;
   /* Brighter on hover */
-  background-color: rgba(255,
-      215,
-      0,
-      0.1);
+  background-color: rgba(255, 215, 0, 0.1);
   /* Subtle gold background on hover */
 }
 
@@ -1260,11 +1359,6 @@ export default {
 /* Adjust size */
 .star-rating .bi {
   transition: color 0.2s ease;
-}
-
-/* Smooth color transition */
-.star-rating .text-muted {
-  font-size: 0.9em;
 }
 
 /* Public Reviews Card Styles */
