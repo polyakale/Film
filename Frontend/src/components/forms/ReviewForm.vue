@@ -35,7 +35,6 @@
       v-model="itemForm.content"
       class="review-input"
       placeholder="Write your review..."
-      required
     ></textarea>
 
     <div class="form-actions">
@@ -124,7 +123,7 @@ export default {
       return (
         this.itemForm.filmId &&
         this.itemForm.evaluation > 0 &&
-        this.itemForm.content?.trim().length > 0
+        this.itemForm.content?.trim().length >= 0
       );
     },
   },

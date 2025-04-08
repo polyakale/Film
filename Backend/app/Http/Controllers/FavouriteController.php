@@ -133,7 +133,7 @@ class FavouriteController extends Controller
                 'userId' => 'required|exists:users,id',
                 'filmId' => 'required|exists:films,id',
                 'evaluation' => 'required|numeric|min:0.5|max:5',
-                'content' => 'required|string|min:3|max:240',
+                'content' => 'string|min:3|max:160',
             ]);
 
             // Check for existing review

@@ -16,7 +16,7 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      meta: { title: (route) => 'Main Page'}
+      meta: { title: (route) => 'Home Page'}
     },
     {
       path: '/films',
@@ -59,7 +59,7 @@ const router = createRouter({
       path: "/:pathMatch(.*)*",
       name: "NotFound",
       component: HomeView,
-      meta: { title: (route) => 'Home' }
+      meta: { title: (route) => 'Home Page' }
     },
   ]
 });

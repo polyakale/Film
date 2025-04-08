@@ -1,79 +1,123 @@
 <template>
-  <nav class="navbar navbar-expand-lg bg-body-tertiary" style="padding: 0">
+  <nav class="navbar navbar-expand-lg" aria-label="Main navigation">
     <div class="container-fluid">
-      <!-- Toggler button -->
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarSupportedContent"
+        aria-label="Toggle navigation"
+        aria-expanded="false"
+      >
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <!-- Main navigation content -->
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <!-- Left side: Menu icon -->
         <ul class="navbar-nav me-auto">
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-              <i class="bi bi-list"></i>
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <RouterLink class="dropdown-item" to="/films">
-                  <i class="bi bi-film"></i>
-                  Films
-                </RouterLink>
-              </li>
-              <li>
-                <RouterLink class="dropdown-item" to="/people">
-                  <i class="bi bi-people-fill"></i>
-                  People
-                </RouterLink>
-              </li>
-              <li>
-                <RouterLink class="dropdown-item" to="/reviews">
-                  <i class="bi bi-pencil-square"></i>
-                  Reviews
-                </RouterLink>
-              </li>
-            </ul>
+          <li class="nav-item">
+            <RouterLink
+              to="/films"
+              class="nav-link"
+              :class="{ 'active-route': $route.path === '/films' }"
+            >
+              <i class="bi bi-film"></i>
+              <span class="nav-link-text">Films</span>
+            </RouterLink>
+          </li>
+          <li class="nav-item">
+            <RouterLink
+              to="/people"
+              class="nav-link"
+              :class="{ 'active-route': $route.path === '/people' }"
+            >
+              <i class="bi bi-people-fill"></i>
+              <span class="nav-link-text">People</span>
+            </RouterLink>
+          </li>
+          <li class="nav-item">
+            <RouterLink
+              to="/reviews"
+              class="nav-link"
+              :class="{ 'active-route': $route.path === '/reviews' }"
+            >
+              <i class="bi bi-pencil-square"></i>
+              <span class="nav-link-text">Reviews</span>
+            </RouterLink>
           </li>
         </ul>
 
-        <!-- Center: Title -->
         <div class="navbar-nav mx-auto">
-          <RouterLink class="nav-link active fw-bold fs-4" to="/">
-            Old Hungarian Films
+          <RouterLink to="/" class="d-flex align-items-center">
+            <h1 class="navbar-brand gradient-title mb-0">
+              Hungarian Interwar Film Archive
+            </h1>
           </RouterLink>
         </div>
 
-        <!-- Right side: Profile -->
         <ul class="navbar-nav ms-auto">
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            <a
+              class="nav-link dropdown-toggle d-flex align-items-center"
+              href="#"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
               <i class="bi bi-person"></i>
-              <span v-if="stateAuth.user">{{ stateAuth.user }}</span>
+              <span v-if="stateAuth.user" class="username-span">
+                {{ stateAuth.user }}
+                <span class="online-indicator"></span>
+              </span>
+              <span v-else class="username-span">Account</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
               <li>
-                <RouterLink class="dropdown-item" to="/login" v-if="!stateAuth.user">
+                <RouterLink
+                  class="dropdown-item"
+                  to="/login"
+                  v-if="!stateAuth.user"
+                >
                   <i class="bi bi-box-arrow-in-right"></i>
                   Login
                 </RouterLink>
               </li>
               <li>
-                <RouterLink class="dropdown-item" to="/registration" v-if="!stateAuth.user">
+                <RouterLink
+                  class="dropdown-item"
+                  to="/registration"
+                  v-if="!stateAuth.user"
+                >
                   <i class="bi bi-person-plus"></i>
                   Registration
                 </RouterLink>
               </li>
               <li>
-                <RouterLink class="dropdown-item" to="/profile" v-if="stateAuth.user">
+                <RouterLink
+                  class="dropdown-item"
+                  to="/profile"
+                  v-if="stateAuth.user"
+                >
                   <i class="bi bi-person-circle"></i>
                   Profile
                 </RouterLink>
               </li>
-              <li>
-                <a class="dropdown-item logout-item" href="#" v-if="stateAuth.user" @click.prevent="logout()">
+              <li v-if="stateAuth.user">
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  @click.prevent="logout()"
+                  :disabled="loading"
+                >
                   <i class="bi bi-box-arrow-right"></i>
-                  Logout
+                  <span v-if="!loading">Logout</span>
+                  <span v-else class="logout-loading">
+                    <span
+                      class="spinner-border spinner-border-sm"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Logging out...
+                  </span>
                 </a>
               </li>
             </ul>
@@ -94,6 +138,7 @@ export default {
   data() {
     return {
       stateAuth: useAuthStore(),
+      loading: false,
     };
   },
   methods: {
@@ -104,202 +149,149 @@ export default {
         Authorization: `Bearer ${this.stateAuth.token}`,
       };
 
+      this.loading = true;
       try {
         await axios.post(url, null, { headers });
+        this.stateAuth.clearStoredData();
+        this.$router.push("/");
       } catch (error) {
-        console.log(error);
+        console.error("Logout failed:", error);
+        // Add your preferred toast/notification system here
+      } finally {
+        this.loading = false;
       }
-      this.stateAuth.clearStoredData();
-      this.$router.push("/");
     },
   },
 };
 </script>
 
 <style scoped>
-/* Improved spacing system */
-:root {
-  --nav-padding: 2.5rem;
-  --nav-item-spacing: 1rem;
-}
-
-/* Navbar container */
+/* Dark cinematic theme with gold accents */
 .navbar {
-  background: rgba(0, 0, 0, 0.9) !important;
-  /* Darker background for better contrast */
-  padding: 0 var(--nav-padding) !important;
-  border-bottom: 1px solid rgba(255, 215, 0, 0.2);
-  opacity: 80%;
-  /* Golden border for cinematic feel */
+  background: #1f1f1f !important;
+  border-bottom: 3px solid #383838;
+  padding: 0.5rem 1rem !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
-/* Left side menu */
-.navbar-nav.me-auto {
-  margin-left: var(--nav-item-spacing) !important;
+.container-fluid {
+  padding: 0;
 }
 
-/* Right side profile */
-.navbar-nav.ms-auto {
-  margin-right: var(--nav-item-spacing) !important;
-}
-
-/* Dropdown menus */
-.dropdown-menu {
-  background: rgba(20, 20, 20, 0.98) !important;
-  /* Darker background for dropdown */
-  border: 1px solid rgba(255, 215, 0, 0.3) !important;
-  /* Golden border */
-  border-radius: 4px !important;
-  /* Slightly rounded corners */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  /* Subtle shadow for depth */
-  margin-top: 0.8rem !important;
-  min-width: 220px;
-  /* Ensure consistent width */
-  animation: dropdownEntrance 0.3s ease;
-  /* Smooth dropdown animation */
-}
-
-@keyframes dropdownEntrance {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Dropdown items */
-.dropdown-item {
-  color: #e0e0e0 !important;
-  /* Light gray text for better readability */
-  padding: 0.75rem 1.5rem !important;
-  /* Increased padding for better spacing */
-  font-family: 'Alegreya Sans', sans-serif;
-  /* Elegant font */
-  font-size: 1.1rem;
-  /* Slightly larger font size */
-  transition: all 0.3s ease;
-  /* Smooth hover transition */
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  /* Space between icon and text */
-  position: relative;
-  /* For hover effect */
-}
-
-/* Golden hover indicator */
-.dropdown-item::before {
-  content: '';
-  position: absolute;
-  left: -4px;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 60%;
-  width: 3px;
-  background: #ffd700;
-  /* Golden accent */
-  opacity: 0;
-  /* Hidden by default */
-  transition: opacity 0.3s ease;
-}
-
-.dropdown-item:hover {
-  background: rgba(255, 215, 0, 0.08) !important;
-  /* Subtle golden hover */
-  padding-left: 2rem !important;
-  /* Animated padding on hover */
-  color: #ffd700 !important;
-  /* Golden text on hover */
-}
-
-.dropdown-item:hover::before {
-  opacity: 1;
-  /* Show golden indicator on hover */
-}
-
-/* Icons */
-.dropdown-item i {
-  font-size: 1.2rem;
-  /* Slightly larger icons */
-  width: 24px;
-  /* Consistent icon width */
-  text-align: center;
-  /* Center icons */
-}
-
-/* Separator */
-.dropdown-divider {
-  border-color: rgba(255, 215, 0, 0.15);
-  /* Golden divider */
-  margin: 0.5rem 0;
-  /* Spacing around divider */
-}
-
-/* Special logout item */
-.dropdown-item.logout-item {
-  color: #ff6666 !important;
-  /* Red for logout */
-}
-
-.dropdown-item.logout-item:hover {
-  background: rgba(255, 102, 102, 0.1) !important;
-  /* Red hover background */
-}
-
-/* Profile section */
-.navbar-nav span {
-  font-family: 'Cinzel Decorative', cursive;
-  /* Vintage font for username */
-  letter-spacing: 0.05em;
-  /* Slightly spaced letters */
-  color: #ffd700;
-  /* Golden username */
-}
-
-/* Active title */
-.nav-link.active {
-  font-size: 1.8rem;
-  /* Larger title */
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-  /* Subtle text shadow */
-  letter-spacing: 0.05em;
-  /* Spaced letters for vintage feel */
-  color: #ffd700 !important;
-  /* Golden title */
-}
-
-/* Toggler button */
 .navbar-toggler {
-  border-color: rgba(255, 255, 255, 0.5);
-  /* Light border */
-  margin-right: var(--nav-item-spacing);
+  border: 2px solid #ffd700;
+  padding: 0.25rem 0.5rem;
 }
 
 .navbar-toggler-icon {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 215, 0, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-  /* Golden toggler icon */
-  transition: opacity 0.2s ease;
 }
 
-.navbar-toggler:hover .navbar-toggler-icon {
-  opacity: 0.8;
-  /* Slightly transparent on hover */
+.navbar-brand.gradient-title {
+  font-family: 'Cinzel', serif;
+  color: #ffd700;
+  font-size: 1.5rem;
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
 }
 
-/* Navigation links */
+.navbar-brand.gradient-title:hover {
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
 .nav-link {
-  padding: 0.75rem 1rem !important;
-  color: white !important;
-  transition: opacity 0.2s ease;
+  color: #b0b0b0 !important;
+  padding: 0.5rem 1rem !important;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
 }
 
 .nav-link:hover {
-  opacity: 0.8;
-  /* Slightly transparent on hover */
+  color: #ffd700 !important;
+  border-bottom-color: rgba(255, 215, 0, 0.5);
+}
+
+.nav-link i {
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.active-route {
+  color: #ffd700 !important;
+  border-bottom: 2px solid #ffd700;
+  font-weight: bold;
+}
+
+.dropdown-menu {
+  background: #383838 !important;
+  border: 2px solid #1f1f1f !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.dropdown-item {
+  color: #b0b0b0 !important;
+  padding: 0.5rem 1rem !important;
+  transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background: rgba(255, 215, 0, 0.1) !important;
+  color: #ffd700 !important;
+}
+
+.dropdown-item i {
+  width: 20px;
+  text-align: center;
+  margin-right: 0.75rem;
+}
+
+.username-span {
+  color: #ffd700;
+  font-family: 'Cinzel', serif;
+  margin-left: 0.5rem;
+}
+
+.online-indicator {
+  background: #4caf50;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 0.5rem;
+}
+
+.logout-item {
+  color: #cc181e !important;
+}
+
+.logout-item:hover {
+  background: rgba(204, 24, 30, 0.1) !important;
+}
+
+.logout-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 991px) {
+  .navbar-collapse {
+    background: #1f1f1f;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    border: 2px solid #383838;
+  }
+  
+  .navbar-nav {
+    gap: 0.5rem;
+  }
+  
+  .dropdown-menu {
+    background: #2a2a2a !important;
+    margin-left: 1rem;
+    width: calc(100% - 2rem);
+  }
 }
 </style>
