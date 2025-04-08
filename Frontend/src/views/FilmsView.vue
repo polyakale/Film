@@ -639,8 +639,8 @@ export default {
 
 .star-icon {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  bottom: 10px;
+  right: 25px;
   font-size: 1.5em;
   color: #f5c518;
   cursor: pointer;
