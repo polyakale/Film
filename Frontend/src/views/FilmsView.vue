@@ -640,7 +640,7 @@ export default {
 .star-icon {
   position: absolute;
   bottom: 10px;
-  right: 10px;
+  right: 25px;
   font-size: 1.5em;
   color: #f5c518;
   cursor: pointer;
