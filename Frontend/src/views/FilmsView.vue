@@ -1,8 +1,10 @@
 <template>
   <div class="container">
+    <!-- Oldal fejléc -->
     <h1>Films</h1>
-    <p v-if="debug">{{ stateAuth }}</p>
+    <p v-if="debug">{{ stateAuth }}</p> <!-- Debug módban megjeleníti az auth állapotot -->
 
+    <!-- Keresés és rendezés -->
     <div class="search-sort-container">
       <input
         type="text"
@@ -19,13 +21,14 @@
       </select>
     </div>
 
+    <!-- Admin gombok -->
     <div v-if="isAdmin" class="admin-actions">
-      <button @click="openAddFilmModal" class="add-film-button">
-        Add New Film
-      </button>
+      <button @click="openAddFilmModal" class="add-film-button">Add New Film</button>
     </div>
 
+    <!-- Filmkártyák kezdete -->
     <div v-if="films.length" class="films-grid">
+      <!-- Minden film egy kártya -->
       <div
         v-for="film in filteredFilms"
         :key="film.id"
@@ -33,40 +36,34 @@
         :class="{ 'film-card-rated': rated(film, stateAuth.id) }"
         @click="openFilmDetail(film)"
       >
+        <!-- Csillag ikon értékeléshez -->
         <span class="star-icon" @click.stop="openRatingModal(film)">★</span>
+        
+        <!-- Film adatok -->
         <h2 class="film-title">{{ film.title }}</h2>
-        <p class="film-info">
-          <strong>Production Year:</strong> {{ film.production }}
-        </p>
+        <p class="film-info"><strong>Production Year:</strong> {{ film.production }}</p>
         <p class="film-info"><strong>Length:</strong> {{ film.length }} min</p>
-        <p class="film-info">
-          <strong>Presentation:</strong> {{ formatDate(film.presentation) }}
-        </p>
-        <p class="film-info">
-          <strong>Evaluation:</strong>
-          {{ film.evaluation || "This film hasn't been rated yet." }}
-        </p>
+        <p class="film-info"><strong>Presentation:</strong> {{ formatDate(film.presentation) }}</p>
+        <p class="film-info"><strong>Evaluation:</strong> {{ film.evaluation || "Not rated yet." }}</p>
+        
+        <!-- IMDb link -->
         <a
           v-if="film.imdbLink"
           :href="formatImdbUrl(film.imdbLink)"
           target="_blank"
           rel="noopener noreferrer"
           class="imdb-link"
-        >
-          View on IMDb
-        </a>
+        >View on IMDb</a>
 
+        <!-- Admin műveletek (szerkesztés/törlés) -->
         <div v-if="isAdmin" class="film-actions">
-          <button @click.stop="openEditFilmModal(film)" class="edit-button">
-            Edit
-          </button>
-          <button @click.stop="deleteFilm(film.id)" class="delete-button">
-            Delete
-          </button>
+          <button @click.stop="openEditFilmModal(film)" class="edit-button">Edit</button>
+          <button @click.stop="deleteFilm(film.id)" class="delete-button">Delete</button>
         </div>
       </div>
     </div>
 
+    <!-- Film részletező modal -->
     <div v-if="selectedFilm" class="film-detail-modal">
       <div class="modal-content">
         <span class="close" @click="closeFilmDetail">&times;</span>
@@ -81,15 +78,12 @@
             :href="formatImdbUrl(selectedFilm.imdbLink)" 
             target="_blank"
             class="imdb-link"
-          >
-            View on IMDb
-          </a>
+          >View on IMDb</a>
         </div>
       </div>
     </div>
 
-    <p v-else>Loading films...</p>
-
+    <!-- Film hozzáadása modal -->
     <div v-if="showAddFilmModal" class="modal">
       <div class="modal-content">
         <h2>Add New Film</h2>
@@ -110,6 +104,7 @@
       </div>
     </div>
 
+    <!-- Film szerkesztése modal -->
     <div v-if="showEditFilmModal" class="modal">
       <div class="modal-content">
         <h2>Edit Film</h2>
@@ -130,9 +125,10 @@
       </div>
     </div>
 
+    <!-- Értékelés modal -->
     <div v-if="showRatingModal" class="modal">
       <div class="modal-content">
-        <h2 class="film-title">Please rate the movie</h2>
+        <h2 class="film-title">Rate: {{ currentFilm.title }}</h2>
         <div class="rating-stars">
           <span
             v-for="n in 5"
@@ -142,23 +138,17 @@
             @mouseleave="hoverRating = null"
             :class="{
               'star-filled': (hoverRating || currentRating) >= n,
-              'star-half':
-                (hoverRating || currentRating) >= n - 0.5 &&
-                (hoverRating || currentRating) < n,
+              'star-half': (hoverRating || currentRating) >= n - 0.5 && (hoverRating || currentRating) < n,
             }"
-          >
-            ★
-          </span>
+          >★</span>
         </div>
         <div class="comment-section">
-          <label>Your Comment (optional):</label>
-          <textarea v-model="currentComment" rows=""></textarea>
+          <label>Comment (optional):</label>
+          <textarea v-model="currentComment" rows="4"></textarea>
         </div>
         <div class="rating-actions">
           <button @click="submitRating" class="submit-button">Submit</button>
-          <button @click="closeRatingModal" class="cancel-button">
-            Cancel
-          </button>
+          <button @click="closeRatingModal" class="cancel-button">Cancel</button>
         </div>
       </div>
     </div>
@@ -174,89 +164,86 @@ import { useAuthStore } from "@/stores/useAuthStore";
 export default {
   data() {
     return {
-      debug: DEBUG,
-      urlApi: `${BASE_URL}/films`,
-      stateAuth: useAuthStore(),
-      films: [],
-      isAdmin: false,
-      searchQuery: "",
-      sortOption: "abc",
-      filteredFilms: [],
-      showAddFilmModal: false,
-      showEditFilmModal: false,
-      showRatingModal: false,
-      newFilm: {
+      debug: DEBUG, // Debug mód beállítása
+      urlApi: `${BASE_URL}/films`, // API endpoint
+      stateAuth: useAuthStore(), // Pinia auth store
+      films: [], // Film lista
+      isAdmin: false, // Admin jogosultság
+      searchQuery: "", // Keresés szövege
+      sortOption: "abc", // Rendezési opció
+      filteredFilms: [], // Szűrt filmek
+      showAddFilmModal: false, // Film hozzáadása modal állapota
+      showEditFilmModal: false, // Film szerkesztése modal állapota
+      showRatingModal: false, // Értékelés modal állapota
+      newFilm: { // Új film adatai
         title: "",
         production: "",
         length: "",
         presentation: "",
         imdbLink: "",
       },
-      editingFilm: null,
-      currentFilm: null,
-      currentRating: 0,
-      hoverRating: null,
-      ifRated: null,
-      selectedEvaulatedFilm: null,
-      currentComment: "",
-      existingCommentId: null,
-      selectedFilm: null
+      editingFilm: null, // Szerkesztett film
+      currentFilm: null, // Aktuálisan kiválasztott film
+      currentRating: 0, // Aktuális értékelés
+      hoverRating: null, // Egérrel érintett csillag
+      ifRated: null, // Már értékelt-e
+      selectedEvaulatedFilm: null, // Kiválasztott film értékeléshez
+      currentComment: "", // Komment szövege
+      existingCommentId: null, // Létező komment ID
+      selectedFilm: null // Nagyított film
     };
   },
+
+  // Komponens betöltésekor lefutó metódusok
   async mounted() {
-    await this.fetchFilmsFromBackend();
-    this.isAdmin = this.stateAuth.positionId === 1;
+    await this.fetchFilmsFromBackend(); // Filmek betöltése
+    this.isAdmin = this.stateAuth.positionId === 1; // Admin jog ellenőrzése
   },
+
+  // Figyelő metódusok (adatok változására reagál)
   watch: {
-    searchQuery() {
-      this.searchFilms();
-    },
-    sortOption() {
-      this.sortFilms();
-    },
+    searchQuery() { this.searchFilms(); }, // Keresés változás
+    sortOption() { this.sortFilms(); }, // Rendezés változás
   },
+
   methods: {
-    async queryFilmsWithEvaluation() {
-      try {
-        const response = await axios.get(`${BASE_URL}/films/evaluations`);
-        return response.data.data || [];
-      } catch (error) {
-        console.error("Error fetching evaluations:", error);
-        return [];
-      }
-    },
+    // Filmek betöltése API-ról
     async fetchFilmsFromBackend() {
       try {
-        const filmsResponse = await axios.get(`${BASE_URL}/queryFilmsWithEvaluation`);
-        this.films = Array.isArray(filmsResponse.data.data) ? filmsResponse.data.data : [];
+        const response = await axios.get(`${BASE_URL}/queryFilmsWithEvaluation`);
+        this.films = Array.isArray(response.data.data) ? response.data.data : [];
         this.filteredFilms = [...this.films];
       } catch (error) {
         console.error("Error loading films:", error);
       }
     },
+
+    // Dátum formázása
     formatDate(dateString) {
       if (!dateString) return "Unknown";
-      const date = new Date(dateString);
-      return date.toISOString().split("T")[0];
+      return new Date(dateString).toISOString().split("T")[0];
     },
+
+    // IMDb URL formázása
     formatImdbUrl(imdbLink) {
-      if (!imdbLink || imdbLink.trim() === "") return "#";
-      if (!imdbLink.startsWith("http")) {
-        return `https://www.imdb.com/title/${imdbLink}/`;
-      }
-      return imdbLink;
+      if (!imdbLink) return "#";
+      return imdbLink.startsWith("http") ? imdbLink : `https://www.imdb.com/title/${imdbLink}/`;
     },
+
+    // Filmek keresése
     searchFilms() {
       const query = this.searchQuery.toLowerCase();
       this.filteredFilms = this.films.filter(
-        (film) =>
+        film =>
           film.title.toLowerCase().includes(query) ||
           String(film.production).includes(query) ||
           String(film.length).includes(query) ||
           (film.evaluation && String(film.evaluation).includes(query))
       );
-      this.sortFilms();
+      this.sortFilms(); // Újrarendezés keresés után
     },
+
+    // Filmek rendezése
     sortFilms() {
       if (this.sortOption === "abc") {
         this.filteredFilms.sort((a, b) => a.title.localeCompare(b.title));
@@ -265,176 +252,160 @@ export default {
       } else if (this.sortOption === "length") {
         this.filteredFilms.sort((a, b) => a.length - b.length);
       } else if (this.sortOption === "evaluation") {
-        this.filteredFilms.sort((a, b) => {
-          const aEval = a.evaluation || 0;
-          const bEval = b.evaluation || 0;
-          return bEval - aEval;
-        });
+        this.filteredFilms.sort((a, b) => (b.evaluation || 0) - (a.evaluation || 0));
       }
     },
+
+    // Film részletek megnyitása
+    openFilmDetail(film) {
+      this.selectedFilm = film;
+    },
+
+    // Film részletek bezárása
+    closeFilmDetail() {
+      this.selectedFilm = null;
+    },
+
+    // Új film modal megnyitása
     openAddFilmModal() {
       this.showAddFilmModal = true;
     },
+
+    // Új film modal bezárása
     closeAddFilmModal() {
       this.showAddFilmModal = false;
-      this.newFilm = {
-        title: "",
-        production: "",
-        length: "",
-        presentation: "",
-        imdbLink: "",
-      };
+      this.newFilm = { title: "", production: "", length: "", presentation: "", imdbLink: "" };
     },
+
+    // Új film mentése
     async submitNewFilm() {
       try {
-        const token = this.stateAuth.token;
-        const headers = { Authorization: `Bearer ${token}` };
-        const filmData = {
-          title: this.newFilm.title,
-          production: this.newFilm.production,
-          length: this.newFilm.length,
-          presentation: this.newFilm.presentation,
-          imdbLink: this.newFilm.imdbLink,
-        };
-        await axios.post(BASE_URL, filmData, { headers });
+        await axios.post(BASE_URL, this.newFilm, { 
+          headers: { Authorization: `Bearer ${this.stateAuth.token}` } 
+        });
         await this.fetchFilmsFromBackend();
         this.closeAddFilmModal();
       } catch (error) {
         console.error("Error adding film:", error);
       }
     },
+
+    // Film szerkesztése modal megnyitása
     openEditFilmModal(film) {
       this.editingFilm = { ...film };
       this.showEditFilmModal = true;
     },
+
+    // Film szerkesztése modal bezárása
     closeEditFilmModal() {
       this.showEditFilmModal = false;
       this.editingFilm = null;
     },
+
+    // Film mentése szerkesztés után
     async submitEditedFilm() {
       try {
-        const token = this.stateAuth.token;
-        const headers = {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        };
-        const filmData = {
-          title: this.editingFilm.title,
-          production: this.editingFilm.production,
-          length: this.editingFilm.length,
-          presentation: this.editingFilm.presentation,
-          imdbLink: this.editingFilm.imdbLink,
-        };
-        await axios.patch(url, filmData, { headers });
+        await axios.patch(
+          `${BASE_URL}/${this.editingFilm.id}`,
+          this.editingFilm,
+          { headers: { Authorization: `Bearer ${this.stateAuth.token}` } }
+        );
         await this.fetchFilmsFromBackend();
         this.closeEditFilmModal();
       } catch (error) {
         console.error("Error editing film:", error);
       }
     },
+
+    // Film törlése
     async deleteFilm(filmId) {
-      if (confirm("Are you sure you want to delete this film?")) {
+      if (confirm("Are you sure?")) {
         try {
-          const token = this.stateAuth.token;
-          const headers = {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          };
-          const url = `${BASE_URL}/${filmId}`;
-          await axios.delete(url, { headers });
+          await axios.delete(`${BASE_URL}/${filmId}`, {
+            headers: { Authorization: `Bearer ${this.stateAuth.token}` }
+          });
           await this.fetchFilmsFromBackend();
         } catch (error) {
           console.error("Error deleting film:", error);
         }
       }
     },
-    rated(film, id) {
-      if (film.usersId) {
-        const usersId = film.usersId.split(",");
-        return usersId.includes(id.toString());
-      }
-      return false;
+
+    // Ellenőrzi, hogy a felhasználó értékelte-e a filmet
+    rated(film, userId) {
+      return film.usersId?.split(",").includes(userId.toString());
     },
+
+    // Értékelés modal megnyitása
     async openRatingModal(film) {
-      this.selectedEvaulatedFilm = film;
-      const id = this.stateAuth.id;
-      if (film.usersId) {
-        const usersId = film.usersId.split(",");
-        this.ifRated = usersId.includes(id.toString());
-      } else {
-        this.ifRated = false;
-      }
-      if (this.ifRated) {
+      this.currentFilm = film;
+      this.showRatingModal = true;
+      this.currentRating = this.rated(film, this.stateAuth.id) ? film.evaluation : 0;
+      
+      // Meglévő komment betöltése (ha van)
+      if (this.rated(film, this.stateAuth.id)) {
         try {
-          const url = `${BASE_URL}/favourites/${film.userId}/${film.id}`;
-          const response = await axios.get(url);
-          if (response.data.data && response.data.data.content) {
+          const response = await axios.get(`${BASE_URL}/favourites/${this.stateAuth.id}/${film.id}`);
+          if (response.data.data?.content) {
             this.currentComment = response.data.data.content;
             this.existingCommentId = response.data.data.id;
           }
         } catch (error) {
-          console.error("Error fetching comment:", error);
+          console.error("Error loading comment:", error);
         }
       }
-      this.currentFilm = film;
-      this.showRatingModal = true;
-      this.currentRating = this.ifRated ? film.evaluation || 0 : 0;
     },
+
+    // Értékelés modal bezárása
     closeRatingModal() {
       this.showRatingModal = false;
       this.currentFilm = null;
       this.currentRating = 0;
       this.currentComment = "";
-      this.existingCommentId = null;
     },
+
+    // Csillag értékelés hover effekt
     handleHover(n, event) {
       const star = event.target;
       const rect = star.getBoundingClientRect();
       const posX = event.clientX - rect.left;
       this.hoverRating = posX < rect.width / 2 ? n - 0.5 : n;
     },
+
+    // Értékelés beállítása
     setRating(n) {
       this.currentRating = this.currentRating === n ? n - 0.5 : n;
     },
+
+    // Értékelés elküldése
     async submitRating() {
-      const token = this.stateAuth.token;
-      const headers = {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
-      this.currentRating = this.currentRating ? this.currentRating : 0;
       try {
-        if (this.ifRated) {
-          const data = {
-            evaluation: this.currentRating,
-            content: this.currentComment || null
-          };
-          const url = `${BASE_URL}/favourites/${this.existingCommentId || this.stateAuth.id}/${this.selectedEvaulatedFilm.id}`;
-          await axios.patch(url, data, { headers });
+        const ratingData = {
+          userId: this.stateAuth.id,
+          filmId: this.currentFilm.id,
+          evaluation: this.currentRating,
+          content: this.currentComment || null
+        };
+
+        if (this.rated(this.currentFilm, this.stateAuth.id)) {
+          await axios.patch(
+            `${BASE_URL}/favourites/${this.existingCommentId || this.stateAuth.id}/${this.currentFilm.id}`,
+            ratingData,
+            { headers: { Authorization: `Bearer ${this.stateAuth.token}` } }
+          );
         } else {
-          const data = {
-            userId: this.stateAuth.id,
-            filmId: this.selectedEvaulatedFilm.id,
-            evaluation: this.currentRating,
-            content: this.currentComment || null,
-          };
-          const url = `${BASE_URL}/favouriteFilmByUser`;
-          await axios.post(url, data, { headers });
+          await axios.post(
+            `${BASE_URL}/favouriteFilmByUser`,
+            ratingData,
+            { headers: { Authorization: `Bearer ${this.stateAuth.token}` } }
+          );
         }
+
         await this.fetchFilmsFromBackend();
         this.closeRatingModal();
       } catch (error) {
         console.error("Error submitting rating:", error);
       }
-    },
-    openFilmDetail(film) {
-      this.selectedFilm = film;
-    },
-    closeFilmDetail() {
-      this.selectedFilm = null;
     }
   }
 };
