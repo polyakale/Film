@@ -383,394 +383,424 @@ export default {
 </script>
 
 <style scoped>
-/* Import Google Fonts (optional, using system fonts otherwise) */
-/* @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Poppins:wght@400;700&display=swap'); */
-
-/* === Background & Container === */
+/* === Core Theme Colors & Fonts === */
 .profile-container {
   display: flex;
   justify-content: center;
-  /* Vertically center the card */
   align-items: center;
   min-height: 90vh;
-  /* Using a slightly darker, less distracting background */
-  background-color: #111; /* Fallback solid color */
-  /* Removed the dark linear-gradient overlay */
+  background-color: #111;
   background-image: url("https://source.unsplash.com/1600x900/?dark,abstract,texture");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  padding: 2rem 1rem;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; /* System font stack */
+  padding: 1rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-/* === Profile Card === */
 .profile-card {
-  background: #1f1f1f; /* Solid dark background */
-  border: 1px solid #383838; /* Subtle dark border */
-  padding: 2rem 2.5rem;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7); /* Slightly stronger shadow */
-  color: #b0b0b0; /* Primary text color (light gray) */
+  background: #1f1f1f;
+  border: 1px solid #383838;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+  color: #fefefe;
   width: 100%;
-  max-width: 500px;
-  text-align: left;
-  border-radius: 8px;
+  max-width: 480px;
+  border-radius: 6px;
 }
 
 /* === Header === */
 .profile-header {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #383838;
 }
 .profile-header h2 {
-  /* Using Cinzel Decorative if imported, otherwise fallback */
   font-family: 'Cinzel Decorative', serif, system-ui;
-  font-size: 1.8rem;
-  color: #ffd700; /* Gold accent */
-  text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
-  font-weight: 700; /* Bold */
-  letter-spacing: 1px;
+  font-size: 1.6rem;
+  color: #ffd700;
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.4);
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
-/* === Profile Body & Info === */
+/* === Profile Info === */
 .profile-body {
-    padding-top: 1rem;
+  padding-top: 0.5rem;
 }
 .profile-info {
-  font-size: 1rem;
-  margin-bottom: 2rem;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
 }
 .profile-info p {
-  margin-bottom: 0.8rem;
-  line-height: 1.6;
+  margin: 0.4rem 0;
+  line-height: 1.4;
 }
 .profile-info strong {
-  color: #ffd700; /* Gold for labels */
+  color: #ffd700;
   font-weight: 700;
-  margin-right: 0.5em;
+  margin-right: 0.25em;
 }
 
 /* === Name Editing Section === */
 .name-section {
-    margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 .name-display {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 .name-display p {
-    margin-bottom: 0;
+  margin: 0;
 }
 .edit-icon {
-  margin-left: 0.75rem;
+  margin-left: 0.5rem;
   cursor: pointer;
-  color: #ffd700; /* Gold icon */
-  font-size: 1.1rem;
-  transition: color 0.3s ease;
-  vertical-align: middle;
+  color: #ffd700;
+  font-size: 1rem;
+  transition: color 0.25s ease;
 }
 .edit-icon:hover {
-  color: #ffc107; /* Darker gold on hover */
+  color: #ffc107;
 }
 .name-edit-form {
   margin-top: 0.5rem;
 }
 .input-group {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.25rem;
   align-items: center;
   flex-wrap: wrap;
 }
 .input-group .form-control {
-    flex-grow: 1;
-    min-width: 150px;
+  flex: 1;
+  min-width: 120px;
 }
 .button-group {
-    display: flex;
-    gap: 0.5rem;
+  display: flex;
+  gap: 0.25rem;
 }
 
 /* === Section Titles === */
 .section-title {
-  /* Using Poppins if imported, otherwise fallback */
   font-family: 'Poppins', sans-serif, system-ui;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 700;
-  color: #ffd700; /* Gold title */
-  margin-top: 1.5rem;
-  margin-bottom: 1rem;
-  padding-bottom: 0.4rem;
-  border-bottom: 1px solid #383838; /* Dark border */
+  color: #ffd700;
+  margin: 0.75rem 0;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid #383838;
 }
 
 /* === Forms & Inputs === */
-.password-form, .name-edit-form {
-  padding-top: 0.5rem;
+.password-form,
+.name-edit-form {
+  padding-top: 0.25rem;
 }
 .form-group {
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
 }
 label {
   display: block;
-  font-size: 0.9rem;
-  color: #b0b0b0; /* Light gray label */
+  font-size: 0.85rem;
+  color: #ccc;
   font-weight: 700;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.25rem;
 }
 .input-container {
   position: relative;
 }
 .form-control {
   width: 100%;
-  padding: 10px 40px 10px 12px;
-  font-size: 1rem;
-  background: #2a2a2a; /* Slightly lighter dark bg */
-  border: 1px solid #383838; /* Dark border */
-  color: #ffffff; /* White text for inputs */
+  padding: 8px 36px 8px 10px;
+  font-size: 0.95rem;
+  background: #2a2a2a;
+  border: 1px solid #383838;
+  color: #fff;
   border-radius: 4px;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 .form-control::placeholder {
-    color: rgba(176, 176, 176, 0.6); /* Lighter placeholder */
+  color: rgba(255, 255, 255, 0.5);
 }
 .form-control:focus {
   outline: none;
-  border-color: #ffd700; /* Gold border on focus */
-  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2); /* Gold focus glow */
+  border-color: #ffd700;
+  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.3);
 }
 .eye-icon {
   position: absolute;
-  right: 12px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: #ffd700; /* Gold icon */
+  color: #ffd700;
   cursor: pointer;
-  font-size: 1.2rem;
+  font-size: 1rem;
   z-index: 2;
-  transition: color 0.3s ease;
+  transition: color 0.25s ease;
 }
 .eye-icon:hover {
-    color: #ffc107; /* Darker gold on hover */
+  color: #ffc107;
 }
 
-/* === Password Strength Meter (Original Structure Styling) === */
+/* === Password Strength Meter === */
 .password-strength-meter {
   display: flex;
   align-items: center;
-  margin-top: 0.6rem;
-  gap: 4px; /* Gap between bars */
-  height: 18px;
+  gap: 2px;
+  height: 16px;
+  margin-top: 0.25rem;
 }
 .password-strength-meter .strength-bar {
   flex: 1;
-  height: 6px;
-  background: #383838; /* Dark background for inactive bars */
-  border-radius: 3px;
-  transition: background-color 0.3s ease;
+  height: 4px;
+  background: #383838;
+  border-radius: 2px;
+  transition: background-color 0.25s ease;
 }
-/* Gold color for active bars */
 .password-strength-meter .strength-bar.active {
-  background: #ffd700; /* Gold accent */
+  background: #ffd700;
 }
 .password-strength-meter .strength-text {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: bold;
-  min-width: 70px;
+  min-width: 50px;
   text-align: right;
-  color: #b0b0b0; /* Default text color */
-  transition: color 0.3s ease;
+  color: #ffd700;
 }
-/* Change text color based on strength */
-.password-strength-meter .strength-text:not(:empty) { /* Apply color only when text exists */
-    color: #ffd700; /* Gold color when showing strength */
-}
-
 
 /* === Buttons === */
-.btn { /* Base button style */
-  padding: 10px 18px;
-  font-size: 1rem;
+.btn {
+  padding: 8px 14px;
+  font-size: 0.9rem;
   font-weight: 700;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
   text-align: center;
-  font-family: inherit; /* Use card's font */
-  line-height: 1.5; /* Ensure consistent line height */
+  line-height: 1.4;
 }
 .btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+  opacity: 0.6;
+  cursor: not-allowed;
 }
-
-/* Primary Button (Save, Submit) */
-.btn-save, .btn-submit {
-  background: #ffd700; /* Gold background */
-  color: #1f1f1f; /* Dark text on gold */
-  min-width: 100px;
-}
-.btn-save:hover:not(:disabled), .btn-submit:hover:not(:disabled) {
-  background: #ffc107; /* Darker gold on hover */
-  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
-}
-.submit-group {
-    flex-grow: 1; /* Allow submit button to take space */
-}
+.btn-save,
 .btn-submit {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 40px; /* Consistent height */
+  background: #ffd700;
+  color: #1f1f1f;
+  min-width: 80px;
 }
-
-/* Cancel Button */
+.btn-save:hover:not(:disabled),
+.btn-submit:hover:not(:disabled) {
+  background: #ffc107;
+  box-shadow: 0 2px 6px rgba(255, 215, 0, 0.3);
+}
 .btn-cancel {
-  background: #2a2a2a; /* Dark background */
-  color: #b0b0b0; /* Light gray text */
-  border: 1px solid #383838; /* Dark border */
-  min-width: 100px;
+  background: #2a2a2a;
+  color: #ccc;
+  border: 1px solid #383838;
+  min-width: 80px;
 }
 .btn-cancel:hover:not(:disabled) {
-  background: #383838; /* Slightly lighter dark on hover */
-  color: #ffffff; /* White text on hover */
+  background: #383838;
+  color: #fff;
 }
-
-/* Delete Button - Updated Style */
 .btn-delete {
-  background: #cc181e; /* Solid red background */
-  color: #ffffff; /* White icon */
-  border: none; /* Removed border */
-  padding: 10px 18px; /* Match primary button padding */
-  font-size: 1rem; /* Adjusted icon size slightly if needed */
-  /* line-height: 1.5; */ /* Match base button line-height */
-  display: inline-flex; /* Align icon nicely */
+  background: #cc181e;
+  color: #fff;
+  padding: 8px 14px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 }
-.btn-delete i { /* Ensure icon vertical alignment */
-    vertical-align: middle;
-}
 .btn-delete:hover:not(:disabled) {
-  background: #a30f13; /* Darker red on hover */
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(204, 24, 30, 0.3); /* Subtle shadow on hover */
+  background: #a30f13;
+  box-shadow: 0 2px 6px rgba(204, 24, 30, 0.3);
 }
 
 /* Layout for action buttons */
 .action-buttons-row {
-    margin-top: 1.5rem; /* Original structure uses d-flex */
-    gap: 1rem; /* Add gap between buttons */
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
-.submit-group.mb-0 { /* Ensure no margin if class is added */
-    margin-bottom: 0 !important;
+.submit-group {
+  flex-grow: 1;
 }
 
 /* === Loading Spinner === */
 .spinner {
   width: 20px;
   height: 20px;
-  border: 3px solid rgba(31, 31, 31, 0.3); /* Match button text color base */
+  border: 3px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
-  border-top-color: #1f1f1f; /* Match button text color */
+  border-top-color: #ffd700;
   animation: spin 0.8s linear infinite;
   display: inline-block;
 }
-
-/* === Status Messages === */
-.status-message {
-  margin-top: 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: 4px;
-  font-size: 0.95rem;
-  text-align: center;
-  font-weight: bold;
-  border: 1px solid transparent; /* Base border */
-}
-/* Inline error for name edit */
-.name-edit-form .error-message {
-    color: #cc181e; /* Red text */
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-    text-align: left;
-    padding: 0; /* No padding/background */
-    border: none;
-    background: none;
-}
-/* General status messages */
-.status-message.error-message {
-  color: #cc181e; /* Red text */
-  background-color: rgba(204, 24, 30, 0.1);
-  border-color: #cc181e; /* Red border */
-}
-.status-message.success-message {
-  color: #28a745; /* Green text */
-  background-color: rgba(40, 167, 69, 0.1);
-  border-color: #28a745; /* Green border */
-}
-
-/* === Spinner Animation === */
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-/* === Responsive Design === */
-@media (max-width: 576px) {
-  .profile-card {
-    max-width: 95%;
-    padding: 1.5rem;
-  }
-  .profile-header h2 {
-    font-size: 1.6rem;
-  }
-  .section-title {
-    font-size: 1.15rem;
-  }
-  .form-control {
-    padding: 8px 35px 8px 10px;
-    font-size: 0.95rem;
-  }
-  .btn {
-    padding: 9px 15px; /* Slightly smaller padding on mobile */
-    font-size: 0.95rem;
-  }
-  /* Keep delete button padding consistent with other buttons on mobile */
-  .btn-delete {
-      padding: 9px 15px;
-      font-size: 1rem; /* Keep icon size reasonable */
-  }
-
-  .action-buttons-row {
-      flex-direction: column; /* Stack buttons vertically */
-      align-items: stretch; /* Make buttons full width */
-      gap: 1rem; /* Add gap between stacked buttons */
-  }
-  .submit-group {
-      order: 1; /* Ensure submit button is first */
-      width: 100%; /* Take full width */
-  }
-  .delete-account-section {
-      order: 2; /* Delete button below */
-      text-align: center; /* Center delete button */
-      width: 100%; /* Take full width */
-  }
-  .btn-delete {
-      display: inline-flex; /* Allow centering, keep flex for icon */
-      width: auto; /* Don't force full width */
-      padding: 9px 20px; /* Adjust padding as needed */
-  }
-  .input-group { /* For name edit */
-      flex-direction: column; /* Stack input and buttons */
-      align-items: stretch;
-  }
-  .button-group { /* For name edit */
-      margin-top: 0.5rem;
-      justify-content: flex-end; /* Align buttons right */
-  }
+/* === Status Messages === */
+.status-message {
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid transparent;
+}
+.status-message.error-message {
+  color: #cc181e;
+  background-color: rgba(204, 24, 30, 0.1);
+  border-color: #cc181e;
+}
+.status-message.success-message {
+  color: #28a745;
+  background-color: rgba(40, 167, 69, 0.1);
+  border-color: #28a745;
 }
 
+/* === Profile Table & Reviews Grid === */
+.table-section,
+.public-reviews-section {
+  flex-grow: 1;
+  overflow: hidden;
+}
+.table-wrapper {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.5rem;
+}
+.custom-table th,
+.custom-table td {
+  padding: 0.5rem;
+  border: 1px solid #444444;
+  text-align: left;
+}
+.custom-table th {
+  background: #2a2a2a;
+  color: #ffd700;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.custom-table td {
+  background: #1f1f1f;
+  color: #fff;
+}
+.custom-table tbody tr:hover {
+  background-color: #2f2f2f;
+  transition: background-color 0.3s ease;
+}
+
+/* Reviews Grid */
+.reviews-wrapper {
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+}
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+.review-card {
+  background: #333333;
+  border: 1px solid #444444;
+  border-radius: 6px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  color: #fff;
+  text-align: left;
+  overflow: hidden;
+}
+.review-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.review-film-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffd700;
+}
+.review-meta {
+  font-size: 0.75rem;
+  color: #aaaaaa;
+}
+.review-content {
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* === Pagination Wrapper === */
+.pagination-wrapper {
+  padding: 0.5rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-top: 1px solid #444444;
+  background: #1f1f1f;
+}
+
+/* === Responsive Adjustments === */
+@media (max-width: 576px) {
+  .profile-card {
+    max-width: 100%;
+    padding: 1.25rem;
+  }
+  .profile-header h2 {
+    font-size: 1.4rem;
+  }
+  .section-title {
+    font-size: 1rem;
+    margin-top: 0.75rem;
+  }
+  .form-control {
+    padding: 6px 30px 6px 8px;
+    font-size: 0.9rem;
+  }
+  .btn {
+    padding: 7px 12px;
+    font-size: 0.85rem;
+  }
+  .action-buttons-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .input-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .button-group {
+    margin-top: 0.5rem;
+    justify-content: flex-end;
+  }
+}
 </style>
+
