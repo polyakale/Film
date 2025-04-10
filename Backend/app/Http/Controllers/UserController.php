@@ -63,20 +63,44 @@ class UserController extends Controller
 
     public function updateName(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|min:2|max:255',
-        ]);
+        try {
+            \Log::info('Update name request:', $request->all());
 
-        $user = $request->user();
-        $user->name = $request->input('name');
-        $user->save();
+            $validated = $request->validate([
+                'name' => 'required|string|min:2|max:255|unique:users,name,' . $request->user()->id
+            ]);
 
-        return response()->json([
-            'message' => 'Name updated successfully!',
-            'user' => $user
-        ], 200);
+            $user = $request->user();
+            \Log::info('Current user:', $user->toArray());
+
+            $user->name = $validated['name'];
+            $user->save();
+
+            \Log::info('Updated user:', $user->fresh()->toArray());
+
+            return response()->json([
+                'message' => 'Name updated successfully!',
+                'user' => $user->only(['id', 'name', 'email']) // Don't return sensitive data
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation error:', $e->errors());
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            \Log::error('Name update error:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'message' => 'Server error occurred',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
     }
-
 
     public function logout(Request $request)
     {
