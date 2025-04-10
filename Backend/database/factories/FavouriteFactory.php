@@ -14,11 +14,14 @@ class FavouriteFactory extends Factory
     {
         $faker = Faker::create('en_US');
 
-        // First ensure we have at least one user and film
+        // Ensure we have at least one user and one film.
         $user = User::first() ?? User::factory()->create();
         $film = Film::first() ?? Film::factory()->create();
 
-        // Get all possible combinations that don't exist yet
+        // Generate a random created_at datetime between 2015-01-01 and now.
+        $createdAt = $faker->dateTimeBetween('2015-01-01', 'now');
+
+        // Retrieve all existing user-film combinations to avoid inserting duplicates.
         $existingPairs = Favourite::select(['userId', 'filmId'])
             ->get()
             ->map(fn($item) => $item->userId . '-' . $item->filmId)
@@ -35,7 +38,7 @@ class FavouriteFactory extends Factory
             ->all();
 
         if (empty($possibleCombinations)) {
-            // Fallback to existing user and film if no combinations left
+            // Fallback to an existing user and film if no new combinations remain.
             $combination = [$user->id, $film->id];
         } else {
             $combination = $faker->randomElement($possibleCombinations);
@@ -43,83 +46,120 @@ class FavouriteFactory extends Factory
 
         $evaluation = $faker->numberBetween(1, 10) / 2;
 
-        // Review content generation remains the same
+        // Generate review content based on the evaluation.
         $content = $this->generateReviewContent($faker, $evaluation);
 
         return [
-            'userId' => $combination[0],
-            'filmId' => $combination[1],
+            'userId'     => $combination[0],
+            'filmId'     => $combination[1],
             'evaluation' => $evaluation,
-            'content' => $content,
+            'content'    => $content,
+            // Format dates as strings in the proper 'Y-m-d H:i:s' format.
+            'created_at' => $createdAt->format('Y-m-d H:i:s'),
+            'updated_at' => $createdAt->format('Y-m-d H:i:s'),
         ];
     }
 
+    /**
+     * Generate a review content string based on a random sentiment.
+     *
+     * @param \Faker\Generator $faker
+     * @param float $evaluation
+     * @return string
+     */
     protected function generateReviewContent($faker, $evaluation): string
     {
-        // More automation: Dynamically generated review sentences
-        $openers = [
-            "I just watched this and",
-            "Honestly,",
-            "To be fair,",
-            "I had high hopes, but",
-            "What a surprise!",
-            "After watching,"
+        // Expanded vocabulary with genre-specific terms
+        $genres = ['drama', 'comedy', 'horror', 'romance', 'historical', 'documentary', 'action'];
+        $technicalAspects = [
+            'lighting' => ['atmospheric', 'harsh', 'subtle', 'dramatic'],
+            'editing' => ['tight', 'choppy', 'rhythmic', 'seamless'],
+            'sound' => ['immersive', 'distracting', 'nuanced', 'powerful']
         ];
 
-        $middleParts = [
-            "the storyline was",
-            "the acting felt",
-            "the cinematography was",
-            "the pacing was",
-            "the dialogue seemed",
-            "the soundtrack was"
+        // Sentence components
+        $structures = [
+            // Structure 1: Personal experience
+            fn() => sprintf(
+                "As someone who loves %s films, %s %s %s %s",
+                $faker->randomElement($genres),
+                $faker->randomElement(["I was ", "I found myself "]),
+                $faker->randomElement(["completely ", "utterly ", "surprisingly "]),
+                match (true) {
+                    $evaluation >= 4.5 => $faker->randomElement(["captivated", "moved", "transported"]),
+                    $evaluation >= 3 => $faker->randomElement(["engaged", "interested", "curious"]),
+                    default => $faker->randomElement(["bored", "disappointed", "frustrated"])
+                },
+                $faker->randomElement([". The %s really stood out to me.", ". However, the %s could have been better."])
+            ),
+
+            // Structure 2: Technical analysis
+            fn() => sprintf(
+                "From a technical perspective, %s %s %s. %s %s",
+                $faker->randomElement($technicalAspects['lighting']) . ' lighting',
+                $faker->randomElement(["combined with", "contrasted with", "was undermined by"]),
+                $faker->randomElement($technicalAspects['editing']) . ' editing',
+                $faker->randomElement(["While", "Although", "Even though"]),
+                $faker->randomElement(["the %s made for %s viewing experience", "the %s left me feeling %s"])
+            ),
+
+            // Structure 3: Character-driven
+            fn() => sprintf(
+                "%s character development was %s, %s %s %s",
+                $faker->randomElement(["The", "While the main", "Secondary"]),
+                match (true) {
+                    $evaluation >= 4.5 => $faker->randomElement(["masterful", "nuanced", "compelling"]),
+                    $evaluation >= 3 => $faker->randomElement(["uneven", "predictable", "serviceable"]),
+                    default => $faker->randomElement(["non-existent", "rushed", "confusing"])
+                },
+                $faker->randomElement(["the", "their"]),
+                $faker->randomElement(["arcs", "motivations", "relationships"]),
+                $faker->randomElement(["felt %s authentic.", "left me %s."])
+            )
         ];
 
-        $positives = [
-            "absolutely brilliant!",
-            "incredibly well done.",
-            "captivating from start to finish.",
-            "a masterpiece in every way.",
-            "one of the best I've seen recently."
-        ];
+        // Build the review
+        $review = $faker->randomElement($structures)();
 
-        $neutrals = [
-            "just okay, nothing special.",
-            "pretty average.",
-            "good in some parts, but weak in others.",
-            "not bad, but not outstanding.",
-            "a mix of highs and lows."
-        ];
+        // Add dynamic elements
+        $review = preg_replace_callback('/%s/', function () use ($faker, $evaluation, $genres, $technicalAspects) {
+            return $faker->randomElement([
+                $faker->randomElement($genres),
+                $faker->randomElement($technicalAspects['sound']),
+                match (true) {
+                    $evaluation >= 4.5 => $faker->randomElement(["rewarding", "memorable"]),
+                    $evaluation >= 3 => $faker->randomElement(["mixed", "inconsistent"]),
+                    default => $faker->randomElement(["regrettable", "forgettable"])
+                },
+                $faker->randomElement(["cinematography", "score", "production design"]),
+                $faker->randomElement(["genuinely", "painfully", "surprisingly"])
+            ]);
+        }, $review);
 
-        $negatives = [
-            "disappointing and dull.",
-            "not engaging at all.",
-            "poorly executed.",
-            "a total letdown.",
-            "frustratingly bad."
-        ];
+        // Add optional postscript 30% of the time
+        if ($faker->boolean(30)) {
+            $review .= " " . $faker->randomElement([
+                "This one will stay with me for days.",
+                "A flawed but fascinating experiment.",
+                "Not what I expected, in " . ($evaluation >= 3 ? "the best way" : "all the wrong ways") . ".",
+                "Proof that " . $faker->randomElement([
+                    "budget doesn't equal quality",
+                    "great ideas can overcome limitations",
+                    "even masters have off days"
+                ]) . "."
+            ]);
+        }
 
-        $closers = [
-            "Would I watch it again? Maybe.",
-            "Overall, it was an interesting experience.",
-            "It had its moments, but could’ve been better.",
-            "Not sure I'd recommend it.",
-            "I'd tell others to check it out, but with lower expectations."
-        ];
+        // Add rating reference 50% of the time
+        if ($faker->boolean(50)) {
+            $ratingStyle = $faker->randomElement([
+                "I'd give it a solid {$evaluation}/5.",
+                "{$evaluation} stars feels about right.",
+                "On my personal scale: {$evaluation} out of 5."
+            ]);
+            $review = substr($review, 0, -1) . " " . $ratingStyle;
+        }
 
-        // Determine which phrases to use based on evaluation score
-        $sentiment = match (true) {
-            $evaluation >= 4.5 => $faker->randomElement($positives),
-            $evaluation >= 3.0 => $faker->randomElement($neutrals),
-            default => $faker->randomElement($negatives),
-        };
-
-        return sprintf(
-            "%s %s %s %s",
-            $faker->randomElement($openers),
-            $faker->randomElement($middleParts),
-            $sentiment,
-            $faker->randomElement($closers)
-        );
+        return ucfirst(str_replace('  ', ' ', $review));
     }
 }
