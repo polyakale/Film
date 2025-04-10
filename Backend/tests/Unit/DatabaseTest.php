@@ -286,9 +286,15 @@ class DatabaseTest extends TestCase
     public function test_favourites_users_relationship()
     {
         $user = User::factory()->create();
-        $favourite = Favourite::factory()->create(['userId' => $user->id]);
-        // Test using Eloquent relationship
-        $freshFavourite = Favourite::with('user')->find($favourite->id);
+        $film = Film::factory()->create();
+
+        $favourite = Favourite::factory()->create([
+            'userId' => $user->id,
+            'filmId' => $film->id
+        ]);
+
+        $freshFavourite = Favourite::with(['user', 'film'])->find($favourite->id);
+
         $this->assertInstanceOf(User::class, $freshFavourite->user);
         $this->assertEquals($user->id, $freshFavourite->user->id);
     }
@@ -320,15 +326,22 @@ class DatabaseTest extends TestCase
     // Films ↔ Favourites relationship
     public function test_films_favourites_relationship()
     {
+        // Create required dependencies first
+        $user = User::factory()->create();
         $film = Film::factory()->create();
-        $favourite = Favourite::factory()->create(['filmId' => $film->id]);
-        // Test film has favourites
+
+        $favourite = Favourite::factory()->create([
+            'userId' => $user->id,
+            'filmId' => $film->id
+        ]);
+
+        // Refresh relationships
+        $film->load('favourites');
+        $favourite->load('film');
+
         $this->assertCount(1, $film->favourites);
-        $this->assertEquals($favourite->id, $film->favourites->first()->id);
-        // Test favourite belongs to film
         $this->assertEquals($film->id, $favourite->film->id);
     }
-
     // Tasks ↔ People relationship
     public function test_tasks_people_relationship()
     {

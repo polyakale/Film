@@ -34,4 +34,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Favourite::class, 'userId');
     }
+
+    public function position()
+    {
+        return $this->belongsTo(Position::class, 'positionId');
+    }
 }

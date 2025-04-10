@@ -1,8 +1,12 @@
-﻿SELECT * FROM films fi;
+﻿SELECT * FROM positions;
+SELECT * FROM users;
+SELECT * FROM favourites;
 
-SELECT * FROM favourites fa;
-
-
+SELECT * FROM films;
+SELECT * FROM people;
+SELECT * FROM videos;
+SELECT * FROM roles;
+SELECT * FROM tasks;
 
 SELECT fi.id, 
        fi.title, 
@@ -21,6 +25,11 @@ GROUP BY fi.id,
        fi.presentation, 
        fi.imdbLink
 ORDER BY evaluation DESC;
+
+SELECT f.title, p.name, r.role from tasks t
+  JOIN people p ON t.personId = p.id
+  JOIN films f  ON t.filmId = f.id
+  JOIN roles r  ON t.roleId = r.id;
 
 #get api/favourites/2/42 
 select id, userId, filmId, evaluation from favourites
