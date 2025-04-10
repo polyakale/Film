@@ -8,7 +8,41 @@
         <!-- User Information -->
         <div class="profile-info">
           <h3 class="section-title">👤 Account Details</h3>
-          <p><strong>Name:</strong> {{ user }}</p>
+          <div class="name-section">
+            <div v-if="!isEditingName" class="name-display">
+              <p>
+                <strong>Name:</strong> {{ user }}
+                <i
+                  class="bi bi-pencil-square edit-icon"
+                  @click="startEditing"
+                ></i>
+              </p>
+            </div>
+
+            <form v-else class="name-edit-form" @submit.prevent="saveName">
+              <div class="input-group">
+                <input
+                  type="text"
+                  v-model="newName"
+                  class="form-control"
+                  placeholder="Enter new name"
+                  required
+                  maxlength="50"
+                />
+                <div class="button-group">
+                  <button type="submit" class="btn-save">Save</button>
+                  <button
+                    type="button"
+                    class="btn-cancel"
+                    @click="cancelEditing"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+              <p v-if="nameError" class="error-message">{{ nameError }}</p>
+            </form>
+          </div>
           <p><strong>Email:</strong> {{ email }}</p>
           <p><strong>Role:</strong> {{ roleName }}</p>
         </div>
@@ -57,6 +91,26 @@
                   ></i>
                 </span>
               </div>
+              <!-- Password Strength Meter -->
+              <div class="password-strength-meter" v-if="password.new">
+                <div
+                  class="strength-bar"
+                  :class="{ active: passwordStrength >= 1 }"
+                ></div>
+                <div
+                  class="strength-bar"
+                  :class="{ active: passwordStrength >= 2 }"
+                ></div>
+                <div
+                  class="strength-bar"
+                  :class="{ active: passwordStrength >= 3 }"
+                ></div>
+                <div
+                  class="strength-bar"
+                  :class="{ active: passwordStrength >= 4 }"
+                ></div>
+                <div class="strength-text">{{ strengthText }}</div>
+              </div>
             </div>
 
             <!-- Confirm New Password -->
@@ -80,12 +134,20 @@
               </div>
             </div>
 
-            <!-- Submit Button -->
-            <div class="form-group">
-              <button type="submit" class="btn-submit" :disabled="loading">
-                Change Password
-              </button>
-              <div v-if="loading" class="spinner"></div>
+            <div class="d-flex justify-content-between">
+              <!-- Submit Button -->
+              <div class="form-group">
+                <button type="submit" class="btn-submit" :disabled="loading">
+                  Change Password
+                </button>
+                <div v-if="loading" class="spinner"></div>
+              </div>
+              <!-- Delete Account Button -->
+              <div class="delete-account-section">
+                <button class="btn-delete" @click="deleteAccount">
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </div>
             </div>
 
             <!-- Status Message -->
@@ -93,13 +155,6 @@
               {{ message }}
             </p>
           </form>
-        </div>
-
-        <!-- Delete Account Button -->
-        <div class="delete-account-section">
-          <button class="btn-delete" @click="deleteAccount">
-            Delete Account
-          </button>
         </div>
       </div>
     </div>
@@ -115,6 +170,9 @@ import { BASE_URL } from "@/helpers/baseUrls";
 export default {
   data() {
     return {
+      isEditingName: false,
+      newName: this.user,
+      nameError: "",
       password: {
         current: "",
         new: "",
@@ -135,14 +193,30 @@ export default {
     roleName() {
       return this.positionId === 1 ? "Administrator" : "Guest";
     },
+    // Compute password strength based on criteria met.
     passwordStrength() {
-      if (!this.password.new) return 0;
       let strength = 0;
       if (this.password.new.length >= 8) strength++;
       if (/[A-Z]/.test(this.password.new)) strength++;
       if (/[0-9]/.test(this.password.new)) strength++;
       if (/[@$!%*#?&]/.test(this.password.new)) strength++;
       return strength;
+    },
+    // Return a text description based on password strength.
+    strengthText() {
+      switch (this.passwordStrength) {
+        case 0:
+        case 1:
+          return "Weak";
+        case 2:
+          return "Moderate";
+        case 3:
+          return "Strong";
+        case 4:
+          return "Very Strong";
+        default:
+          return "";
+      }
     },
   },
   methods: {
@@ -157,12 +231,22 @@ export default {
         this.messageClass = "";
       }, 5000);
     },
+    startEditing() {
+      this.isEditingName = true;
+      this.newName = this.user; // Reset to current name
+      this.nameError = "";
+    },
+
+    cancelEditing() {
+      this.isEditingName = false;
+      this.newName = this.user; // Reset on cancel
+    },
+
     async changePassword() {
       if (this.password.new !== this.password.confirm) {
         this.showMessage("New passwords do not match", "error-message");
         return;
       }
-
       this.loading = true;
       try {
         const requestData = {
@@ -170,29 +254,23 @@ export default {
           new_password: this.password.new,
           new_password_confirmation: this.password.confirm,
         };
-
-        // Add email for guest users (no token)
+        // For guest users (no token), include email.
         if (!this.token) {
-          requestData.email = this.email; // Get email from your store
+          requestData.email = this.email;
         }
-
         const config = {
           headers: {
             "Content-Type": "application/json",
           },
         };
-
-        // Add token only if available
         if (this.token) {
           config.headers.Authorization = `Bearer ${this.token}`;
         }
-
         await axios.patch(
           `${BASE_URL}/users/change-password`,
           requestData,
           config
         );
-
         this.showMessage("Password changed successfully!", "success-message");
         this.password = { current: "", new: "", confirm: "" };
       } catch (error) {
@@ -204,9 +282,7 @@ export default {
         this.loading = false;
       }
     },
-
     async deleteAccount() {
-      console.log("Deleting account for:", this.id);
       if (window.confirm("Are you sure you want to delete your account?")) {
         try {
           await axios.delete(`${BASE_URL}/users/${this.id}`, {
@@ -220,10 +296,43 @@ export default {
         }
       }
     },
+    async saveName() {
+      try {
+        if (!this.newName.trim()) {
+          this.nameError = "Name cannot be empty";
+          return;
+        }
+
+        if (this.newName === this.user) {
+          this.isEditingName = false;
+          return;
+        }
+
+        const response = await axios.patch(
+          `${BASE_URL}/users/update-name`,
+          { name: this.newName },
+          {
+            headers: {
+              Authorization: `Bearer ${this.token}`,
+            },
+          }
+        );
+
+        // Update Pinia store properly
+        useAuthStore().setUserName(this.newName);
+        this.isEditingName = false;
+        this.showMessage("Name updated successfully!", "success-message");
+      } catch (error) {
+        console.error("Name update error:", error);
+        this.nameError =
+          error.response?.data?.message || "Failed to update name";
+      }
+    },
     ...mapActions(useAuthStore, ["clearStoredData"]),
   },
 };
 </script>
+
 <style scoped>
 /* === Background & Container === */
 .profile-container {
@@ -270,6 +379,28 @@ export default {
 
 .profile-info strong {
   color: #ffd700;
+}
+
+/* Name Editing Styles */
+.name-edit-form {
+  margin-top: 0.5rem;
+}
+
+.input-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Edit icon styling */
+.edit-icon {
+  margin-left: 0.5rem;
+  cursor: pointer;
+  color: #ffd700;
+}
+
+.edit-icon:hover {
+  color: #ffc107;
 }
 
 /* === Section Titles === */
@@ -358,15 +489,9 @@ label {
 }
 
 /* === Delete Account Button === */
-.delete-account-section {
-  margin-top: 2rem;
-  text-align: center;
-}
-
 .btn-delete {
-  width: 100%;
   padding: 12px;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: bold;
   color: white;
   background: #ff4d4d;
@@ -378,6 +503,7 @@ label {
 .btn-delete:hover {
   background: #e60000;
   box-shadow: 0 0 15px rgba(255, 77, 77, 0.6);
+  
 }
 
 /* === Loading Spinner === */
@@ -415,6 +541,31 @@ label {
   }
 }
 
+/* === Password Strength Meter Styling === */
+.password-strength-meter {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.password-strength-meter .strength-bar {
+  flex: 1;
+  height: 6px;
+  margin-right: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  transition: background-color 0.3s ease;
+}
+
+.password-strength-meter .strength-bar.active {
+  background: #ffd700;
+}
+
+.password-strength-meter .strength-text {
+  font-size: 0.9rem;
+  color: #ffd700;
+}
+
 /* === Responsive Design for Smaller Screens === */
 @media (max-width: 768px) {
   .profile-card {
@@ -428,7 +579,7 @@ label {
     font-size: 1.1rem;
   }
   .form-control {
-    padding: 8px 35px 8px 8px; /* adjust padding for smaller screens */
+    padding: 8px 35px 8px 8px;
     font-size: 0.9rem;
   }
   .btn-submit,

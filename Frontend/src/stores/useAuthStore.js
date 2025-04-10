@@ -9,6 +9,10 @@ export const useAuthStore = defineStore("auth", {
     token: localStorage.getItem("token") || null,
   }),
   actions: {
+    setUserName(newName) {
+      this.user = newName; // Direct update if user is a string
+      // If user is an object: this.user.name = newName;
+    },
     setAuthData(payload) {
       this.id = payload.id;
       this.user = payload.name;

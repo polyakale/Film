@@ -15,16 +15,16 @@ class UserController extends Controller
     public function login(LoginUserRequest $request)
     {
         $user = User::where('email', $request->email)->first();
-    
+
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
-    
+
         $user->tokens()->delete();
-    
+
         // Issue token to ALL users (including guests)
         $token = $user->createToken('basic-access', ['change-password'])->plainTextToken;
-    
+
         return response()->json([
             'message' => 'ok',
             'data' => [
@@ -41,25 +41,42 @@ class UserController extends Controller
             'new_password' => 'required|min:8|max:16|confirmed',
             'email' => 'required_if:token,false|email' // Require email if no token
         ]);
-    
+
         // Authenticate via token or email/password
         if ($request->bearerToken()) {
             $user = $request->user(); // Token-based auth
         } else {
             // Email + password auth for guests
             $user = User::where('email', $request->email)->first();
-    
+
             if (!$user || !Hash::check($request->current_password, $user->password)) {
                 return response()->json(['message' => 'Invalid credentials'], 401);
             }
         }
-    
+
         // Update password
         $user->password = Hash::make($request->new_password);
         $user->save();
-    
+
         return response()->json(['message' => 'Password changed successfully'], 200);
     }
+
+    public function updateName(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|min:2|max:255',
+        ]);
+
+        $user = $request->user();
+        $user->name = $request->input('name');
+        $user->save();
+
+        return response()->json([
+            'message' => 'Name updated successfully!',
+            'user' => $user
+        ], 200);
+    }
+
 
     public function logout(Request $request)
     {
