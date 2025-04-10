@@ -36,7 +36,6 @@
         <p class="film-info"><strong>Presentation:</strong> {{ formatDate(film.presentation) }}</p>
         <p class="film-info"><strong>Evaluation:</strong> {{ film.evaluation || "Not rated yet." }}</p>
         <h2 class="film-title">Cast & Crew</h2>
-        <!-- <p class="film-info"><strong>Cast:</strong> {{ roles.role }}</p> -->
 
         <!-- IMDb link -->
         <a v-if="film.imdbLink" :href="formatImdbUrl(film.imdbLink)" target="_blank" rel="noopener noreferrer"
@@ -197,7 +196,7 @@ export default {
     },
     async fetchRolesFromBackend() {
       try {
-        const response = await axios.get(`${BASE_URL}/roles/role`);
+        const response = await axios.get(`${BASE_URL}/queryRolesFromBackend`);
         this.roles = Array.isArray(response.data.data) ? response.data.data : [];
         this.filteredRoles = [...this.roles];
       } catch (error) {

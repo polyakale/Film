@@ -18,19 +18,19 @@ Route::get('favouritesByUserId/{userId}', [FavouriteController::class, 'getByUse
 // users
 Route::post('users/login', [UserController::class, 'login']);
 Route::patch('users/change-password', [UserController::class, 'changePassword'])
-    ->middleware('auth:sanctum');
+->middleware('auth:sanctum');
 Route::post('users/logout', [UserController::class, 'logout']);
 Route::get('users', [UserController::class, 'index'])
-    ->middleware('auth:sanctum');
+->middleware('auth:sanctum');
 
 Route::get('users/{id}', [UserController::class, 'show'])
-    ->middleware('auth:sanctum');
+->middleware('auth:sanctum');
 Route::post('users', [UserController::class, 'store']);
 
 Route::patch('users/{id}', [UserController::class, 'update'])
-    ->middleware('auth:sanctum');
+->middleware('auth:sanctum');
 Route::delete('users/{id}', [UserController::class, 'destroy'])
-    ->middleware('auth:sanctum');
+->middleware('auth:sanctum');
 Route::middleware('auth:sanctum')->group(function () {
     Route::delete('users/{id}', [UserController::class, 'destroy']);
 });
@@ -40,13 +40,14 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('positions', [PositionController::class, 'index']);
 Route::get('positions/{id}', [PositionController::class, 'show']);
 Route::post('positions', [PositionController::class, 'store'])
-    ->middleware('auth:sanctum');
+->middleware('auth:sanctum');
 Route::patch('positions/{id}', [PositionController::class, 'update'])
-    ->middleware('auth:sanctum');
+->middleware('auth:sanctum');
 Route::delete('positions/{id}', [PositionController::class, 'destroy'])
-    ->middleware('auth:sanctum');
+->middleware('auth:sanctum');
 // films
 Route::get('queryFilmsWithEvaluation', [FilmController::class, 'queryFilmsWithEvaluation']);
+Route::get('queryRolesFromBackend/{id}', [FilmController::class, 'queryRolesFromBackend']);
 Route::get('films', [FilmController::class, 'index']);
 Route::get('films/{id}', [FilmController::class, 'show']);
 Route::post('films', [FilmController::class, 'store'])

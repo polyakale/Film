@@ -75,6 +75,11 @@ get {{host}}/api/
 ### get queryFilmsWithEvaluation
 get {{host}}/api/queryFilmsWithEvaluation
 
+
+### get queryRolesFromBackend
+get {{host}}/api/queryRolesFromBackend
+
+
 ### patch rateing/userId/filmId
 PATCH {{host}}/api/favourites/6/2
 Content-Type: application/json

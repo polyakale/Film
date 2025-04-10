@@ -41,6 +41,27 @@ class FilmController extends Controller
 
         return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
+    public function queryRolesFromBackend($id)
+    {
+        //natív SQL
+        $query = 
+        '
+            SELECT f.title, p.name, r.role from tasks t
+            JOIN people p ON t.personId = p.id
+            JOIN films f  ON t.filmId = f.id
+            JOIN roles r  ON t.roleId = r.id
+            where f.id = ?;
+        ';
+        
+        $rows = DB::select($query, [$id]);
+
+        $data = [
+            'message' => 'ok',
+            'data' => $rows
+        ];
+
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
+    }
 
 
     public function index()
