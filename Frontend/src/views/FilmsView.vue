@@ -24,15 +24,16 @@
         Add New Film
       </button>
     </div>
-    <!-- Kártyák -->
+
     <div v-if="films.length" class="films-grid">
       <div
         v-for="film in filteredFilms"
         :key="film.id"
         class="film-card"
         :class="{ 'film-card-rated': rated(film, stateAuth.id) }"
+        @click="openFilmDetail(film)"
       >
-        <span class="star-icon" @click="openRatingModal(film)">★</span>
+        <span class="star-icon" @click.stop="openRatingModal(film)">★</span>
         <h2 class="film-title">{{ film.title }}</h2>
         <p class="film-info">
           <strong>Production Year:</strong> {{ film.production }}
@@ -56,12 +57,33 @@
         </a>
 
         <div v-if="isAdmin" class="film-actions">
-          <button @click="openEditFilmModal(film)" class="edit-button">
+          <button @click.stop="openEditFilmModal(film)" class="edit-button">
             Edit
           </button>
-          <button @click="deleteFilm(film.id)" class="delete-button">
+          <button @click.stop="deleteFilm(film.id)" class="delete-button">
             Delete
           </button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="selectedFilm" class="film-detail-modal">
+      <div class="modal-content">
+        <span class="close" @click="closeFilmDetail">&times;</span>
+        <h2>{{ selectedFilm.title }}</h2>
+        <div class="film-details">
+          <p><strong>Production Year:</strong> {{ selectedFilm.production }}</p>
+          <p><strong>Length:</strong> {{ selectedFilm.length }} minutes</p>
+          <p><strong>Presentation Date:</strong> {{ formatDate(selectedFilm.presentation) }}</p>
+          <p><strong>Evaluation:</strong> {{ selectedFilm.evaluation || 'Not rated yet' }}</p>
+          <a 
+            v-if="selectedFilm.imdbLink" 
+            :href="formatImdbUrl(selectedFilm.imdbLink)" 
+            target="_blank"
+            class="imdb-link"
+          >
+            View on IMDb
+          </a>
         </div>
       </div>
     </div>
@@ -74,19 +96,14 @@
         <form @submit.prevent="submitNewFilm">
           <label>Title:</label>
           <input v-model="newFilm.title" required />
-
           <label>Production Year:</label>
           <input v-model="newFilm.production" type="number" required />
-
           <label>Length (minutes):</label>
           <input v-model="newFilm.length" type="number" required />
-
           <label>Presentation Date:</label>
           <input v-model="newFilm.presentation" type="date" required />
-
           <label>IMDb Link:</label>
           <input v-model="newFilm.imdbLink" />
-
           <button type="submit">Save</button>
           <button type="button" @click="closeAddFilmModal">Cancel</button>
         </form>
@@ -99,19 +116,14 @@
         <form @submit.prevent="submitEditedFilm">
           <label>Title:</label>
           <input v-model="editingFilm.title" required />
-
           <label>Production Year:</label>
           <input v-model="editingFilm.production" type="number" required />
-
           <label>Length (minutes):</label>
           <input v-model="editingFilm.length" type="number" required />
-
           <label>Presentation Date:</label>
           <input v-model="editingFilm.presentation" type="date" required />
-
           <label>IMDb Link:</label>
           <input v-model="editingFilm.imdbLink" />
-
           <button type="submit">Save</button>
           <button type="button" @click="closeEditFilmModal">Cancel</button>
         </form>
@@ -188,6 +200,7 @@ export default {
       selectedEvaulatedFilm: null,
       currentComment: "",
       existingCommentId: null,
+      selectedFilm: null
     };
   },
   async mounted() {
@@ -212,28 +225,20 @@ export default {
         return [];
       }
     },
-
     async fetchFilmsFromBackend() {
       try {
-        const filmsResponse = await axios.get(
-          `${BASE_URL}/queryFilmsWithEvaluation`
-        );
-        this.films = Array.isArray(filmsResponse.data.data)
-          ? filmsResponse.data.data
-          : [];
-
+        const filmsResponse = await axios.get(`${BASE_URL}/queryFilmsWithEvaluation`);
+        this.films = Array.isArray(filmsResponse.data.data) ? filmsResponse.data.data : [];
         this.filteredFilms = [...this.films];
       } catch (error) {
         console.error("Error loading films:", error);
       }
     },
-
     formatDate(dateString) {
       if (!dateString) return "Unknown";
       const date = new Date(dateString);
       return date.toISOString().split("T")[0];
     },
-
     formatImdbUrl(imdbLink) {
       if (!imdbLink || imdbLink.trim() === "") return "#";
       if (!imdbLink.startsWith("http")) {
@@ -241,7 +246,6 @@ export default {
       }
       return imdbLink;
     },
-
     searchFilms() {
       const query = this.searchQuery.toLowerCase();
       this.filteredFilms = this.films.filter(
@@ -253,7 +257,6 @@ export default {
       );
       this.sortFilms();
     },
-
     sortFilms() {
       if (this.sortOption === "abc") {
         this.filteredFilms.sort((a, b) => a.title.localeCompare(b.title));
@@ -269,11 +272,9 @@ export default {
         });
       }
     },
-
     openAddFilmModal() {
       this.showAddFilmModal = true;
     },
-
     closeAddFilmModal() {
       this.showAddFilmModal = false;
       this.newFilm = {
@@ -284,14 +285,10 @@ export default {
         imdbLink: "",
       };
     },
-
     async submitNewFilm() {
       try {
         const token = this.stateAuth.token;
-        const headers = {
-          Authorization: `Bearer ${token}`,
-        };
-
+        const headers = { Authorization: `Bearer ${token}` };
         const filmData = {
           title: this.newFilm.title,
           production: this.newFilm.production,
@@ -299,7 +296,6 @@ export default {
           presentation: this.newFilm.presentation,
           imdbLink: this.newFilm.imdbLink,
         };
-
         await axios.post(BASE_URL, filmData, { headers });
         await this.fetchFilmsFromBackend();
         this.closeAddFilmModal();
@@ -307,17 +303,14 @@ export default {
         console.error("Error adding film:", error);
       }
     },
-
     openEditFilmModal(film) {
       this.editingFilm = { ...film };
       this.showEditFilmModal = true;
     },
-
     closeEditFilmModal() {
       this.showEditFilmModal = false;
       this.editingFilm = null;
     },
-
     async submitEditedFilm() {
       try {
         const token = this.stateAuth.token;
@@ -326,7 +319,6 @@ export default {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         };
-
         const filmData = {
           title: this.editingFilm.title,
           production: this.editingFilm.production,
@@ -334,7 +326,6 @@ export default {
           presentation: this.editingFilm.presentation,
           imdbLink: this.editingFilm.imdbLink,
         };
-
         await axios.patch(url, filmData, { headers });
         await this.fetchFilmsFromBackend();
         this.closeEditFilmModal();
@@ -342,7 +333,6 @@ export default {
         console.error("Error editing film:", error);
       }
     },
-
     async deleteFilm(filmId) {
       if (confirm("Are you sure you want to delete this film?")) {
         try {
@@ -352,7 +342,6 @@ export default {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           };
-
           const url = `${BASE_URL}/${filmId}`;
           await axios.delete(url, { headers });
           await this.fetchFilmsFromBackend();
@@ -371,20 +360,12 @@ export default {
     async openRatingModal(film) {
       this.selectedEvaulatedFilm = film;
       const id = this.stateAuth.id;
-      
-      // Reset comment fields
-      // this.currentComment = "";
-      // this.existingCommentId = null;
-      
-      // Check if user has already rated
       if (film.usersId) {
         const usersId = film.usersId.split(",");
         this.ifRated = usersId.includes(id.toString());
       } else {
         this.ifRated = false;
       }
-      
-      // If rated, try to fetch existing comment
       if (this.ifRated) {
         try {
           const url = `${BASE_URL}/favourites/${film.userId}/${film.id}`;
@@ -397,7 +378,6 @@ export default {
           console.error("Error fetching comment:", error);
         }
       }
-      
       this.currentFilm = film;
       this.showRatingModal = true;
       this.currentRating = this.ifRated ? film.evaluation || 0 : 0;
@@ -425,12 +405,9 @@ export default {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       };
-      
       this.currentRating = this.currentRating ? this.currentRating : 0;
-      
       try {
         if (this.ifRated) {
-          // Update existing rating and comment
           const data = {
             evaluation: this.currentRating,
             content: this.currentComment || null
@@ -438,7 +415,6 @@ export default {
           const url = `${BASE_URL}/favourites/${this.existingCommentId || this.stateAuth.id}/${this.selectedEvaulatedFilm.id}`;
           await axios.patch(url, data, { headers });
         } else {
-          // Create new rating with optional comment
           const data = {
             userId: this.stateAuth.id,
             filmId: this.selectedEvaulatedFilm.id,
@@ -448,14 +424,19 @@ export default {
           const url = `${BASE_URL}/favouriteFilmByUser`;
           await axios.post(url, data, { headers });
         }
-
         await this.fetchFilmsFromBackend();
         this.closeRatingModal();
       } catch (error) {
         console.error("Error submitting rating:", error);
       }
     },
-  },
+    openFilmDetail(film) {
+      this.selectedFilm = film;
+    },
+    closeFilmDetail() {
+      this.selectedFilm = null;
+    }
+  }
 };
 </script>
 
@@ -471,16 +452,6 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
-}
-
-.submit-button {
-  background: #4caf50;
-  color: white;
-}
-
-.cancel-button {
-  background: #f44336;
-  color: white;
 }
 
 .search-input {
@@ -512,6 +483,7 @@ export default {
   transition: transform 0.2s ease-in-out;
   color: white;
   position: relative;
+  cursor: pointer;
 }
 
 .film-card-rated {
@@ -700,5 +672,52 @@ export default {
   border: 1px solid #ccc;
   background: #2d2d2d;
   color: white;
+}
+
+.film-detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.film-detail-modal .modal-content {
+  background: #2a2a2a;
+  padding: 30px;
+  border-radius: 15px;
+  width: 80%;
+  max-width: 600px;
+  position: relative;
+  color: white;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.film-detail-modal .close {
+  position: absolute;
+  top: 15px;
+  right: 25px;
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.film-detail-modal .close:hover {
+  color: white;
+}
+
+.film-details {
+  text-align: left;
+  line-height: 1.6;
+}
+
+.film-details p {
+  margin: 10px 0;
 }
 </style>
