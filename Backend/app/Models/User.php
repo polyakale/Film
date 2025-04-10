@@ -11,7 +11,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $fillable = ['positionId', 'name', 'email', 'password'];
+    protected $fillable = ['id','positionId', 'name', 'email', 'password'];
 
     protected $hidden = ['password', 'remember_token', 'email_verified_at', 'created_at', 'updated_at'];
 

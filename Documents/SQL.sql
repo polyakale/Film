@@ -26,10 +26,19 @@ GROUP BY fi.id,
        fi.imdbLink
 ORDER BY evaluation DESC;
 
+
 SELECT f.title, p.name, r.role from tasks t
   JOIN people p ON t.personId = p.id
   JOIN films f  ON t.filmId = f.id
   JOIN roles r  ON t.roleId = r.id;
+
+
+SELECT p.name, f.title, r.role from tasks t
+  JOIN people p ON t.personId = p.id
+  JOIN films f  ON t.filmId = f.id
+  JOIN roles r  ON t.roleId = r.id
+  WHERE t.personId = 1082;
+  
 
 #get api/favourites/2/42 
 select id, userId, filmId, evaluation from favourites
