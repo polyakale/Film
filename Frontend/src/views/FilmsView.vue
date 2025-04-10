@@ -6,13 +6,8 @@
 
     <!-- Keresés és rendezés -->
     <div class="search-sort-container">
-      <input
-        type="text"
-        v-model="searchQuery"
-        @input="searchFilms"
-        placeholder="Search films..."
-        class="search-input"
-      />
+      <input type="text" v-model="searchQuery" @input="searchFilms" placeholder="Search films..."
+        class="search-input" />
       <select v-model="sortOption" @change="sortFilms" class="sort-select">
         <option value="abc">ABC</option>
         <option value="production">Production Year</option>
@@ -29,31 +24,23 @@
     <!-- Filmkártyák kezdete -->
     <div v-if="films.length" class="films-grid">
       <!-- Minden film egy kártya -->
-      <div
-        v-for="film in filteredFilms"
-        :key="film.id"
-        class="film-card"
-        :class="{ 'film-card-rated': rated(film, stateAuth.id) }"
-        @click="openFilmDetail(film)"
-      >
+      <div v-for="film in filteredFilms" :key="film.id" class="film-card"
+        :class="{ 'film-card-rated': rated(film, stateAuth.id) }" @click="openFilmDetail(film)">
         <!-- Csillag ikon értékeléshez -->
         <span class="star-icon" @click.stop="openRatingModal(film)">★</span>
-        
+
         <!-- Film adatok -->
         <h2 class="film-title">{{ film.title }}</h2>
         <p class="film-info"><strong>Production Year:</strong> {{ film.production }}</p>
         <p class="film-info"><strong>Length:</strong> {{ film.length }} min</p>
         <p class="film-info"><strong>Presentation:</strong> {{ formatDate(film.presentation) }}</p>
         <p class="film-info"><strong>Evaluation:</strong> {{ film.evaluation || "Not rated yet." }}</p>
-        
+        <h2 class="film-title">Cast & Crew</h2>
+        <!-- <p class="film-info"><strong>Cast:</strong> {{ roles.role }}</p> -->
+
         <!-- IMDb link -->
-        <a
-          v-if="film.imdbLink"
-          :href="formatImdbUrl(film.imdbLink)"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="imdb-link"
-        >View on IMDb</a>
+        <a v-if="film.imdbLink" :href="formatImdbUrl(film.imdbLink)" target="_blank" rel="noopener noreferrer"
+          class="imdb-link">View on IMDb</a>
 
         <!-- Admin műveletek (szerkesztés/törlés) -->
         <div v-if="isAdmin" class="film-actions">
@@ -73,12 +60,8 @@
           <p><strong>Length:</strong> {{ selectedFilm.length }} minutes</p>
           <p><strong>Presentation Date:</strong> {{ formatDate(selectedFilm.presentation) }}</p>
           <p><strong>Evaluation:</strong> {{ selectedFilm.evaluation || 'Not rated yet' }}</p>
-          <a 
-            v-if="selectedFilm.imdbLink" 
-            :href="formatImdbUrl(selectedFilm.imdbLink)" 
-            target="_blank"
-            class="imdb-link"
-          >View on IMDb</a>
+          <a v-if="selectedFilm.imdbLink" :href="formatImdbUrl(selectedFilm.imdbLink)" target="_blank"
+            class="imdb-link">View on IMDb</a>
         </div>
       </div>
     </div>
@@ -130,17 +113,11 @@
       <div class="modal-content">
         <h2 class="film-title">Rate: {{ currentFilm.title }}</h2>
         <div class="rating-stars">
-          <span
-            v-for="n in 5"
-            :key="n"
-            @click="setRating(n)"
-            @mousemove="handleHover(n, $event)"
-            @mouseleave="hoverRating = null"
-            :class="{
+          <span v-for="n in 5" :key="n" @click="setRating(n)" @mousemove="handleHover(n, $event)"
+            @mouseleave="hoverRating = null" :class="{
               'star-filled': (hoverRating || currentRating) >= n,
               'star-half': (hoverRating || currentRating) >= n - 0.5 && (hoverRating || currentRating) < n,
-            }"
-          >★</span>
+            }">★</span>
         </div>
         <div class="comment-section">
           <label>Comment (optional):</label>
@@ -172,6 +149,7 @@ export default {
       searchQuery: "", // Keresés szövege
       sortOption: "abc", // Rendezési opció
       filteredFilms: [], // Szűrt filmek
+      filteredRoles: [], // Szűrt szerepkörök
       showAddFilmModal: false, // Film hozzáadása modal állapota
       showEditFilmModal: false, // Film szerkesztése modal állapota
       showRatingModal: false, // Értékelés modal állapota
@@ -215,6 +193,15 @@ export default {
         this.filteredFilms = [...this.films];
       } catch (error) {
         console.error("Error loading films:", error);
+      }
+    },
+    async fetchRolesFromBackend() {
+      try {
+        const response = await axios.get(`${BASE_URL}/roles/role`);
+        this.roles = Array.isArray(response.data.data) ? response.data.data : [];
+        this.filteredRoles = [...this.roles];
+      } catch (error) {
+        console.error("Error loading roles:", error);
       }
     },
 
