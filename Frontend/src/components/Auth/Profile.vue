@@ -41,7 +41,9 @@
                   </button>
                 </div>
               </div>
-              <p v-if="nameError" class="status-message error-message">{{ nameError }}</p>
+              <p v-if="nameError" class="status-message error-message">
+                {{ nameError }}
+              </p>
             </form>
           </div>
           <p><strong>Email:</strong> {{ email }}</p>
@@ -63,7 +65,11 @@
                   required
                   aria-label="Current password input"
                 />
-                <span @click="toggleVisibility('current')" class="eye-icon" title="Toggle visibility">
+                <span
+                  @click="toggleVisibility('current')"
+                  class="eye-icon"
+                  title="Toggle visibility"
+                >
                   <i
                     :class="
                       passwordVisible.current ? 'bi bi-eye-slash' : 'bi bi-eye'
@@ -88,7 +94,11 @@
                   aria-label="New password input"
                   aria-describedby="password-strength-text"
                 />
-                <span @click="toggleVisibility('new')" class="eye-icon" title="Toggle visibility">
+                <span
+                  @click="toggleVisibility('new')"
+                  class="eye-icon"
+                  title="Toggle visibility"
+                >
                   <i
                     :class="
                       passwordVisible.new ? 'bi bi-eye-slash' : 'bi bi-eye'
@@ -97,11 +107,25 @@
                 </span>
               </div>
               <div class="password-strength-meter" v-if="password.new">
-                <div class="strength-bar" :class="{ active: passwordStrength >= 1 }"></div>
-                <div class="strength-bar" :class="{ active: passwordStrength >= 2 }"></div>
-                <div class="strength-bar" :class="{ active: passwordStrength >= 3 }"></div>
-                <div class="strength-bar" :class="{ active: passwordStrength >= 4 }"></div>
-                <div class="strength-text" id="password-strength-text">{{ strengthText }}</div>
+                <div
+                  class="strength-bar"
+                  :class="{ active: passwordStrength >= 1 }"
+                ></div>
+                <div
+                  class="strength-bar"
+                  :class="{ active: passwordStrength >= 2 }"
+                ></div>
+                <div
+                  class="strength-bar"
+                  :class="{ active: passwordStrength >= 3 }"
+                ></div>
+                <div
+                  class="strength-bar"
+                  :class="{ active: passwordStrength >= 4 }"
+                ></div>
+                <div class="strength-text" id="password-strength-text">
+                  {{ strengthText }}
+                </div>
               </div>
             </div>
 
@@ -117,7 +141,11 @@
                   required
                   aria-label="Confirm new password input"
                 />
-                <span @click="toggleVisibility('confirm')" class="eye-icon" title="Toggle visibility">
+                <span
+                  @click="toggleVisibility('confirm')"
+                  class="eye-icon"
+                  title="Toggle visibility"
+                >
                   <i
                     :class="
                       passwordVisible.confirm ? 'bi bi-eye-slash' : 'bi bi-eye'
@@ -127,14 +155,31 @@
               </div>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center action-buttons-row">
-              <div class="form-group submit-group mb-0"> <button type="submit" class="btn btn-submit" :disabled="loading">
+            <div
+              class="d-flex justify-content-between align-items-center action-buttons-row"
+            >
+              <div class="form-group submit-group mb-0">
+                <button
+                  type="submit"
+                  class="btn btn-submit"
+                  :disabled="loading"
+                >
                   <span v-if="!loading">Change Password</span>
-                  <div v-if="loading" class="spinner" role="status" aria-label="Loading"></div>
+                  <div
+                    v-if="loading"
+                    class="spinner"
+                    role="status"
+                    aria-label="Loading"
+                  ></div>
                 </button>
               </div>
               <div class="delete-account-section">
-                <button type="button" class="btn btn-delete" @click="deleteAccount" title="Delete Account">
+                <button
+                  type="button"
+                  class="btn btn-delete"
+                  @click="deleteAccount"
+                  title="Delete Account"
+                >
                   <i class="bi bi-trash3"></i>
                 </button>
               </div>
@@ -163,7 +208,8 @@ export default {
       isEditingName: false, // Flag to control name edit state
       newName: "", // Initialize empty, set in mounted
       nameError: "", // Error message for name validation/update
-      password: { // Object to hold password fields
+      password: {
+        // Object to hold password fields
         current: "",
         new: "",
         confirm: "",
@@ -171,7 +217,8 @@ export default {
       loading: false, // Loading indicator state for async operations
       message: "", // Feedback message for user actions
       messageClass: "", // CSS class for the feedback message (e.g., success or error)
-      passwordVisible: { // Flags to control password field visibility
+      passwordVisible: {
+        // Flags to control password field visibility
         current: false,
         new: false,
         confirm: false,
@@ -207,11 +254,16 @@ export default {
       if (!this.password.new) return "";
       switch (this.passwordStrength) {
         case 0:
-        case 1: return "Weak";
-        case 2: return "Moderate";
-        case 3: return "Strong";
-        case 4: return "Very Strong";
-        default: return "";
+        case 1:
+          return "Weak";
+        case 2:
+          return "Moderate";
+        case 3:
+          return "Strong";
+        case 4:
+          return "Very Strong";
+        default:
+          return "";
       }
     },
   },
@@ -251,7 +303,10 @@ export default {
       }
       // Basic validation: check new password length
       if (this.password.new.length < 8 || this.password.new.length > 16) {
-        this.showMessage("New password must be between 8 and 16 characters.", "error-message");
+        this.showMessage(
+          "New password must be between 8 and 16 characters.",
+          "error-message"
+        );
         return;
       }
 
@@ -288,12 +343,12 @@ export default {
         this.showMessage("Password changed successfully!", "success-message");
         this.password = { current: "", new: "", confirm: "" }; // Reset password fields
         this.passwordVisible = { current: false, new: false, confirm: false }; // Hide passwords
-
       } catch (error) {
         console.error("Password change error:", error);
         // Extract error message from response or provide a default
         const errorMsg =
-          error.response?.data?.message || "Password change failed. Please check current password and try again.";
+          error.response?.data?.message ||
+          "Password change failed. Please check current password and try again.";
         this.showMessage(errorMsg, "error-message");
       } finally {
         this.loading = false; // Hide loading indicator
@@ -302,10 +357,15 @@ export default {
     // Handle account deletion
     async deleteAccount() {
       // Confirm with the user before proceeding
-      if (window.confirm("Are you absolutely sure you want to delete your account? This action cannot be undone.")) {
+      if (
+        window.confirm(
+          "Are you absolutely sure you want to delete your account? This action cannot be undone."
+        )
+      ) {
         try {
           // Make the API call to delete the user account
-          await axios.delete(`${BASE_URL}/users/${this.id}`, { // Your API endpoint
+          await axios.delete(`${BASE_URL}/users/${this.id}`, {
+            // Your API endpoint
             headers: { Authorization: `Bearer ${this.token}` }, // Requires authentication
           });
           // Clear local auth data (Pinia store and potentially localStorage/sessionStorage)
@@ -314,52 +374,50 @@ export default {
           this.$router.push("/login");
         } catch (error) {
           console.error("Error deleting account:", error);
-          this.showMessage(error.response?.data?.message || "Failed to delete account. Please try again.", "error-message");
+          this.showMessage(
+            error.response?.data?.message ||
+              "Failed to delete account. Please try again.",
+            "error-message"
+          );
         }
       }
     },
     // Handle name change submission
     async saveName() {
-        this.nameError = ""; // Clear previous errors
-        // Basic validation: check if name is empty
-        if (!this.newName || !this.newName.trim()) {
-            this.nameError = "Name cannot be empty.";
-            return;
-        }
-        // Basic validation: check if name exceeds max length
-        if (this.newName.length > 50) {
-            this.nameError = "Name cannot exceed 50 characters.";
-            return;
-        }
-        // No change needed if name hasn't changed
-        if (this.newName.trim() === this.user) {
-            this.isEditingName = false;
-            return;
-        }
+      this.nameError = "";
+      if (!this.newName.trim()) {
+        this.nameError = "Name cannot be empty.";
+        return;
+      }
+      if (this.newName.length > 50) {
+        this.nameError = "Name cannot exceed 50 characters.";
+        return;
+      }
+      if (this.newName.trim() === this.user) {
+        this.isEditingName = false;
+        return;
+      }
 
-        try {
-            // Make the API call to update the name
-            await axios.patch(
-            `${BASE_URL}/users/update-name`, // Your API endpoint
-            { name: this.newName.trim() }, // Send trimmed name
-            {
-                headers: {
-                Authorization: `Bearer ${this.token}`, // Requires authentication
-                },
-            }
-            );
+      try {
+        await axios.patch(
+          `${BASE_URL}/users/update-name/${this.id}`,
+          { name: this.newName.trim() },
+          { headers: { Authorization: `Bearer ${this.token}` } }
+        );
 
-            // Update the name in the Pinia store
-            useAuthStore().setUserName(this.newName.trim());
-            this.isEditingName = false; // Exit editing mode
-            this.showMessage("Name updated successfully!", "success-message");
+        useAuthStore().setUserName(this.newName.trim());
+        this.isEditingName = false;
+        this.showMessage("Name updated successfully!", "success-message");
+      } catch (error) {
+        console.error("Name update error:", error);
+        this.nameError =
+          error.response?.data?.message ||
+          "Failed to update name. Please try again.";
 
-        } catch (error) {
-            console.error("Name update error:", error);
-            this.nameError =
-            error.response?.data?.message || "Failed to update name. Please try again.";
-            // Display error inline for name editing
+        if (error.response?.data?.errors?.name) {
+          this.nameError = error.response.data.errors.name[0];
         }
+      }
     },
     // Map the action from the Pinia store to clear auth data
     ...mapActions(useAuthStore, ["clearStoredData"]),
@@ -368,17 +426,17 @@ export default {
     // Initialize newName with the user's current name when component mounts
     // Ensure user state is loaded before assigning
     if (this.user) {
-        this.newName = this.user;
+      this.newName = this.user;
     }
   },
   watch: {
-      // Watch the user state from Pinia in case it loads after mount
-      user(newUserValue) {
-          if (!this.isEditingName && newUserValue) {
-              this.newName = newUserValue;
-          }
+    // Watch the user state from Pinia in case it loads after mount
+    user(newUserValue) {
+      if (!this.isEditingName && newUserValue) {
+        this.newName = newUserValue;
       }
-  }
+    },
+  },
 };
 </script>
 
@@ -395,8 +453,8 @@ export default {
   background-position: center;
   background-attachment: fixed;
   padding: 1rem;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
 
 .profile-card {
@@ -418,7 +476,7 @@ export default {
   border-bottom: 1px solid #383838;
 }
 .profile-header h2 {
-  font-family: 'Cinzel Decorative', serif, system-ui;
+  font-family: "Cinzel Decorative", serif, system-ui;
   font-size: 1.6rem;
   color: #ffd700;
   text-shadow: 0 0 6px rgba(255, 215, 0, 0.4);
@@ -485,7 +543,7 @@ export default {
 
 /* === Section Titles === */
 .section-title {
-  font-family: 'Poppins', sans-serif, system-ui;
+  font-family: "Poppins", sans-serif, system-ui;
   font-size: 1.15rem;
   font-weight: 700;
   color: #ffd700;
@@ -643,8 +701,12 @@ label {
   display: inline-block;
 }
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* === Status Messages === */

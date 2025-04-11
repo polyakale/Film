@@ -1,27 +1,45 @@
 <template>
   <nav class="navbar navbar-expand-lg" aria-label="Main navigation">
     <div class="container-fluid">
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-        aria-label="Toggle navigation" aria-expanded="false">
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarSupportedContent"
+        aria-label="Toggle navigation"
+        aria-expanded="false"
+      >
         <span class="navbar-toggler-icon"></span>
       </button>
 
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto">
           <li class="nav-item">
-            <RouterLink to="/films" class="nav-link" :class="{ 'active-route': $route.path === '/films' }">
+            <RouterLink
+              to="/films"
+              class="nav-link"
+              :class="{ 'active-route': $route.path === '/films' }"
+            >
               <i class="bi bi-film"></i>
               <span class="nav-link-text">Films</span>
             </RouterLink>
           </li>
           <li class="nav-item">
-            <RouterLink to="/people" class="nav-link" :class="{ 'active-route': $route.path === '/people' }">
+            <RouterLink
+              to="/people"
+              class="nav-link"
+              :class="{ 'active-route': $route.path === '/people' }"
+            >
               <i class="bi bi-people-fill"></i>
               <span class="nav-link-text">People</span>
             </RouterLink>
           </li>
           <li class="nav-item">
-            <RouterLink to="/reviews" class="nav-link" :class="{ 'active-route': $route.path === '/reviews' }">
+            <RouterLink
+              to="/reviews"
+              class="nav-link"
+              :class="{ 'active-route': $route.path === '/reviews' }"
+            >
               <i class="bi bi-pencil-square"></i>
               <span class="nav-link-text">Reviews</span>
             </RouterLink>
@@ -30,16 +48,19 @@
 
         <div class="navbar-nav mx-auto">
           <RouterLink to="/" class="d-flex align-items-center">
-            <h1 class="navbar-brand gradient-title mb-0">
-              Hungarian Interwar Film Archive
-            </h1>
+            <img src="../public/icon.png" />
           </RouterLink>
         </div>
 
         <ul class="navbar-nav ms-auto">
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
-              data-bs-toggle="dropdown" aria-expanded="false">
+            <a
+              class="nav-link dropdown-toggle d-flex align-items-center"
+              href="#"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
               <i class="bi bi-person"></i>
               <span v-if="stateAuth.user" class="username-span">
                 {{ stateAuth.user }}
@@ -49,29 +70,50 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
               <li>
-                <RouterLink class="dropdown-item" to="/login" v-if="!stateAuth.user">
+                <RouterLink
+                  class="dropdown-item"
+                  to="/login"
+                  v-if="!stateAuth.user"
+                >
                   <i class="bi bi-box-arrow-in-right"></i>
                   Login
                 </RouterLink>
               </li>
               <li>
-                <RouterLink class="dropdown-item" to="/registration" v-if="!stateAuth.user">
+                <RouterLink
+                  class="dropdown-item"
+                  to="/registration"
+                  v-if="!stateAuth.user"
+                >
                   <i class="bi bi-person-plus"></i>
                   Registration
                 </RouterLink>
               </li>
               <li>
-                <RouterLink class="dropdown-item" to="/profile" v-if="stateAuth.user">
+                <RouterLink
+                  class="dropdown-item"
+                  to="/profile"
+                  v-if="stateAuth.user"
+                >
                   <i class="bi bi-person-circle"></i>
                   Profile
                 </RouterLink>
               </li>
               <li v-if="stateAuth.user">
-                <a class="dropdown-item" href="#" @click.prevent="logout()" :disabled="loading">
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  @click.prevent="logout()"
+                  :disabled="loading"
+                >
                   <i class="bi bi-box-arrow-right"></i>
                   <span v-if="!loading">Logout</span>
                   <span v-else class="logout-loading">
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span
+                      class="spinner-border spinner-border-sm"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
                     Logging out...
                   </span>
                 </a>
@@ -144,11 +186,7 @@ export default {
 }
 
 .navbar-brand.gradient-title {
-  font-family: 'Cinzel', serif;
-  color: #ffd700;
-  font-size: 1.5rem;
-  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
-  letter-spacing: 1px;
+  background-image: url("../public/icon.png");
   transition: all 0.3s ease;
 }
 
@@ -205,7 +243,7 @@ export default {
 
 .username-span {
   color: #ffd700;
-  font-family: 'Cinzel', serif;
+  font-family: "Cinzel", serif;
   margin-left: 0.5rem;
 }
 
