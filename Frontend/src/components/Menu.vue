@@ -13,6 +13,12 @@
       </button>
 
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <!-- Add a margin-end class here -->
+        <div>
+          <RouterLink to="/" class="d-flex align-items-center me-3">
+            <img src="/icon.png" alt="Logo" />
+          </RouterLink>
+        </div>
         <ul class="navbar-nav me-auto">
           <li class="nav-item">
             <RouterLink
@@ -45,13 +51,6 @@
             </RouterLink>
           </li>
         </ul>
-
-        <div class="navbar-nav mx-auto">
-          <RouterLink to="/" class="d-flex align-items-center">
-            <img src="../public/icon.png" />
-          </RouterLink>
-        </div>
-
         <ul class="navbar-nav ms-auto">
           <li class="nav-item dropdown">
             <a
@@ -164,7 +163,7 @@ export default {
 </script>
 
 <style scoped>
-/* Dark cinematic theme with gold accents */
+/* Dark cinematic theme with gold accents for the navbar */
 .navbar {
   background: #1f1f1f !important;
   border-bottom: 3px solid #383838;
@@ -182,16 +181,7 @@ export default {
 }
 
 .navbar-toggler-icon {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 215, 0, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-}
-
-.navbar-brand.gradient-title {
-  background-image: url("../public/icon.png");
-  transition: all 0.3s ease;
-}
-
-.navbar-brand.gradient-title:hover {
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 215, 0, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
 .nav-link {
@@ -256,30 +246,12 @@ export default {
   margin-left: 0.5rem;
 }
 
-.logout-item {
-  color: #cc181e !important;
-}
-
-.logout-item:hover {
-  background: rgba(204, 24, 30, 0.1) !important;
-}
-
-.logout-loading {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 @media (max-width: 991px) {
   .navbar-collapse {
     background: #1f1f1f;
     padding: 1rem;
     margin-top: 0.5rem;
     border: 2px solid #383838;
-  }
-
-  .navbar-nav {
-    gap: 0.5rem;
   }
 
   .dropdown-menu {

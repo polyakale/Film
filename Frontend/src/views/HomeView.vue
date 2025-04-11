@@ -5,6 +5,7 @@ import filmBgImage from "@/assets/filmBgImage.png";
 <template>
   <main class="home-container">
     <div class="content-wrapper">
+      <!-- Header Section -->
       <section class="header-section">
         <h1 class="main-title">🎥 Hungarian Interwar Film Archive</h1>
         <p class="subtitle-text">
@@ -12,6 +13,7 @@ import filmBgImage from "@/assets/filmBgImage.png";
         </p>
       </section>
 
+      <!-- Image Section -->
       <section class="image-section">
         <div class="image-wrapper">
           <img
@@ -43,8 +45,7 @@ import filmBgImage from "@/assets/filmBgImage.png";
   min-height: 90vh;
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   padding: 2rem 1.5rem;
   display: flex;
   justify-content: center;
@@ -89,14 +90,16 @@ import filmBgImage from "@/assets/filmBgImage.png";
 }
 
 .image-wrapper {
-  overflow: hidden;
+  /* Remove overflow hiding so nothing is cut off */
+  /* overflow: hidden; */
 }
 
 .hero-image {
   width: 100%;
   height: auto;
-  aspect-ratio: 16/9;
-  object-fit: cover;
+  /* Use 'object-fit: contain' to ensure the full image appears */
+  object-fit: contain;
+  /* Removed aspect-ratio so that the image scales fully with its natural dimensions */
 }
 
 /* === Responsive Design === */
