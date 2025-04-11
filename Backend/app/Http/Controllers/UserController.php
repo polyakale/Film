@@ -7,6 +7,7 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\PersonalAccessToken;
 
@@ -61,47 +62,36 @@ class UserController extends Controller
         return response()->json(['message' => 'Password changed successfully'], 200);
     }
 
-    public function updateName(Request $request)
+    public function updateName(Request $request, int $id)
     {
-        try {
-            \Log::info('Update name request:', $request->all());
-
-            $validated = $request->validate([
-                'name' => 'required|string|min:2|max:255|unique:users,name,' . $request->user()->id
-            ]);
-
-            $user = $request->user();
-            \Log::info('Current user:', $user->toArray());
-
-            $user->name = $validated['name'];
-            $user->save();
-
-            \Log::info('Updated user:', $user->fresh()->toArray());
-
+        // You can also check that the authenticated user's id matches $id if needed
+        if (!$request->user() || $request->user()->id !== $id) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+    
+        $request->validate([
+            'name' => 'required|string|min:2|max:255|unique:users,name,' . $id,
+        ]);
+    
+        $updated = DB::update('UPDATE users SET name = ? WHERE id = ?', [
+            $request->input('name'),
+            $id,
+        ]);
+    
+        if ($updated) {
+            $user = DB::table('users')->select('id', 'name', 'email')
+                ->where('id', $id)
+                ->first();
             return response()->json([
                 'message' => 'Name updated successfully!',
-                'user' => $user->only(['id', 'name', 'email']) // Don't return sensitive data
+                'user' => $user,
             ]);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Validation error:', $e->errors());
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $e->errors()
-            ], 422);
-
-        } catch (\Exception $e) {
-            \Log::error('Name update error:', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json([
-                'message' => 'Server error occurred',
-                'error' => config('app.debug') ? $e->getMessage() : null
-            ], 500);
+        } else {
+            return response()->json(['message' => 'Failed to update name.'], 500);
         }
     }
-
+    
+    
     public function logout(Request $request)
     {
         $token = $request->bearerToken();
