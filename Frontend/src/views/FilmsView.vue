@@ -35,7 +35,6 @@
         <p class="film-info"><strong>Length:</strong> {{ film.length }} min</p>
         <p class="film-info"><strong>Presentation:</strong> {{ formatDate(film.presentation) }}</p>
         <p class="film-info"><strong>Evaluation:</strong> {{ film.evaluation || "Not rated yet." }}</p>
-        <h2 class="film-title">Cast & Crew</h2>
 
         <!-- IMDb link -->
         <a v-if="film.imdbLink" :href="formatImdbUrl(film.imdbLink)" target="_blank" rel="noopener noreferrer"
@@ -53,12 +52,14 @@
     <div v-if="selectedFilm" class="film-detail-modal">
       <div class="modal-content">
         <span class="close" @click="closeFilmDetail">&times;</span>
-        <h2>{{ selectedFilm.title }}</h2>
+        <h2 class="film-title2">{{ selectedFilm.title }}</h2>
         <div class="film-details">
           <p><strong>Production Year:</strong> {{ selectedFilm.production }}</p>
           <p><strong>Length:</strong> {{ selectedFilm.length }} minutes</p>
           <p><strong>Presentation Date:</strong> {{ formatDate(selectedFilm.presentation) }}</p>
           <p><strong>Evaluation:</strong> {{ selectedFilm.evaluation || 'Not rated yet' }}</p>
+          <p v-for="role in filteredRoles" :key="role.id" >{{ role }}</p>
+          <p v-for="people in filteredPerson" :key="people.id" >{{ people }}</p>
           <a v-if="selectedFilm.imdbLink" :href="formatImdbUrl(selectedFilm.imdbLink)" target="_blank"
             class="imdb-link">View on IMDb</a>
         </div>
@@ -149,6 +150,7 @@ export default {
       sortOption: "abc", // Rendezési opció
       filteredFilms: [], // Szűrt filmek
       filteredRoles: [], // Szűrt szerepkörök
+      filteredPerson: [], // Szűrt Faszik
       showAddFilmModal: false, // Film hozzáadása modal állapota
       showEditFilmModal: false, // Film szerkesztése modal állapota
       showRatingModal: false, // Értékelés modal állapota
@@ -194,13 +196,24 @@ export default {
         console.error("Error loading films:", error);
       }
     },
-    async fetchRolesFromBackend() {
+    async getrolesAZ() {
       try {
-        const response = await axios.get(`${BASE_URL}/queryRolesFromBackend`);
+        const response = await axios.get(`${BASE_URL}/rolesAZ`);
         this.roles = Array.isArray(response.data.data) ? response.data.data : [];
         this.filteredRoles = [...this.roles];
       } catch (error) {
         console.error("Error loading roles:", error);
+      }
+    },
+    async getpeopleAZ() {
+      try {
+        const response = await axios.get(`${BASE_URL}/peopleAZ`);
+        this.roles = Array.isArray(response.data.data) ? response.data.data : [];
+        this.filteredPerson = [...this.people];
+        console.log(this.people);
+        
+      } catch (error) {
+        console.error("Error loading people:", error);
       }
     },
 
@@ -244,6 +257,8 @@ export default {
 
     // Film részletek megnyitása
     openFilmDetail(film) {
+      this.getrolesAZ();
+      this.getpeopleAZ();
       this.selectedFilm = film;
     },
 
@@ -403,6 +418,19 @@ export default {
   margin: auto;
   padding: 20px;
   text-align: center;
+}
+
+.film-title2{
+  font-size: 1.8em;
+  margin-bottom: 10px;
+  color: #f5c518;
+}
+
+.cast-crew-title{
+  position: absolute;
+  font-size: 1.4em;
+  margin-bottom: 10px;
+  color: #f5c518;
 }
 
 .search-sort-container {

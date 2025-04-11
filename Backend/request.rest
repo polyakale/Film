@@ -344,6 +344,9 @@ Authorization: Bearer {{token}}
 ### get role
 get {{host}}/api/roles
 
+### get rolesAZ
+get {{host}}/api/rolesAZ
+
 ### get favourites by id
 get {{host}}/api/roles/1
 

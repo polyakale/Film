@@ -26,13 +26,14 @@ GROUP BY fi.id,
        fi.imdbLink
 ORDER BY evaluation DESC;
 
-
+# A kiválasztott film szerepői
 SELECT f.title, p.name, r.role from tasks t
   JOIN people p ON t.personId = p.id
   JOIN films f  ON t.filmId = f.id
-  JOIN roles r  ON t.roleId = r.id;
+  JOIN roles r  ON t.roleId = r.id
+where f.id = 2;
 
-
+#Egy filmhez
 SELECT p.name, f.title, r.role from tasks t
   JOIN people p ON t.personId = p.id
   JOIN films f  ON t.filmId = f.id
@@ -58,5 +59,15 @@ VALUES
 #delete api/favourites/2/42 
 DELETE from favourites
   WHERE userId = 6 AND filmId = 3;
+
+#Szereplők ABC
+  #peopleAZ
+  SELECT name, id FROM people
+    order BY name;
+
+#roles sort
+#rolesAZ
+SELECT role, id FROM roles
+  ORDER BY role;
 
 

@@ -5,12 +5,41 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
+use Illuminate\Support\Facades\DB;
 
 class RoleController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+         public function rolesAZ()
+         {
+             //natív SQL
+             $query =
+                '
+                SELECT role, id FROM roles
+                ORDER BY role;
+                ';
+             try {
+                 //code...
+                 $rows = DB::select($query);
+     
+                 $data = [
+                     'message' => 'ok',
+                     'data' => $rows
+                 ];
+             } catch (\Throwable $th) {
+                 //throw $th;
+                 $data = [
+                     'message' => 'Query Error',
+                     'data' => []
+                 ];
+             }
+     
+     
+             return response()->json($data, options: JSON_UNESCAPED_UNICODE);
+         }
+    
     public function index()
     {
         $rows = Role::all();

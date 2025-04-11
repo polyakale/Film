@@ -82,7 +82,7 @@ Route::delete('favourites/{userId}/{filmId}', [FavouriteController::class, 'dest
 // ->middleware('auth:sanctum');
 // roles
 Route::get('roles', [RoleController::class, 'index']);
-Route::get('rolesAZ', [RoleController::class, 'roleAZ']);
+Route::get('rolesAZ', [RoleController::class, 'rolesAZ']);
 Route::get('roles/{id}', [RoleController::class, 'show']);
 Route::post('roles', [RoleController::class, 'store'])
     ->middleware('auth:sanctum');
