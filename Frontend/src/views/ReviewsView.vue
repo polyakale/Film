@@ -39,8 +39,8 @@
             @click="
               toggleControl(activeTab === 'my' ? 'tableFilter' : 'publicFilter')
             "
-            title="Filter Reviews"
-            aria-label="Toggle Filter Options"
+            title="Filter/Sort Reviews"
+            aria-label="Toggle Filter/Sort Options"
             :aria-expanded="
               activeTab === 'my' ? showTableFilter : showPublicFilter
             "
@@ -50,7 +50,7 @@
         </div>
 
         <transition name="fade-slide">
-          <div v-if="showSearch" class="search-container">
+          <div v-if="showSearch" class="search-container dropdown-panel">
             <div class="search-wrapper">
               <input
                 type="text"
@@ -67,9 +67,10 @@
         <transition name="fade-slide">
           <div
             v-if="showTableFilter && isLoggedIn && activeTab === 'my'"
-            class="filter-container"
+            class="filter-container dropdown-panel"
           >
-            <div class="filter-wrapper position-relative">
+            <div class="filter-wrapper">
+              <label for="tableFilter" class="filter-label">Sort My Reviews:</label>
               <select
                 id="tableFilter"
                 v-model="tableReviewFilter"
@@ -89,9 +90,10 @@
         <transition name="fade-slide">
           <div
             v-if="showPublicFilter && (activeTab === 'all' || !isLoggedIn)"
-            class="filter-container"
+            class="filter-container dropdown-panel"
           >
-            <div class="filter-wrapper position-relative">
+            <div class="filter-wrapper">
+               <label for="publicFilter" class="filter-label">Sort All Reviews:</label>
               <select
                 id="publicFilter"
                 v-model="publicReviewFilter"
@@ -112,17 +114,17 @@
 
     <div v-if="loading" class="loading-overlay">
       <div class="loading-content">
-        <div class="spinner-border" role="status">
+        <div class="spinner" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
-        <div class="loading-text">Loading...</div>
+        <div class="loading-text">Loading Reviews...</div>
       </div>
     </div>
 
     <div v-else class="content-area">
       <div
         v-if="errorMessages"
-        class="error-message alert alert-danger"
+        class="error-message alert"
         role="alert"
       >
         {{ errorMessages }}
@@ -132,11 +134,7 @@
         <div v-show="isLoggedIn && activeTab === 'my'" class="table-section">
           <div class="table-wrapper" ref="tableWrapperRef">
             <div
-              v-if="
-                !paginatedFavourites.length &&
-                filteredFavourites.length === 0 &&
-                !searchQuery
-              "
+              v-if="!paginatedFavourites.length && filteredFavourites.length === 0 && !searchQuery"
               class="no-data-message"
             >
               You haven't added any reviews yet.
@@ -162,30 +160,30 @@
                   v-for="favourite in paginatedFavourites"
                   :key="favourite.id"
                 >
-                  <td data-label="Film" class="film">
+                  <td data-label="Film" class="film-title-cell">
                     {{ favourite.filmTitle || "Unknown Film" }}
                   </td>
-                  <td data-label="Evaluation" class="text-center">
+                  <td data-label="Evaluation" class="text-center evaluation-cell">
                     <div class="star-rating d-inline-flex align-items-center">
                       <i
                         v-for="starIndex in 5"
                         :key="starIndex"
-                        class="bi mx-1 text-warning"
+                        class="bi star-icon"
                         :class="getStarClass(favourite, starIndex)"
                         :aria-label="`Star ${starIndex}`"
                       ></i>
-                      <small class="text-muted ms-2">
+                      <small class="evaluation-text">
                         ({{ formatEvaluation(favourite.evaluation) }})
                       </small>
                     </div>
                   </td>
-                  <td data-label="Date" class="date">
+                  <td data-label="Created" class="date-cell">
                     {{ formatDate(favourite.created_at) }}
                   </td>
-                  <td data-label="Date" class="date">
+                   <td data-label="Updated" class="date-cell">
                     {{ formatDate(favourite.updated_at) }}
                   </td>
-                  <td class="text-nowrap text-center">
+                  <td data-label="Operations" class="text-nowrap text-center operations-cell">
                     <OperationsCrud
                       @onClickDelete="onClickDelete(favourite)"
                       @onClickUpdate="onClickUpdate(favourite)"
@@ -197,14 +195,13 @@
             </table>
           </div>
           <div
-            class="pagination-container"
+            class="pagination-wrapper"
             ref="tablePaginationRef"
-            v-if="filteredFavourites.length > dynamicItemsPerPage"
+            v-if="totalFavPages > 1"
           >
             <Paginator
               :pageNumber="currentPage"
               :numberOfPages="totalFavPages"
-              :pagesArray="favPagesArray"
               @paging="handlePageChange"
             />
           </div>
@@ -216,11 +213,7 @@
         >
           <div class="reviews-wrapper" ref="reviewsWrapperRef">
             <div
-              v-if="
-                !paginatedPublicReviews.length &&
-                filteredPublicReviews.length === 0 &&
-                !searchQuery
-              "
+              v-if="!paginatedPublicReviews.length && filteredPublicReviews.length === 0 && !searchQuery"
               class="no-data-message"
             >
               No public reviews available yet.
@@ -239,49 +232,45 @@
               >
                 <div class="review-header">
                   <div class="review-meta">
-                    <span class="review-author">{{
+                    <span class="review-author"><i class="bi bi-person-fill me-1"></i>{{
                       review.userName || "Anonymous"
                     }}</span>
-                    <div v-if="review.created_at !== review.updated_at">
-                      <span class="review-date">{{
+                    <span class="review-date"><i class="bi bi-calendar3 me-1"></i>{{
                         formatDate(review.updated_at)
-                      }}</span>
-                      (edited)
-                    </div>
-                    <div v-else>
-                      <span class="review-date">{{
-                        formatDate(review.created_at)
-                      }}</span>
-                    </div>
+                      }}
+                      <span v-if="review.created_at !== review.updated_at" class="edited-indicator">(edited)</span>
+                    </span>
                   </div>
                 </div>
-                <div class="review-film-title">
-                  {{ review.filmTitle || "Unknown Film" }}
+                 <div class="review-film-title">
+                   <i class="bi bi-film me-1"></i>{{ review.filmTitle || "Unknown Film" }}
                 </div>
                 <div class="star-rating d-inline-flex align-items-center">
                   <i
                     v-for="starIndex in 5"
                     :key="`star-${review.id}-${starIndex}`"
-                    class="bi mx-1 text-warning"
+                    class="bi star-icon"
                     :class="getStarClass(review, starIndex)"
                     :aria-label="`Star ${starIndex}`"
                   ></i>
+                   <small class="evaluation-text">
+                        ({{ formatEvaluation(review.evaluation) }})
+                    </small>
                 </div>
                 <div class="review-content">
-                  {{ review.content }}
+                  <p>{{ review.content }}</p>
                 </div>
               </div>
             </div>
           </div>
-          <div
-            class="pagination-container"
+           <div
+            class="pagination-wrapper"
             ref="publicPaginationRef"
-            v-if="filteredPublicReviews.length > dynamicItemsPerPage"
+            v-if="totalPublicPages > 1"
           >
             <Paginator
               :pageNumber="currentPublicPage"
               :numberOfPages="totalPublicPages"
-              :pagesArray="publicPagesArray"
               @paging="handlePublicPageChange"
             />
           </div>
@@ -299,7 +288,7 @@
         @yesEvent="yesEventHandler"
         @close="closeModal"
       >
-        <div v-if="modalState === 'Delete'">{{ modalMessageYesNo }}</div>
+        <div v-if="modalState === 'Delete'" class="modal-delete-message">{{ modalMessageYesNo }}</div>
         <ReviewForm
           v-if="modalState === 'Update'"
           :itemForm="modalItem"
@@ -319,136 +308,113 @@ import { BASE_URL } from "../helpers/baseUrls";
 
 // Import Child Components
 import Modal from "@/components/Modal.vue";
-import Paginator from "@/components/Paginator.vue";
-import OperationsCrud from "@/components/OperationsCrud.vue";
-import ReviewForm from "@/components/forms/ReviewForm.vue";
+import Paginator from "@/components/Paginator.vue"; // Assuming this is styled
+import OperationsCrud from "@/components/OperationsCrud.vue"; // Needs styling if not done
+import ReviewForm from "@/components/forms/ReviewForm.vue"; // Needs styling if not done
 
 export default {
   components: { Paginator, OperationsCrud, Modal, ReviewForm },
   data() {
     return {
       // Component state properties
-      authStore: null, // Will be initialized in mounted()
-      loading: false, // Indicates if API calls are in progress
-      errorMessages: null, // Stores error messages for display
-      activeTab: "my", // 'my' or 'all'
-      tableReviewFilter: "ABC", // Sort order for 'my' reviews table
-      publicReviewFilter: "ABC", // Sort order for 'all' reviews
-      searchQuery: "", // Input model for search
-      debounceTimer: null, // Timer for debouncing search input
-      films: [], // List of films for the update form dropdown
+      authStore: null,
+      loading: false,
+      errorMessages: null,
+      activeTab: "my", // Default to 'my' if logged in, else 'all'
+      tableReviewFilter: "newest", // Default sort for 'my' reviews table
+      publicReviewFilter: "newest", // Default sort for 'all' reviews
+      searchQuery: "",
+      debounceTimer: null,
+      films: [],
       favourites: [], // User's reviews ('my' tab)
       publicReviews: [], // All public reviews ('all' tab)
 
-      // For Paginator
+      // --- Pagination ---
       currentPage: 1, // Current page for 'my' reviews
       currentPublicPage: 1, // Current page for 'all' reviews
-      dynamicItemsPerPage: 10, // Default, will be calculated dynamically
+      itemsPerPage: 9, // ** FIXED number of items per page **
 
-      // Controls there visibility
+      // Controls visibility
       showSearch: false,
       showTableFilter: false,
       showPublicFilter: false,
 
       // Modal state properties
-      isModalVisible: false, // Controls modal visibility via v-model
-      modalItem: {}, // Data for the item being updated/deleted
-      modalMessageYesNo: null, // Confirmation message for delete
-      modalState: "Read", // Current modal mode: 'Read', 'Delete', 'Update'
-      modalTitle: null, // Modal title
-      modalYes: null, // Text for the 'Yes' button (null hides it)
-      modalNo: null, // Text for the 'No' button
-      modalSize: null, // Modal size (e.g., 'lg')
-      selectedRowId: null, // ID of the item being acted upon
+      isModalVisible: false,
+      modalItem: {},
+      modalMessageYesNo: null,
+      modalState: "Read",
+      modalTitle: null,
+      modalYes: null,
+      modalNo: null,
+      modalSize: null,
+      selectedRowId: null,
     };
   },
   computed: {
     /**
-     * Checks if the user is currently logged in based on the auth store state.
+     * Checks if the user is currently logged in.
      */
     isLoggedIn() {
-      return this.authStore && this.authStore.id && this.authStore.id !== 0;
+      return !!this.authStore?.id; // Simplified check
     },
 
     /**
-     * Filters and sorts the user's favourite reviews based on search query and table filter.
+     * Filters and sorts the user's favourite reviews.
      */
     filteredFavourites() {
       return this.filterAndSortReviews(
         this.favourites,
         this.searchQuery,
         this.tableReviewFilter,
-        false
+        false // isPublic = false
       );
     },
 
     /**
-     * Filters and sorts all public reviews based on search query and public filter.
+     * Filters and sorts all public reviews.
      */
     filteredPublicReviews() {
       return this.filterAndSortReviews(
         this.publicReviews,
         this.searchQuery,
         this.publicReviewFilter,
-        true
+        true // isPublic = true
       );
     },
 
-    // --- Pagination Computed Properties ---
+    // --- Pagination Computed Properties (Using fixed itemsPerPage) ---
 
     /**
-     * Calculates the total number of pages for the 'My Reviews' table.
+     * Calculates total pages for 'My Reviews'.
      */
     totalFavPages() {
-      if (!this.dynamicItemsPerPage) return 0;
-      return Math.ceil(
-        this.filteredFavourites.length / this.dynamicItemsPerPage
-      );
+      return Math.ceil(this.filteredFavourites.length / this.itemsPerPage);
     },
 
     /**
      * Gets the slice of 'My Reviews' for the current page.
      */
     paginatedFavourites() {
-      const start = (this.currentPage - 1) * this.dynamicItemsPerPage;
-      const end = start + this.dynamicItemsPerPage;
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
       return this.filteredFavourites.slice(start, end);
     },
 
     /**
-     * Generates the array of page numbers/ellipses for the 'My Reviews' paginator.
-     */
-    favPagesArray() {
-      return this.generatePagesArray(this.totalFavPages, this.currentPage);
-    },
-
-    /**
-     * Calculates the total number of pages for the 'All Reviews' list.
+     * Calculates total pages for 'All Reviews'.
      */
     totalPublicPages() {
-      if (!this.dynamicItemsPerPage) return 0;
-      return Math.ceil(
-        this.filteredPublicReviews.length / this.dynamicItemsPerPage
-      );
+      return Math.ceil(this.filteredPublicReviews.length / this.itemsPerPage);
     },
 
     /**
      * Gets the slice of 'All Reviews' for the current page.
      */
     paginatedPublicReviews() {
-      const start = (this.currentPublicPage - 1) * this.dynamicItemsPerPage;
-      const end = start + this.dynamicItemsPerPage;
+      const start = (this.currentPublicPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
       return this.filteredPublicReviews.slice(start, end);
-    },
-
-    /**
-     * Generates the array of page numbers/ellipses for the 'All Reviews' paginator.
-     */
-    publicPagesArray() {
-      return this.generatePagesArray(
-        this.totalPublicPages,
-        this.currentPublicPage
-      );
     },
   },
   methods: {
@@ -484,6 +450,8 @@ export default {
           error.message ||
           "An unknown error occurred."
         }`;
+         // Automatically clear error after some time
+        setTimeout(() => { this.errorMessages = null; }, 7000);
         return null;
       } finally {
         this.loading = false;
@@ -491,7 +459,7 @@ export default {
     },
 
     /**
-     * Fetches the logged-in user's favourite reviews from the API.
+     * Fetches the logged-in user's favourite reviews.
      */
     async fetchFavourites() {
       if (!this.isLoggedIn) return;
@@ -507,11 +475,14 @@ export default {
       } else {
         this.favourites = [];
       }
-      this.$nextTick(this.calculateDimensions);
+      // Reset page if current page becomes invalid after fetch/filter
+      if (this.currentPage > this.totalFavPages) {
+        this.currentPage = Math.max(1, this.totalFavPages);
+      }
     },
 
     /**
-     * Fetches all public reviews from the API.
+     * Fetches all public reviews.
      */
     async fetchAllReviews() {
       const responseData = await this._fetchApi(`${BASE_URL}/favourites`);
@@ -526,47 +497,42 @@ export default {
       } else {
         this.publicReviews = [];
       }
-      this.$nextTick(this.calculateDimensions);
-    },
-
-    /**
-     * Fetches the list of films, typically used for dropdowns in forms.
-     */
-    async fetchFilms() {
-      const responseData = await this._fetchApi(`${BASE_URL}/films`);
-      if (responseData?.data) {
-        this.films = responseData.data;
-      } else {
-        this.films = [];
+       // Reset page if current page becomes invalid after fetch/filter
+       if (this.currentPublicPage > this.totalPublicPages) {
+        this.currentPublicPage = Math.max(1, this.totalPublicPages);
       }
     },
 
     /**
-     * Switches the active tab between 'My Reviews' and 'All Reviews'.
+     * Fetches the list of films.
+     */
+    async fetchFilms() {
+      const responseData = await this._fetchApi(`${BASE_URL}/films`);
+      this.films = responseData?.data || [];
+    },
+
+    /**
+     * Switches the active tab.
      */
     switchTab(tab) {
-      if (tab === "my" && !this.isLoggedIn) return;
+      if (tab === "my" && !this.isLoggedIn) return; // Cannot switch to 'my' if not logged in
 
       this.activeTab = tab;
-      this.currentPage = 1;
+      this.currentPage = 1; // Reset pagination for both on tab switch
       this.currentPublicPage = 1;
-      this.searchQuery = "";
-      this.errorMessages = null;
+      this.searchQuery = ""; // Clear search on tab switch
+      this.errorMessages = null; // Clear errors
 
+      // Close any open controls
       this.showSearch = false;
       this.showTableFilter = false;
       this.showPublicFilter = false;
 
+      // Fetch data if needed
       if (tab === "all" && this.publicReviews.length === 0) {
         this.fetchAllReviews();
-      } else if (
-        tab === "my" &&
-        this.favourites.length === 0 &&
-        this.isLoggedIn
-      ) {
+      } else if (tab === "my" && this.favourites.length === 0 && this.isLoggedIn) {
         this.fetchFavourites();
-      } else {
-        this.$nextTick(this.calculateDimensions);
       }
     },
 
@@ -576,45 +542,55 @@ export default {
     handleSearch() {
       clearTimeout(this.debounceTimer);
       this.debounceTimer = setTimeout(() => {
+        // Reset pagination when search query changes
         this.currentPage = 1;
         this.currentPublicPage = 1;
-        this.$nextTick(this.calculateDimensions);
-      }, 300);
+      }, 300); // 300ms debounce time
     },
 
     /**
-     * Toggles the visibility of the search or filter dropdowns.
+     * Toggles the visibility of the search or filter dropdowns, ensuring only one is open.
      */
     toggleControl(type) {
-      const isOpening =
-        (type === "search" && !this.showSearch) ||
-        (type === "tableFilter" && !this.showTableFilter) ||
-        (type === "publicFilter" && !this.showPublicFilter);
+        // Determine the target state for the clicked control
+        let nextShowSearch = this.showSearch;
+        let nextShowTableFilter = this.showTableFilter;
+        let nextShowPublicFilter = this.showPublicFilter;
 
-      this.showSearch =
-        type === "search"
-          ? !this.showSearch
-          : isOpening
-          ? false
-          : this.showSearch;
-      this.showTableFilter =
-        type === "tableFilter"
-          ? !this.showTableFilter
-          : isOpening
-          ? false
-          : this.showTableFilter;
-      this.showPublicFilter =
-        type === "publicFilter"
-          ? !this.showPublicFilter
-          : isOpening
-          ? false
-          : this.showPublicFilter;
+        if (type === 'search') {
+            nextShowSearch = !this.showSearch; // Toggle the clicked one
+            // If opening search, close others
+            if (nextShowSearch) {
+                nextShowTableFilter = false;
+                nextShowPublicFilter = false;
+            }
+        } else if (type === 'tableFilter') {
+            nextShowTableFilter = !this.showTableFilter;
+            // If opening table filter, close others
+            if (nextShowTableFilter) {
+                nextShowSearch = false;
+                nextShowPublicFilter = false;
+            }
+        } else if (type === 'publicFilter') {
+            nextShowPublicFilter = !this.showPublicFilter;
+            // If opening public filter, close others
+            if (nextShowPublicFilter) {
+                nextShowSearch = false;
+                nextShowTableFilter = false;
+            }
+        }
+
+        // Apply the new states
+        this.showSearch = nextShowSearch;
+        this.showTableFilter = nextShowTableFilter;
+        this.showPublicFilter = nextShowPublicFilter;
     },
+
 
     // --- CRUD Methods ---
 
     /**
-     * Sets up the modal state for deleting a review and shows the modal.
+     * Sets up and shows the delete confirmation modal.
      */
     onClickDelete(item) {
       this.modalState = "Delete";
@@ -624,191 +600,130 @@ export default {
       }"? This action cannot be undone.`;
       this.modalYes = "Yes, Delete";
       this.modalNo = "No, Cancel";
-      this.modalSize = null;
+      this.modalSize = null; // Default size
       this.selectedRowId = item.id;
-      this.isModalVisible = true; // Show modal
+      this.isModalVisible = true;
     },
 
     /**
-     * Sets up the modal state for updating a review and shows the modal.
+     * Sets up and shows the update review modal.
      */
     onClickUpdate(item) {
       this.modalState = "Update";
       this.selectedRowId = item.id;
+      // Ensure evaluation is a number for the form
       this.modalItem = {
         ...item,
         evaluation: Number(item.evaluation) || 0,
-        filmId: item.filmId,
-        content: item.content,
       };
       this.modalTitle = `Update Review for "${
         item.filmTitle || "Unknown Film"
       }"`;
-      this.modalYes = null;
+      this.modalYes = null; // Hide Yes button for update form
       this.modalNo = "Cancel";
-      this.modalSize = "lg";
-      this.isModalVisible = true; // Show modal
+      this.modalSize = "lg"; // Larger modal for the form
+      this.isModalVisible = true;
     },
 
     /**
-     * Performs the actual delete API call after confirmation.
+     * Performs the delete API call.
      */
     async deleteReview() {
       if (!this.selectedRowId) return;
-
       const result = await this._fetchApi(
-        `${BASE_URL}/favourites/${this.selectedRowId}`,
-        {},
-        "delete"
+        `${BASE_URL}/favourites/${this.selectedRowId}`, {}, "delete"
       );
-
       if (result !== null) {
-        await this.fetchFavourites();
-        this.isModalVisible = false; // Hide modal on success
-        // State reset is now handled in closeModal
+        await this.fetchFavourites(); // Refresh list
       }
-      // Reset state even on failure, handled by closeModal triggered by user action
-      // this.modalState = 'Read'; // OLD: Removed from here
+      this.closeModal(); // Close modal regardless of success/failure
     },
 
     /**
-     * Handles the 'saveItem' event emitted by the ReviewForm component.
+     * Handles saving the updated review from the form.
      */
     async saveItemHandler(formData) {
       if (this.modalState !== "Update" || !this.selectedRowId) return;
-
       const payload = {
         evaluation: formData.evaluation,
         filmId: formData.filmId,
         content: formData.content,
       };
-
       const result = await this._fetchApi(
-        `${BASE_URL}/favourites/${this.selectedRowId}`,
-        {},
-        "patch",
-        payload
+        `${BASE_URL}/favourites/${this.selectedRowId}`, {}, "patch", payload
       );
-
       if (result !== null) {
-        await this.fetchFavourites();
-        // Hide the modal first
-        this.isModalVisible = false;
-        // Then, after the modal is hidden, reset its state
-        this.$nextTick(() => {
-          this.modalState = "Read";
-          this.modalItem = {};
-          this.selectedRowId = null;
-          this.modalTitle = null;
-          this.modalMessageYesNo = null;
-          this.modalYes = null;
-          this.modalNo = null;
-          this.modalSize = null;
-        });
+        await this.fetchFavourites(); // Refresh list
       }
+      this.closeModal(); // Close modal regardless of success/failure
     },
 
     /**
-     * Handles the 'yesEvent' emitted by the Modal component (for Delete confirmation).
+     * Handles the 'yes' button click in the modal (only for Delete).
      */
     yesEventHandler() {
       if (this.modalState === "Delete") {
         this.deleteReview();
-        // Modal closing is handled within deleteReview on success
       }
     },
 
     /**
      * Closes the modal and resets its state.
-     * Called via v-model update or @close event from Modal.
      */
     closeModal() {
       this.isModalVisible = false;
-      // Reset other states...
-      // Add a small delay to allow Bootstrap cleanup
+      // Use timeout to prevent state reset before modal fade-out completes
       setTimeout(() => {
         this.modalState = "Read";
         this.modalItem = {};
         this.selectedRowId = null;
-      }, 300);
+        this.modalTitle = null;
+        this.modalMessageYesNo = null;
+        this.modalYes = null;
+        this.modalNo = null;
+        this.modalSize = null;
+      }, 300); // Adjust timing if needed (matches Bootstrap fade duration)
     },
 
     // --- Helper & Formatting Methods ---
 
     /**
-     * Shared method to filter and sort an array of reviews.
+     * Shared method to filter and sort reviews.
      */
     filterAndSortReviews(sourceArray, query, filterType, isPublic = false) {
       let filtered = [...sourceArray];
 
+      // Apply search query filter
       if (query) {
         const lowerQuery = query.toLowerCase();
-        filtered = filtered.filter(
-          (review) =>
-            (review.filmTitle || "").toLowerCase().includes(lowerQuery) ||
-            // Remove content check for public reviews ↓
-            (isPublic
-              ? (review.userName || "").toLowerCase().includes(lowerQuery)
-              : (review.content || "").toLowerCase().includes(lowerQuery))
+        filtered = filtered.filter(review =>
+          (review.filmTitle || "").toLowerCase().includes(lowerQuery) ||
+          (review.userName || "").toLowerCase().includes(lowerQuery) || // Search username too
+          (!isPublic && (review.content || "").toLowerCase().includes(lowerQuery)) // Search content only for 'my' reviews
         );
       }
 
+      // Apply sorting
       switch (filterType) {
         case "ABC":
-          filtered.sort((a, b) =>
-            (a.filmTitle || "").localeCompare(b.filmTitle || "")
-          );
+          filtered.sort((a, b) => (a.filmTitle || "").localeCompare(b.filmTitle || ""));
           break;
         case "highToLow":
-          filtered.sort(
-            (a, b) => (Number(b.evaluation) || 0) - (Number(a.evaluation) || 0)
-          );
+          filtered.sort((a, b) => (Number(b.evaluation) || 0) - (Number(a.evaluation) || 0));
           break;
         case "lowToHigh":
-          filtered.sort(
-            (a, b) => (Number(a.evaluation) || 0) - (Number(b.evaluation) || 0)
-          );
+          filtered.sort((a, b) => (Number(a.evaluation) || 0) - (Number(b.evaluation) || 0));
           break;
         case "newest":
-          filtered.sort(
-            (a, b) => new Date(b.updated_at) - new Date(a.updated_at)
-          );
+          // Sort by updated_at primarily, then created_at as fallback
+          filtered.sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at));
           break;
         case "oldest":
-          filtered.sort(
-            (a, b) => new Date(a.created_at) - new Date(b.updated_at)
-          );
+           // Sort by created_at primarily, then updated_at as fallback
+          filtered.sort((a, b) => new Date(a.created_at || a.updated_at) - new Date(b.created_at || b.updated_at));
           break;
       }
       return filtered;
-    },
-
-    /**
-     * Generates the array for the Paginator component's `pagesArray` prop.
-     */
-    generatePagesArray(total, current) {
-      if (total <= 7) {
-        return Array.from({ length: total }, (_, i) => i + 1);
-      }
-      const pages = new Set([1, total]);
-      const rangeStart = Math.max(2, current - 1);
-      const rangeEnd = Math.min(total - 1, current + 1);
-
-      for (let i = rangeStart; i <= rangeEnd; i++) {
-        pages.add(i);
-      }
-
-      const result = [];
-      let lastPage = 0;
-      const sortedPages = Array.from(pages).sort((a, b) => a - b);
-      sortedPages.forEach((p) => {
-        if (lastPage > 0 && p - lastPage > 1) {
-          result.push("...");
-        }
-        result.push(p);
-        lastPage = p;
-      });
-      return result;
     },
 
     /**
@@ -816,13 +731,9 @@ export default {
      */
     getStarClass(item, starIndex) {
       const evaluation = Number(item.evaluation) || 0;
-      if (evaluation >= starIndex) {
-        return "bi-star-fill";
-      } else if (evaluation + 0.75 >= starIndex) {
-        return "bi-star-half";
-      } else {
-        return "bi-star";
-      }
+      if (evaluation >= starIndex) return "bi-star-fill";
+      if (evaluation >= starIndex - 0.5) return "bi-star-half"; // Use half star for .5 ratings
+      return "bi-star";
     },
 
     /**
@@ -830,34 +741,40 @@ export default {
      */
     formatEvaluation(value) {
       const num = Number(value);
-      return Number.isNaN(num) ? "N/A" : num.toFixed(1);
+      return isNaN(num) ? "N/A" : num.toFixed(1);
     },
 
     /**
-     * Formats a date string into a more readable format using Hungarian locale.
+     * Formats a date string into 'YYYY Month DD - HH:MM:SS' format (using English month names).
      */
     formatDate(dateString) {
       if (!dateString) return "N/A";
       try {
         const date = new Date(dateString);
         if (isNaN(date.getTime())) return "Invalid Date";
-        return new Intl.DateTimeFormat("hu-HU", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }).format(date);
+
+        // Define options for formatting
+        const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+        const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+
+        // Format parts using English locale for consistency with example "July"
+        const formattedDate = new Intl.DateTimeFormat('en-US', dateOptions).format(date);
+        const formattedTime = new Intl.DateTimeFormat('en-US', timeOptions).format(date);
+
+        // Combine parts with the desired separator
+        return `${formattedDate} - ${formattedTime}`;
+
       } catch (e) {
         console.warn("Error formatting date:", dateString, e);
-        return "N/A";
+        return "N/A"; // Fallback
       }
     },
+
 
     // --- Pagination Event Handlers ---
 
     /**
-     * Handles the 'paging' event from the 'My Reviews' Paginator.
+     * Handles page change for 'My Reviews'.
      */
     handlePageChange(pageInfo) {
       if (typeof pageInfo.pageNumber === "number") {
@@ -866,80 +783,47 @@ export default {
     },
 
     /**
-     * Handles the 'paging' event from the 'All Reviews' Paginator.
+     * Handles page change for 'All Reviews'.
      */
     handlePublicPageChange(pageInfo) {
       if (typeof pageInfo.pageNumber === "number") {
         this.currentPublicPage = pageInfo.pageNumber;
       }
     },
-
-    // --- Dynamic Layout Calculation ---
-
-    /**
-     * Calculates the number of items that should fit per page based on container height.
-     */
-    calculateDimensions() {
-      const tableRowHeight = 60;
-      const reviewCardHeight = 60;
-
-      let containerHeight = 0;
-      let itemHeight = 0;
-
-      if (this.activeTab === "my" && this.$refs.tableWrapperRef) {
-        containerHeight = this.$refs.tableWrapperRef.clientHeight;
-        itemHeight = tableRowHeight;
-      } else if (this.activeTab === "all" && this.$refs.reviewsWrapperRef) {
-        containerHeight = this.$refs.reviewsWrapperRef.clientHeight;
-        itemHeight = reviewCardHeight;
-      }
-
-      if (containerHeight > 0 && itemHeight > 0) {
-        this.dynamicItemsPerPage = Math.max(
-          1,
-          Math.floor(containerHeight / itemHeight)
-        );
-      } else {
-        this.dynamicItemsPerPage = 10;
-      }
-
-      if (this.currentPage > this.totalFavPages) {
-        this.currentPage = Math.max(1, this.totalFavPages);
-      }
-      if (this.currentPublicPage > this.totalPublicPages) {
-        this.currentPublicPage = Math.max(1, this.totalPublicPages);
-      }
-    },
   },
   watch: {
     /**
-     * Watches for changes in the login state.
+     * Watches for changes in the login state to update UI/data.
      */
     isLoggedIn(loggedIn, wasLoggedIn) {
+        // If user logs out, switch to 'all' tab and clear personal data
       if (!loggedIn && wasLoggedIn) {
-        this.switchTab("all");
+        this.activeTab = 'all';
         this.favourites = [];
-      } else if (loggedIn && !wasLoggedIn) {
-        if (this.activeTab === "my") {
-          this.fetchFavourites();
+        // Fetch all reviews if not already loaded
+        if (this.publicReviews.length === 0) {
+            this.fetchAllReviews();
         }
+      }
+      // If user logs in, potentially fetch their reviews if 'my' tab is active
+      else if (loggedIn && !wasLoggedIn) {
+        this.activeTab = 'my'; // Default to 'my' tab on login
+        this.fetchFavourites();
       }
     },
 
     /**
-     * Watches the 'My Reviews' filter selection.
+     * Watches the 'My Reviews' filter/sort selection.
      */
     tableReviewFilter() {
-      this.currentPage = 1;
-      this.$nextTick(this.calculateDimensions);
+      this.currentPage = 1; // Reset page when filter changes
     },
 
     /**
-     * Watches the 'All Reviews' filter selection.
+     * Watches the 'All Reviews' filter/sort selection.
      */
     publicReviewFilter() {
-      this.currentPublicPage = 1;
-      this.$nextTick(this.calculateDimensions);
+      this.currentPublicPage = 1; // Reset page when filter changes
     },
   },
   /**
@@ -947,117 +831,113 @@ export default {
    */
   mounted() {
     this.authStore = useAuthStore();
+    // Set initial tab based on login state
     this.activeTab = this.isLoggedIn ? "my" : "all";
-    this.fetchFilms();
 
+    // Fetch initial data based on active tab
+    this.fetchFilms(); // Always fetch films for the update form
     if (this.activeTab === "my") {
       this.fetchFavourites();
     } else {
       this.fetchAllReviews();
     }
-
-    this.$nextTick(() => {
-      this.calculateDimensions();
-    });
-    window.addEventListener("resize", this.calculateDimensions);
+    // Removed resize listener and dynamic calculation
   },
   /**
-   * Lifecycle hook called right before the component instance is destroyed.
+   * Lifecycle hook called right before the component instance is unmounted (Vue 3).
    */
-  beforeDestroy() {
-    window.removeEventListener("resize", this.calculateDimensions);
-    clearTimeout(this.debounceTimer);
+  beforeUnmount() {
+    // Removed resize listener cleanup
+    clearTimeout(this.debounceTimer); // Clear any pending debounce timers
   },
 };
 </script>
 
 <style scoped>
-/* General Styles */
+/* === Define a Consistent Color Palette via CSS Variables === */
 .film-reviews {
-  color: white;
-  /* Assuming a dark theme */
+  /* Central Color Variables for a Dark Theme */
+  --bg-base: #121212;        /* Base background */
+  --bg-primary: #1f1f1f;       /* Header and similar elements */
+  --bg-secondary: #2a2a2a;     /* Dropdowns and secondary backgrounds */
+  --bg-tertiary: #333333;      /* Cards and content backgrounds */
+  --bg-dropdown: #1f1f1f;      /* Dropdown panels */
+
+  --text-primary: #ffffff;     /* Primary text – white */
+  --text-secondary: #eeeeee;   /* Secondary text */
+  --text-muted: #aaaaaa;       /* Muted text (for auxiliary info) */
+
+  --accent-gold: #ffd700;      /* Gold accent (for highlights, buttons, etc.) */
+  --accent-red: #ff4d4d;       /* Red accent for error messages */
+  --border-color: #444444;     /* General border color */
+  --focus-ring-color: rgba(255, 215, 0, 0.4); /* For focus outlines */
+
   height: 90vh;
-  /* Example height, adjust as needed */
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  /* Prevent whole page scroll */
-  background-color: #121212;
-  /* Dark background */
+  background-color: var(--bg-base);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-/* Header Styles */
+/* === Header Section === */
 .header-container {
-  background: #1a1a1a;
-  border-bottom: 2px solid #ffd700;
-  /* Gold accent */
+  background: var(--bg-primary);
+  border-bottom: 2px solid var(--accent-gold);
   width: 100%;
   display: flex;
   flex-wrap: wrap;
-  /* Allow wrapping on smaller screens */
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1.5rem;
   gap: 1rem;
   flex-shrink: 0;
-  /* Prevent header from shrinking */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .tabs-wrapper {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   align-items: center;
   flex-grow: 1;
-  /* Allow tabs to take space */
   min-width: 0;
-  justify-content: flex-start;
-  /* Align tabs left */
 }
 
 .title-text {
-  color: #bdbdbd;
-  /* Lighter grey for inactive tabs */
-  font-size: 1.1rem;
+  color: var(--text-primary);
+  font-size: 1rem;
   font-weight: 600;
   margin: 0;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.1rem;
   white-space: nowrap;
   text-align: center;
-  border-radius: 4px;
+  border-radius: 6px;
   transition: all 0.2s ease;
   border: 1px solid transparent;
-  /* Placeholder for border */
-}
-
-.clickable {
-  cursor: pointer;
 }
 
 .clickable:hover {
-  color: #ffffff;
-  /* Brighter on hover */
-  background-color: rgba(255, 215, 0, 0.1);
-  /* Subtle gold background on hover */
+  color: var(--accent-gold);
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
 }
 
 .active-tab {
-  background: #ffd700;
-  color: #1a1a1a !important;
-  /* Dark text on active tab */
+  background: var(--accent-gold) !important;
+  color: var(--bg-primary) !important;
   font-weight: 700;
-  border-color: #ffd700;
+  border-color: var(--accent-gold) !important;
+  box-shadow: 0 1px 4px rgba(255, 215, 0, 0.2);
 }
 
-/* Controls container */
+/* === Controls (Search/Filter) === */
 .controls-container {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  /* Reduced gap */
+  gap: 0.75rem;
   position: relative;
-  /* For positioning dropdowns */
   flex-shrink: 0;
-  /* Prevent shrinking */
 }
 
 .control-buttons {
@@ -1069,225 +949,186 @@ export default {
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 50%;
-  width: 38px;
-  /* Slightly larger */
-  height: 38px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #2a2a2a;
-  color: #bdbdbd;
-  transition: all 0.3s ease;
-  border: 1px solid #444;
-  /* Subtle border */
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+  border: 1px solid var(--border-color);
 }
 
 .control-item:hover {
-  background: #ffd700;
-  color: #1a1a1a;
-  border-color: #ffd700;
+  background: var(--accent-gold);
+  color: var(--bg-primary);
+  border-color: var(--accent-gold);
 }
 
 .control-item i {
-  font-size: 1.1rem;
+  font-size: 1rem;
   transition: transform 0.2s ease;
 }
 
-.control-item:active i {
-  transform: scale(0.95);
-}
-
-/* Collapsible containers (Search & Filter) */
-.search-container,
-.filter-container {
+/* === Dropdown Panels (Search/Filter) === */
+.dropdown-panel {
   position: absolute;
   right: 0;
   top: calc(100% + 8px);
-  /* Position below the controls */
   z-index: 100;
-  background: #2a2a2a;
-  /* Slightly lighter than header */
-  border: 1px solid #444;
+  background-color: var(--bg-dropdown);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 0.75rem;
-  /* More padding */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  padding: 1rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  min-width: 280px;
 }
 
-/* Animation for dropdowns */
 .fade-slide-enter-active,
 .fade-slide-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
-
 .fade-slide-enter-from,
 .fade-slide-leave-to {
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateY(-8px);
 }
 
-.search-wrapper {
-  min-width: 250px;
-}
-
-.filter-wrapper {
-  min-width: 200px;
-}
-
-/* Search Input */
 .search-input {
   width: 100%;
   padding: 0.6rem 1rem;
-  border-radius: 20px;
-  /* Pill shape */
-  border: 1px solid #555;
-  background-color: #333;
-  color: white;
-  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 0.95rem;
   outline: none;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-
 .search-input::placeholder {
-  color: #aaa;
+  color: #888;
 }
-
 .search-input:focus {
-  border-color: #ffd700;
-  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px var(--focus-ring-color);
 }
 
-/* Filter Select Dropdown */
+.filter-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
 .custom-filter-select {
   width: 100%;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  /* Consistent rounding */
-  border: 1px solid #555;
-  background-color: #333;
-  color: white;
-  font-size: 1rem;
+  padding: 0.6rem 2.5rem 0.6rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 0.95rem;
   cursor: pointer;
   outline: none;
   appearance: none;
-  /* Remove default arrow */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23bdbdbd' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23b0b0b0' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   background-size: 1em 1em;
-  padding-right: 2.5rem;
-  /* Space for custom arrow */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-
 .custom-filter-select:focus {
-  border-color: #ffd700;
-  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px var(--focus-ring-color);
 }
 
-/* Loading Overlay */
+/* === Loading Overlay === */
 .loading-overlay {
   position: absolute;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 150;
-  /* Above content, below modal */
 }
-
 .loading-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: white;
+  color: var(--text-secondary);
   gap: 1rem;
 }
-
-.spinner-border {
-  width: 3rem;
-  height: 3rem;
-  color: #ffd700;
-  /* Gold spinner */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 215, 0, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--accent-gold);
+  animation: spin 1s linear infinite;
 }
-
 .loading-text {
   font-size: 1.1rem;
+  font-weight: 600;
 }
 
-/* Content Area */
+/* === Content Area === */
 .content-area {
   flex-grow: 1;
-  /* Allow content to take remaining space */
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  /* Important: Prevents content scroll from affecting page */
-  padding: 1rem;
+  padding: 1rem 1.5rem;
   gap: 1rem;
-  /* Space between error message and data */
 }
 
-.error-message {
+.error-message.alert {
   flex-shrink: 0;
-  /* Prevent error message from shrinking */
-  background-color: #dc3545;
-  /* Bootstrap danger red */
-  color: white;
+  background-color: rgba(204, 24, 30, 0.15);
+  color: var(--accent-red);
   padding: 0.75rem 1.25rem;
-  border-radius: 0.25rem;
-  border: 1px solid #d32535;
+  border-radius: 6px;
+  border: 1px solid var(--accent-red);
+  font-weight: 600;
 }
 
 .data-container {
   flex-grow: 1;
-  /* Takes up remaining space in content-area */
   display: flex;
-  /* Use flex to manage visibility */
   flex-direction: column;
-  /* Stack sections vertically */
   overflow: hidden;
-  /* Contains the scrolling areas */
 }
 
-/* Sections for Table and Cards */
+/* === Table & Reviews Sections === */
 .table-section,
 .public-reviews-section {
   flex-grow: 1;
-  /* Allow section to fill data-container */
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  /* Important */
   height: 100%;
-  /* Ensure it takes full height of parent */
 }
 
-/* Wrapper for scrollable content */
+/* Scrollable Content Wrappers */
 .table-wrapper,
 .reviews-wrapper {
   flex-grow: 1;
-  /* Allow this area to scroll */
   overflow-y: auto;
-  /* Enable vertical scrolling */
-  padding-right: 5px;
-  /* Space for scrollbar */
-  /* Custom scrollbar styling (optional) */
+  padding-right: 8px;
   scrollbar-width: thin;
   scrollbar-color: #555 #333;
 }
-
 .table-wrapper::-webkit-scrollbar,
 .reviews-wrapper::-webkit-scrollbar {
   width: 8px;
 }
-
 .table-wrapper::-webkit-scrollbar-track,
 .reviews-wrapper::-webkit-scrollbar-track {
   background: #333;
   border-radius: 4px;
 }
-
 .table-wrapper::-webkit-scrollbar-thumb,
 .reviews-wrapper::-webkit-scrollbar-thumb {
   background-color: #555;
@@ -1295,233 +1136,229 @@ export default {
   border: 2px solid #333;
 }
 
-/* Table Styles */
+/* === Improved Table Styles with Full Grid Borders === */
 .custom-table {
   width: 100%;
-  border-collapse: separate;
-  /* Use separate for border-radius */
-  border-spacing: 0;
-  background: #1e1e1e;
-  /* Slightly lighter dark */
-  border-radius: 8px;
-  overflow: hidden;
-  /* Clip content to rounded corners */
+  border-collapse: collapse;
+  margin-bottom: 1rem;
 }
 
 .custom-table th,
 .custom-table td {
-  padding: 0.9rem 1rem;
-  /* Increased padding */
-  text-align: left;
-  border-bottom: 1px solid #3a3a3a;
-  /* Darker border */
-  vertical-align: middle;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
 }
 
 .custom-table th {
-  background-color: #2a2a2a;
-  /* Header background */
-  color: #ffd700;
-  /* Gold header text */
+  background: var(--bg-secondary);
+  color: var(--accent-gold);
   font-weight: 600;
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  text-align: left;
+  /* Optional: subtle vertical gradient for depth */
+  background-image: linear-gradient(180deg, var(--bg-secondary), var(--bg-primary));
 }
 
-.custom-table tbody tr:last-child td {
-  border-bottom: none;
+.custom-table td {
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
-.custom-table tbody tr {
-  transition: background-color 0.2s ease;
-}
-
+/* Hover effects on rows */
 .custom-table tbody tr:hover {
   background-color: #2f2f2f;
-  /* Hover effect */
+  transition: background-color 0.3s ease;
 }
 
-.custom-table .film {
-  font-weight: 500;
+/* Optional: enforce minimum widths for specific cells */
+.custom-table .evaluation-cell {
+  min-width: 150px;
+}
+.custom-table .operations-cell {
+  min-width: 100px;
 }
 
-.custom-table .date {
+/* Specific cell styling */
+.custom-table .film-title-cell { 
+  font-weight: 600; 
+  color: var(--text-primary);
+}
+
+.custom-table .date-cell {
   font-size: 0.9em;
-  color: #aaa;
+  color: var(--text-muted);
 }
 
-/* Star Rating Styles */
+/* === Star Rating === */
 .star-rating {
-  font-size: 1.1rem;
+  font-size: 1rem;
+}
+.star-icon {
+  color: var(--accent-gold);
+  margin: 0 1px;
+}
+.evaluation-text,
+.date-cell {
+  color: var(--text-muted);
 }
 
-/* Adjust size */
-.star-rating .bi {
-  transition: color 0.2s ease;
-}
-
-/* Public Reviews Card Styles */
+/* === Public Reviews Card Styles === */
 .reviews-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+  padding-bottom: 1rem;
 }
-
 .review-card {
-  background: #1e1e1e;
-  /* Match film-card background */
-  border-radius: 10px;
-  /* Match film-card radius */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  /* Match film-card shadow */
-  padding: 15px;
-  /* Match film-card padding */
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+  padding: 1rem 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  transition: transform 0.2s ease-in-out;
-  /* Match film-card transition */
-  color: white;
-  /* Match film-card color */
-  border: none;
+  gap: 0.6rem;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  color: var(--text-primary);
   text-align: left;
-  /* Keep text left-aligned for reviews */
 }
-
 .review-card:hover {
-  transform: scale(1.02);
-  /* Match film-card hover */
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-  /* Slightly enhance shadow on hover */
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
 }
-
-/* Keep specific review card content styles */
 .review-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
 .review-meta {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  font-size: 0.85rem;
-  color: #aaa;
+  gap: 0.1rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
-
 .review-author {
   font-weight: 600;
-  color: #ccc;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
 }
-
+.review-date {
+  display: flex;
+  align-items: center;
+}
+.edited-indicator {
+  font-style: italic;
+  margin-left: 0.3em;
+  font-size: 0.9em;
+}
 .review-film-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #ffd700;
-  /* Gold title */
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
 }
-
 .review-content {
-  font-size: 0.95rem;
-  color: #ddd;
+  font-size: 0.9rem;
+  color: var(--text-primary);
   line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  margin-top: 0.25rem;
+}
+.review-content p {
+  margin: 0;
 }
 
-/* No Data Message */
+/* === No Data Message === */
 .no-data-message {
   text-align: center;
-  padding: 3rem 1rem;
-  color: #aaa;
+  padding: 4rem 1rem;
+  color: #888;
   font-size: 1.1rem;
   flex-grow: 1;
-  /* Center vertically */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Pagination Container */
-.pagination-container {
-  padding: 1rem 0 0 0;
-  /* Padding top */
+/* === Pagination Wrapper === */
+.pagination-wrapper {
+  padding: 1rem 0 0.5rem 0;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
-  /* Prevent shrinking */
-  border-top: 1px solid #3a3a3a;
-  /* Separator line */
+  border-top: 1px solid var(--border-color);
   margin-top: auto;
-  /* Push to bottom if content is short */
+  background: var(--bg-primary);
 }
 
-/* Responsive Adjustments */
+/* === Modal Delete Message === */
+.modal-delete-message {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+/* === Responsive Adjustments === */
 @media (max-width: 768px) {
   .header-container {
     flex-direction: column;
     align-items: stretch;
-    /* Stretch items full width */
+    padding: 0.75rem 1rem;
   }
-
   .tabs-wrapper {
     justify-content: center;
-    /* Center tabs on small screens */
     width: 100%;
   }
-
   .controls-container {
     width: 100%;
     justify-content: center;
-    /* Center controls */
   }
-
-  .search-container,
-  .filter-container {
+  .dropdown-panel {
     width: calc(100% - 2rem);
-    /* Make dropdowns wider */
     left: 1rem;
     right: 1rem;
+    min-width: unset;
   }
-
+  .content-area {
+    padding: 1rem;
+  }
   .custom-table thead {
     display: none;
-    /* Hide table header on small screens */
   }
-
   .custom-table tbody,
   .custom-table tr,
   .custom-table td {
     display: block;
     width: 100%;
   }
-
   .custom-table tr {
-    border: 1px solid #3a3a3a;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     margin-bottom: 1rem;
     padding: 0.5rem;
+    background: var(--bg-secondary);
   }
-
   .custom-table td {
     text-align: right;
-    /* Align content to the right */
-    padding-left: 50%;
-    /* Make space for the label */
+    padding: 0.6rem 0.5rem 0.6rem 50%;
     position: relative;
-    border-bottom: none;
-    /* Remove inner borders */
+    border-bottom: 1px dashed var(--border-color);
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
   }
-
+  .custom-table tr td:last-child {
+    border-bottom: none;
+  }
   .custom-table td::before {
     content: attr(data-label);
-    /* Use data-label for pseudo-header */
     position: absolute;
     left: 10px;
     width: calc(50% - 20px);
@@ -1529,25 +1366,65 @@ export default {
     white-space: nowrap;
     text-align: left;
     font-weight: bold;
-    color: #ffd700;
-    /* Gold label */
+    color: var(--accent-gold);
+    font-size: 0.85rem;
   }
-
   .custom-table td.text-center {
     text-align: right;
   }
-
-  /* Override center alignment */
   .custom-table td.text-center::before {
     text-align: left;
   }
-
-  /* Keep label left */
-
-  .reviews-grid {
-    /* Adjust grid columns for smaller screens if needed, auto-fit might be sufficient */
-    grid-template-columns: 1fr;
-    /* Stack cards vertically */
+  .custom-table .evaluation-cell .star-rating {
+    justify-content: flex-end;
   }
+  .custom-table .operations-cell {
+    padding-left: 10px;
+    justify-content: center;
+  }
+  .custom-table .operations-cell::before {
+    display: none;
+  }
+  .reviews-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .title-text {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.8rem;
+  }
+  .control-item {
+    width: 32px;
+    height: 32px;
+  }
+  .control-item i {
+    font-size: 0.9rem;
+  }
+  .dropdown-panel {
+    padding: 0.75rem;
+  }
+  .search-input,
+  .custom-filter-select {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.8rem;
+  }
+  .custom-filter-select {
+    padding-right: 2rem;
+  }
+  .custom-table td {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  .review-card {
+    padding: 0.8rem 1rem;
+  }
+}
+
+/* Spinner Animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>
