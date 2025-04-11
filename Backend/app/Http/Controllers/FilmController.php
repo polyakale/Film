@@ -41,24 +41,33 @@ class FilmController extends Controller
 
         return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
-    public function queryRolesFromBackend($id)
+    public function queryFilmCasts($id)
     {
         //natív SQL
-        $query = 
-        '
+        $query =
+            '
             SELECT f.title, p.name, r.role from tasks t
             JOIN people p ON t.personId = p.id
             JOIN films f  ON t.filmId = f.id
             JOIN roles r  ON t.roleId = r.id
             where f.id = ?;
         ';
-        
-        $rows = DB::select($query, [$id]);
+        try {
+            //code...
+            $rows = DB::select($query, [$id]);
 
-        $data = [
-            'message' => 'ok',
-            'data' => $rows
-        ];
+            $data = [
+                'message' => 'ok',
+                'data' => $rows
+            ];
+        } catch (\Throwable $th) {
+            //throw $th;
+            $data = [
+                'message' => 'Query Error',
+                'data' => []
+            ];
+        }
+
 
         return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
@@ -145,6 +154,4 @@ class FilmController extends Controller
         //visszaküldjük a módosított rekordot
         return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
-
-   
 }

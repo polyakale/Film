@@ -5,9 +5,39 @@ namespace App\Http\Controllers;
 use App\Models\Person;
 use App\Http\Requests\StorePersonRequest;
 use App\Http\Requests\UpdatePersonRequest;
+use Illuminate\Support\Facades\DB;
 
 class PersonController extends Controller
 {
+    public function peopleAZ()
+    {
+        //natív SQL
+        $query =
+            '
+            SELECT name, id FROM people
+            order BY name;
+            ';
+        try {
+            //code...
+            $rows = DB::select($query);
+
+            $data = [
+                'message' => 'ok',
+                'data' => $rows
+            ];
+        } catch (\Throwable $th) {
+            //throw $th;
+            $data = [
+                'message' => 'Query Error',
+                'data' => []
+            ];
+        }
+
+
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
+    }
+
+
     public function index()
     {
         $rows = Person::all();

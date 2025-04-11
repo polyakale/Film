@@ -47,7 +47,7 @@ Route::delete('positions/{id}', [PositionController::class, 'destroy'])
 ->middleware('auth:sanctum');
 // films
 Route::get('queryFilmsWithEvaluation', [FilmController::class, 'queryFilmsWithEvaluation']);
-Route::get('queryRolesFromBackend/{id}', [FilmController::class, 'queryRolesFromBackend']);
+Route::get('queryFilmCasts/{id}', [FilmController::class, 'queryFilmCasts']);
 Route::get('films', [FilmController::class, 'index']);
 Route::get('films/{id}', [FilmController::class, 'show']);
 Route::post('films', [FilmController::class, 'store'])
@@ -80,6 +80,7 @@ Route::delete('favourites/{userId}/{filmId}', [FavouriteController::class, 'dest
 // ->middleware('auth:sanctum');
 // roles
 Route::get('roles', [RoleController::class, 'index']);
+Route::get('rolesAZ', [RoleController::class, 'roleAZ']);
 Route::get('roles/{id}', [RoleController::class, 'show']);
 Route::post('roles', [RoleController::class, 'store'])
     ->middleware('auth:sanctum');
@@ -89,6 +90,7 @@ Route::delete('roles/{id}', [RoleController::class, 'destroy'])
     ->middleware('auth:sanctum');
 // people
 Route::get('people', [PersonController::class, 'index']);
+Route::get('peopleAZ', [PersonController::class, 'peopleAZ']);
 Route::get('people/{id}', [PersonController::class, 'show']);
 Route::post('people', [PersonController::class, 'store'])
     ->middleware('auth:sanctum');
