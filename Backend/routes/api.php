@@ -35,7 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('users/{id}', [UserController::class, 'destroy']);
 });
 // New endpoint to update user profile (e.g. change name)
-Route::patch('users/update-name', [UserController::class, 'updateName'])
+Route::patch('users/update-name/{id}', [UserController::class, 'updateName'])
     ->middleware('auth:sanctum');
 
 // positions

@@ -126,14 +126,11 @@
 
 <script>
 import { RouterLink } from "vue-router";
-// Assuming useAuthStore and BASE_URL are correctly set up
 import { useAuthStore } from "@/stores/useAuthStore";
 import axios from "axios";
 import { BASE_URL } from "@/helpers/baseUrls";
 
 export default {
-  // Component name (optional but good practice)
-  name: "StickyNavbar",
   // Register components used in the template
   components: {
     RouterLink,

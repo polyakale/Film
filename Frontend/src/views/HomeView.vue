@@ -30,9 +30,6 @@ import filmBgImage from "@/assets/filmBgImage.png";
 /* === Theme Variables === */
 .home-container {
   /* Using variables assumed to be defined globally or inherited */
-  /* --bg-primary: #1f1f1f; */
-  /* --text-primary: #ffffff; */
-  /* --accent-gold: #ffd700; */
   --overlay-bg: rgba(31, 31, 31, 0.85); /* Darker overlay from your version */
 }
 
