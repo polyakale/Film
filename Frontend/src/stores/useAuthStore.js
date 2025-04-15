@@ -10,8 +10,8 @@ export const useAuthStore = defineStore("auth", {
   }),
   actions: {
     setUserName(newName) {
-      this.user = newName; // Direct update if user is a string
-      // If user is an object: this.user.name = newName;
+      this.user = newName; // Update state
+      localStorage.setItem("user", newName); // Persist the new name
     },
     setAuthData(payload) {
       this.id = payload.id;
