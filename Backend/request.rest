@@ -159,8 +159,14 @@ Authorization: Bearer {{token}}
 
 ### get tasks
 get {{host}}/api/tasks
+
+### get filmPeopleRoles
+get {{host}}/api/filmPeopleRoles/2
+Accept: application/json
+
 ### get tasks by id
 get {{host}}/api/tasks/1
+
 ### post tasks
 POST {{host}}/api/tasks
 Accept: application/json

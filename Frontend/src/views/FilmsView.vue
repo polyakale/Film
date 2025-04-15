@@ -2,12 +2,18 @@
   <div class="container">
     <!-- Oldal fejléc -->
     <h1>Films</h1>
-    <p v-if="debug">{{ stateAuth }}</p> <!-- Debug módban megjeleníti az auth állapotot -->
+    <p v-if="debug">{{ stateAuth }}</p>
+    <!-- Debug módban megjeleníti az auth állapotot -->
 
     <!-- Keresés és rendezés -->
     <div class="search-sort-container">
-      <input type="text" v-model="searchQuery" @input="searchFilms" placeholder="Search films..."
-        class="search-input" />
+      <input
+        type="text"
+        v-model="searchQuery"
+        @input="searchFilms"
+        placeholder="Search films..."
+        class="search-input"
+      />
       <select v-model="sortOption" @change="sortFilms" class="sort-select">
         <option value="abc">ABC</option>
         <option value="production">Production Year</option>
@@ -18,50 +24,149 @@
 
     <!-- Admin gombok -->
     <div v-if="isAdmin" class="admin-actions">
-      <button @click="openAddFilmModal" class="add-film-button">Add New Film</button>
+      <button @click="openAddFilmModal" class="add-film-button">
+        Add New Film
+      </button>
     </div>
 
     <!-- Filmkártyák kezdete -->
     <div v-if="films.length" class="films-grid">
       <!-- Minden film egy kártya -->
-      <div v-for="film in filteredFilms" :key="film.id" class="film-card"
-        :class="{ 'film-card-rated': rated(film, stateAuth.id) }" @click="openFilmDetail(film)">
+      <div
+        v-for="film in filteredFilms"
+        :key="film.id"
+        class="film-card"
+        :class="{ 'film-card-rated': rated(film, stateAuth.id) }"
+        @click="openFilmDetail(film)"
+      >
         <!-- Csillag ikon értékeléshez -->
         <span class="star-icon" @click.stop="openRatingModal(film)">★</span>
 
         <!-- Film adatok -->
         <h2 class="film-title">{{ film.title }}</h2>
-        <p class="film-info"><strong>Production Year:</strong> {{ film.production }}</p>
+        <p class="film-info">
+          <strong>Production Year:</strong> {{ film.production }}
+        </p>
         <p class="film-info"><strong>Length:</strong> {{ film.length }} min</p>
-        <p class="film-info"><strong>Presentation:</strong> {{ formatDate(film.presentation) }}</p>
-        <p class="film-info"><strong>Evaluation:</strong> {{ film.evaluation || "Not rated yet." }}</p>
+        <p class="film-info">
+          <strong>Presentation:</strong> {{ formatDate(film.presentation) }}
+        </p>
+        <p class="film-info">
+          <strong>Evaluation:</strong> {{ film.evaluation || "Not rated yet." }}
+        </p>
 
         <!-- IMDb link -->
-        <a v-if="film.imdbLink" :href="formatImdbUrl(film.imdbLink)" target="_blank" rel="noopener noreferrer"
-          class="imdb-link">View on IMDb</a>
+        <a
+          v-if="film.imdbLink"
+          :href="formatImdbUrl(film.imdbLink)"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="imdb-link"
+          >View on IMDb</a
+        >
 
         <!-- Admin műveletek (szerkesztés/törlés) -->
         <div v-if="isAdmin" class="film-actions">
-          <button @click.stop="openEditFilmModal(film)" class="edit-button">Edit</button>
-          <button @click.stop="deleteFilm(film.id)" class="delete-button">Delete</button>
+          <button @click.stop="openEditFilmModal(film)" class="edit-button">
+            Edit
+          </button>
+          <button @click.stop="deleteFilm(film.id)" class="delete-button">
+            Delete
+          </button>
         </div>
       </div>
     </div>
 
     <!-- Film részletező modal -->
-    <div v-if="selectedFilm" class="film-detail-modal">
+    <div
+      v-if="selectedFilm"
+      class="modal-dialog film-detail-modal modal-dialog-scrollable"
+    >
       <div class="modal-content">
         <span class="close" @click="closeFilmDetail">&times;</span>
         <h2 class="film-title2">{{ selectedFilm.title }}</h2>
         <div class="film-details">
           <p><strong>Production Year:</strong> {{ selectedFilm.production }}</p>
           <p><strong>Length:</strong> {{ selectedFilm.length }} minutes</p>
-          <p><strong>Presentation Date:</strong> {{ formatDate(selectedFilm.presentation) }}</p>
-          <p><strong>Evaluation:</strong> {{ selectedFilm.evaluation || 'Not rated yet' }}</p>
-          <p v-for="role in filteredRoles" :key="role.id" >{{ role }}</p>
-          <p v-for="people in filteredPerson" :key="people.id" >{{ people }}</p>
-          <a v-if="selectedFilm.imdbLink" :href="formatImdbUrl(selectedFilm.imdbLink)" target="_blank"
-            class="imdb-link">View on IMDb</a>
+          <p>
+            <strong>Presentation Date:</strong>
+            {{ formatDate(selectedFilm.presentation) }}
+          </p>
+          <p>
+            <strong>Evaluation:</strong>
+            {{ selectedFilm.evaluation || "Not rated yet" }}
+          </p>
+
+          <!-- Szereplők és stáb -->
+          <div class="d-flex">
+            <h2 class="cast-crew-title text-nowrap">Cast & Crew:</h2>
+            <button
+              type="button"
+              v-if="isAdmin && stateCastCrew != 'new'"
+              class="ms-2 btn btn-outline-success"
+              @click="onClickNewPerson()"
+            >
+              <i class="bi bi-person-fill-add"></i>
+            </button>
+
+            <button
+              type="button"
+              v-if="isAdmin && stateCastCrew == 'new'"
+              class="ms-2 btn btn-outline-primary"
+              @click="onClickSavePerson()"
+            >
+              <i class="bi bi-floppy-fill"></i>
+            </button>
+
+            <!-- People list -->
+            <select
+              v-if="stateCastCrew == 'new'"
+              class="form-select"
+              aria-label="Default select example"
+              v-model="currentTask.personId"
+            >
+              <option
+                v-for="person in peopleAZ"
+                :key="person.id"
+                :value="person.id"
+              >
+                {{ person.name }}
+              </option>
+            </select>
+            <!-- Roles list -->
+            <select
+              v-if="stateCastCrew == 'new'"
+              class="form-select"
+              aria-label="Default select example"
+              v-model="currentTask.roleId"
+            >
+              <option v-for="role in rolesAZ" :key="role.id" :value="role.id">
+                {{ role.role }}
+              </option>
+            </select>
+          </div>
+          <div class="cast-crew" v-if="filmPeopleRoles.length">
+            <div v-for="(item, index) in filmPeopleRoles" :key="index">
+              <button
+                type="button"
+                v-if="isAdmin"
+                class="me-2 btn btn-outline-danger"
+                @click="deletePerson(item.id)"
+              >
+                <i class="bi bi-person-x-fill"></i>
+              </button>
+              {{ item.name }} - {{ item.role }}
+            </div>
+          </div>
+          <!-- Admin/ Cast&Crew szerkesztő -->
+
+          <a
+            v-if="selectedFilm.imdbLink"
+            :href="formatImdbUrl(selectedFilm.imdbLink)"
+            target="_blank"
+            class="imdb-link"
+            >View on IMDb</a
+          >
         </div>
       </div>
     </div>
@@ -113,11 +218,20 @@
       <div class="modal-content">
         <h2 class="film-title">Rate: {{ currentFilm.title }}</h2>
         <div class="rating-stars">
-          <span v-for="n in 5" :key="n" @click="setRating(n)" @mousemove="handleHover(n, $event)"
-            @mouseleave="hoverRating = null" :class="{
+          <span
+            v-for="n in 5"
+            :key="n"
+            @click="setRating(n)"
+            @mousemove="handleHover(n, $event)"
+            @mouseleave="hoverRating = null"
+            :class="{
               'star-filled': (hoverRating || currentRating) >= n,
-              'star-half': (hoverRating || currentRating) >= n - 0.5 && (hoverRating || currentRating) < n,
-            }">★</span>
+              'star-half':
+                (hoverRating || currentRating) >= n - 0.5 &&
+                (hoverRating || currentRating) < n,
+            }"
+            >★</span
+          >
         </div>
         <div class="comment-section">
           <label>Comment (optional):</label>
@@ -125,7 +239,9 @@
         </div>
         <div class="rating-actions">
           <button @click="submitRating" class="submit-button">Submit</button>
-          <button @click="closeRatingModal" class="cancel-button">Cancel</button>
+          <button @click="closeRatingModal" class="cancel-button">
+            Cancel
+          </button>
         </div>
       </div>
     </div>
@@ -133,6 +249,14 @@
 </template>
 
 <script>
+class Task {
+  constructor(id = null, filmId = null, personId = null, roleId = null) {
+    this.id = id;
+    this.filmId = filmId;
+    this.personId = personId;
+    this.roleId = roleId;
+  }
+}
 import axios from "axios";
 import { BASE_URL } from "../helpers/baseUrls";
 import { DEBUG } from "../helpers/baseUrls";
@@ -145,75 +269,107 @@ export default {
       urlApi: `${BASE_URL}/films`, // API endpoint
       stateAuth: useAuthStore(), // Pinia auth store
       films: [], // Film lista
+      rolesAZ: [], // Szerepkörök listája
+      peopleAZ: [], // Személyek listája
+      filmPeopleRoles: [], // Filmhez tartozó szerepkörök és személyek
       isAdmin: false, // Admin jogosultság
       searchQuery: "", // Keresés szövege
       sortOption: "abc", // Rendezési opció
       filteredFilms: [], // Szűrt filmek
-      filteredRoles: [], // Szűrt szerepkörök
-      filteredPerson: [], // Szűrt Faszik
       showAddFilmModal: false, // Film hozzáadása modal állapota
       showEditFilmModal: false, // Film szerkesztése modal állapota
       showRatingModal: false, // Értékelés modal állapota
-      newFilm: { // Új film adatai
+      newFilm: {
+        // Új film adatai
         title: "",
         production: "",
         length: "",
         presentation: "",
         imdbLink: "",
       },
+      currentTask: new Task(),
       editingFilm: null, // Szerkesztett film
       currentFilm: null, // Aktuálisan kiválasztott film
       currentRating: 0, // Aktuális értékelés
       hoverRating: null, // Egérrel érintett csillag
-      ifRated: null, // Már értékelt-e
-      selectedEvaulatedFilm: null, // Kiválasztott film értékeléshez
       currentComment: "", // Komment szövege
       existingCommentId: null, // Létező komment ID
-      selectedFilm: null // Nagyított film
+      selectedFilm: null, // Nagyított film
+      stateCastCrew: "read",
+      
     };
   },
 
   // Komponens betöltésekor lefutó metódusok
   async mounted() {
     await this.fetchFilmsFromBackend(); // Filmek betöltése
+    await this.getrolesAZ(); // Szerepkörök betöltése
+    await this.getpeopleAZ(); // Személyek betöltése
     this.isAdmin = this.stateAuth.positionId === 1; // Admin jog ellenőrzése
   },
 
   // Figyelő metódusok (adatok változására reagál)
   watch: {
-    searchQuery() { this.searchFilms(); }, // Keresés változás
-    sortOption() { this.sortFilms(); }, // Rendezés változás
+    searchQuery() {
+      this.searchFilms();
+    }, // Keresés változás
+    sortOption() {
+      this.sortFilms();
+    }, // Rendezés változás
   },
 
   methods: {
     // Filmek betöltése API-ról
     async fetchFilmsFromBackend() {
       try {
-        const response = await axios.get(`${BASE_URL}/queryFilmsWithEvaluation`);
-        this.films = Array.isArray(response.data.data) ? response.data.data : [];
+        const response = await axios.get(
+          `${BASE_URL}/queryFilmsWithEvaluation`
+        );
+        this.films = Array.isArray(response.data.data)
+          ? response.data.data
+          : [];
         this.filteredFilms = [...this.films];
       } catch (error) {
         console.error("Error loading films:", error);
       }
     },
+
+    // Szerepkörök betöltése
     async getrolesAZ() {
       try {
         const response = await axios.get(`${BASE_URL}/rolesAZ`);
-        this.roles = Array.isArray(response.data.data) ? response.data.data : [];
-        this.filteredRoles = [...this.roles];
+        this.rolesAZ = Array.isArray(response.data.data)
+          ? response.data.data
+          : [];
       } catch (error) {
         console.error("Error loading roles:", error);
       }
     },
+
+    // Személyek betöltése
     async getpeopleAZ() {
       try {
         const response = await axios.get(`${BASE_URL}/peopleAZ`);
-        this.roles = Array.isArray(response.data.data) ? response.data.data : [];
-        this.filteredPerson = [...this.people];
-        console.log(this.people);
-        
+        this.peopleAZ = Array.isArray(response.data.data)
+          ? response.data.data
+          : [];
       } catch (error) {
         console.error("Error loading people:", error);
+      }
+    },
+
+    // Filmhez tartozó szerepkörök és személyek betöltése
+    async fetchFilmPeopleRoles(filmId) {
+      try {
+        const response = await axios.get(
+          `${BASE_URL}/filmPeopleRoles/${filmId}`
+        );
+        this.filmPeopleRoles = Array.isArray(response.data.data)
+          ? response.data.data
+          : [];
+        console.log("Valami", this.filmPeopleRoles);
+      } catch (error) {
+        console.error("Error loading film people:", error);
       }
     },
 
@@ -226,14 +382,16 @@ export default {
     // IMDb URL formázása
     formatImdbUrl(imdbLink) {
       if (!imdbLink) return "#";
-      return imdbLink.startsWith("http") ? imdbLink : `https://www.imdb.com/title/${imdbLink}/`;
+      return imdbLink.startsWith("http")
+        ? imdbLink
+        : `https://www.imdb.com/title/${imdbLink}/`;
     },
 
     // Filmek keresése
     searchFilms() {
       const query = this.searchQuery.toLowerCase();
       this.filteredFilms = this.films.filter(
-        film =>
+        (film) =>
           film.title.toLowerCase().includes(query) ||
           String(film.production).includes(query) ||
           String(film.length).includes(query) ||
@@ -251,20 +409,23 @@ export default {
       } else if (this.sortOption === "length") {
         this.filteredFilms.sort((a, b) => a.length - b.length);
       } else if (this.sortOption === "evaluation") {
-        this.filteredFilms.sort((a, b) => (b.evaluation || 0) - (a.evaluation || 0));
+        this.filteredFilms.sort(
+          (a, b) => (b.evaluation || 0) - (a.evaluation || 0)
+        );
       }
     },
 
     // Film részletek megnyitása
-    openFilmDetail(film) {
-      this.getrolesAZ();
-      this.getpeopleAZ();
+    async openFilmDetail(film) {
       this.selectedFilm = film;
+      await this.fetchFilmPeopleRoles(film.id);
+      this.stateCastCrew = "read";
     },
 
     // Film részletek bezárása
     closeFilmDetail() {
       this.selectedFilm = null;
+      this.filmPeopleRoles = [];
     },
 
     // Új film modal megnyitása
@@ -275,14 +436,22 @@ export default {
     // Új film modal bezárása
     closeAddFilmModal() {
       this.showAddFilmModal = false;
-      this.newFilm = { title: "", production: "", length: "", presentation: "", imdbLink: "" };
+      this.newFilm = {
+        title: "",
+        production: "",
+        length: "",
+        presentation: "",
+        imdbLink: "",
+      };
     },
 
     // Új film mentése
     async submitNewFilm() {
       try {
-        await axios.post(BASE_URL, this.newFilm, { 
-          headers: { Authorization: `Bearer ${this.stateAuth.token}` } 
+        await axios.post(BASE_URL, this.newFilm, {
+          headers: { 
+            Accept: application/json,
+            Authorization: `Bearer ${this.stateAuth.token}` },
         });
         await this.fetchFilmsFromBackend();
         this.closeAddFilmModal();
@@ -301,6 +470,14 @@ export default {
     closeEditFilmModal() {
       this.showEditFilmModal = false;
       this.editingFilm = null;
+    },
+
+    onClickNewPerson() {
+      this.stateCastCrew = "new";
+    },
+
+    onClickSavePerson() {
+      this.stateCastCrew = "read";
     },
 
     // Film mentése szerkesztés után
@@ -323,9 +500,23 @@ export default {
       if (confirm("Are you sure?")) {
         try {
           await axios.delete(`${BASE_URL}/${filmId}`, {
-            headers: { Authorization: `Bearer ${this.stateAuth.token}` }
+            headers: { Authorization: `Bearer ${this.stateAuth.token}` },
           });
           await this.fetchFilmsFromBackend();
+        } catch (error) {
+          console.error("Error deleting film:", error);
+        }
+      }
+    },
+
+    async deletePerson(id) {
+      if (confirm("Are you sure?")) {
+        this.stateCastCrew = "delete";
+        try {
+          await axios.delete(`${BASE_URL}/tasks/${id}`, {
+            headers: { Authorization: `Bearer ${this.stateAuth.token}` },
+          });
+          await this.fetchFilmPeopleRoles(this.selectedFilm.id);
         } catch (error) {
           console.error("Error deleting film:", error);
         }
@@ -341,12 +532,16 @@ export default {
     async openRatingModal(film) {
       this.currentFilm = film;
       this.showRatingModal = true;
-      this.currentRating = this.rated(film, this.stateAuth.id) ? film.evaluation : 0;
-      
+      this.currentRating = this.rated(film, this.stateAuth.id)
+        ? film.evaluation
+        : 0;
+
       // Meglévő komment betöltése (ha van)
       if (this.rated(film, this.stateAuth.id)) {
         try {
-          const response = await axios.get(`${BASE_URL}/favourites/${this.stateAuth.id}/${film.id}`);
+          const response = await axios.get(
+            `${BASE_URL}/favourites/${this.stateAuth.id}/${film.id}`
+          );
           if (response.data.data?.content) {
             this.currentComment = response.data.data.content;
             this.existingCommentId = response.data.data.id;
@@ -385,21 +580,21 @@ export default {
           userId: this.stateAuth.id,
           filmId: this.currentFilm.id,
           evaluation: this.currentRating,
-          content: this.currentComment || null
+          content: this.currentComment || null,
         };
 
         if (this.rated(this.currentFilm, this.stateAuth.id)) {
           await axios.patch(
-            `${BASE_URL}/favourites/${this.existingCommentId || this.stateAuth.id}/${this.currentFilm.id}`,
+            `${BASE_URL}/favourites/${
+              this.existingCommentId || this.stateAuth.id
+            }/${this.currentFilm.id}`,
             ratingData,
             { headers: { Authorization: `Bearer ${this.stateAuth.token}` } }
           );
         } else {
-          await axios.post(
-            `${BASE_URL}/favouriteFilmByUser`,
-            ratingData,
-            { headers: { Authorization: `Bearer ${this.stateAuth.token}` } }
-          );
+          await axios.post(`${BASE_URL}/favouriteFilmByUser`, ratingData, {
+            headers: { Authorization: `Bearer ${this.stateAuth.token}` },
+          });
         }
 
         await this.fetchFilmsFromBackend();
@@ -407,8 +602,8 @@ export default {
       } catch (error) {
         console.error("Error submitting rating:", error);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -420,17 +615,31 @@ export default {
   text-align: center;
 }
 
-.film-title2{
+.film-title2 {
   font-size: 1.8em;
   margin-bottom: 10px;
   color: #f5c518;
 }
 
-.cast-crew-title{
-  position: absolute;
-  font-size: 1.4em;
-  margin-bottom: 10px;
+.cast-crew {
+  height: 350px;
+  overflow-y: auto;
+  margin-top: 20px;
+  padding: 15px;
+  background: #2d2d2d;
+  border-radius: 8px;
+}
+
+.cast-crew-title {
   color: #f5c518;
+  margin-bottom: 10px;
+  font-size: 1.2em;
+}
+
+.cast-crew div {
+  margin: 5px 0;
+  padding: 5px;
+  border-bottom: 1px solid #3d3d3d;
 }
 
 .search-sort-container {

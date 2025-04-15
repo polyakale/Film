@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
+use Illuminate\Support\Facades\DB;
 
 class TaskController extends Controller
 {
@@ -26,6 +27,38 @@ class TaskController extends Controller
         ];
         return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
+
+    public function filmPeopleRoles($filmId)
+    {
+        //natív SQL
+        $query =
+           'SELECT f.title, p.name, r.role, f.id filmId, r.id roleId, p.id peopleId from tasks t
+            JOIN people p ON t.personId = p.id
+            JOIN films f  ON t.filmId = f.id
+            JOIN roles r  ON t.roleId = r.id
+            where f.id = ?
+            ORDER BY p.name
+           ';
+        try {
+            //code...
+            $rows = DB::select($query, [$filmId]);
+
+            $data = [
+                'message' => 'ok',
+                'data' => $rows
+            ];
+        } catch (\Throwable $th) {
+            //throw $th;
+            $data = [
+                'message' => 'Query Error',
+                'data' => []
+            ];
+        }
+
+
+        return response()->json($data, options: JSON_UNESCAPED_UNICODE);
+    }
+
     public function show(int $id)
     {
         $row = Task::find($id);

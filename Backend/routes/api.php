@@ -102,6 +102,7 @@ Route::delete('people/{id}', [PersonController::class, 'destroy'])
     ->middleware('auth:sanctum');
 // tasks
 Route::get('tasks', [TaskController::class, 'index']);
+Route::get('filmPeopleRoles/{filmId}', [TaskController::class, 'filmPeopleRoles']);
 Route::get('tasks/{id}', [TaskController::class, 'show']);
 Route::post('tasks', [TaskController::class, 'store'])
     ->middleware('auth:sanctum');

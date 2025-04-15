@@ -71,3 +71,5 @@ SELECT role, id FROM roles
   ORDER BY role;
 
 
+#filmPeopleRoles
+SELECT roleId, personId, filmId FROM tasks
