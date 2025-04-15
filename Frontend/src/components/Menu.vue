@@ -15,7 +15,7 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <div>
           <RouterLink to="/" class="d-flex align-items-center me-3">
-            <img src="/iconForNav.png" alt="Logo" style="height: 40px;" />
+            <img class="rounded" src="/iconForNav.png" alt="Logo" style="height: 40px;" />
             </RouterLink>
         </div>
         <ul class="navbar-nav me-auto">

@@ -12,12 +12,12 @@ import filmBgImage from "@/assets/filmBgImage.png";
           alt="Vintage Hungarian film reel and projector"
           loading="lazy"
           decoding="async"
-          class="hero-image"
+          class="img-fluid hero-image"
         />
       </div>
 
       <section class="header-section header-overlay">
-        <h1 class="main-title">🎥 Hungarian Interwar Film Archive</h1>
+        <h1 class="main-title">Hungarian Interwar Film Archive (HIFA)</h1>
         <p class="subtitle-text">
           Dedicated to preserving and celebrating Hungarian films from the interwar period (1929–1945)
         </p>

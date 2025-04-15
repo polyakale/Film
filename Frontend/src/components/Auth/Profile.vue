@@ -61,7 +61,7 @@
                   :type="passwordVisible.current ? 'text' : 'password'"
                   v-model="password.current"
                   class="form-control"
-                  placeholder="Enter your current password"
+                  placeholder="Enter current password"
                   required
                   aria-label="Current password input"
                 />
@@ -87,7 +87,7 @@
                   :type="passwordVisible.new ? 'text' : 'password'"
                   v-model="password.new"
                   class="form-control"
-                  placeholder="Enter your new password"
+                  placeholder="Enter new password"
                   required
                   minlength="8"
                   maxlength="16"
@@ -137,7 +137,7 @@
                   :type="passwordVisible.confirm ? 'text' : 'password'"
                   v-model="password.confirm"
                   class="form-control"
-                  placeholder="Confirm your new password"
+                  placeholder="Confirm new password"
                   required
                   aria-label="Confirm new password input"
                 />
@@ -180,7 +180,7 @@
                   @click="deleteAccount"
                   title="Delete Account"
                 >
-                  <i class="bi bi-trash3"></i>
+                  Delete Account
                 </button>
               </div>
             </div>
@@ -334,7 +334,7 @@ export default {
 
         // Make the API call to change password
         await axios.patch(
-          `${BASE_URL}/users/change-password`, // Your API endpoint
+          `${BASE_URL}/users/change-password/${this.id}`, // Your API endpoint
           requestData,
           config
         );
