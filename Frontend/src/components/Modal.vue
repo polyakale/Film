@@ -1,6 +1,10 @@
 <template>
   <!-- Modal -->
-  <div class="modal fade" id="modal" tabindex="-1">
+  <div
+    class="modal fade"
+    id="modal"
+    tabindex="-1"
+  >
     <div
       class="modal-dialog modal-dialog-centered"
       :class="{
@@ -55,14 +59,7 @@ export default {
     onClickYesButton() {
       this.$emit("yesEvent");
     },
-    showModal() {
-      this.$emit("show");
-      this.isVisible = true;
-    },
-    hideModal() {
-      this.$emit("hide");
-      this.isVisible = false;
-    },
+
   },
 };
 </script>
@@ -88,6 +85,11 @@ export default {
 }
 
 .modal-body {
+  padding: 20px;
+}
+
+.modal-footer {
+  border-top: 2px solid #1f1f1f;
   padding: 20px;
 }
 </style>

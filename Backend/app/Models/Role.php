@@ -12,9 +12,4 @@ class Role extends Model
     protected $table = 'roles';
     protected $fillable = ['id', 'role'];
     public $timestamps = true;
-
-    public function tasks()
-    {
-        return $this->hasMany(Task::class, 'roleId');
-    }
 }

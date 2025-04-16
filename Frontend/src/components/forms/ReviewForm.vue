@@ -1,213 +1,206 @@
 <template>
-  <form @submit.prevent="onClickSubmit" class="review-form">
-
-    <div class="form-row user-info">
-      <div class="form-group star-input-group">
-         <label>Rating*</label>
-         <div class="star-input">
-           <span
-             v-for="starIndex in 5"
-             :key="starIndex"
-             @click="setRating(starIndex, $event)"
-             @keydown.enter.space="setRating(starIndex, $event)"
-             tabindex="0"
-             role="radio"
-             :aria-checked="itemForm.evaluation >= starIndex"
-             :aria-label="`${starIndex} stars`"
-             class="star-wrapper"
-             :title="`${starIndex} stars`"
-           >
-             <i class="bi star-icon" :class="getStarClass(starIndex)"></i>
-           </span>
-           <span class="rating-display" v-if="itemForm.evaluation > 0"
-             >({{ itemForm.evaluation.toFixed(1) }}/5.0)</span
-           >
-         </div>
-      </div>
-
-      <div class="form-group film-select-group">
-         <label for="filmSelect">Film*</label>
-         <select
-            id="filmSelect"
-            v-model="itemForm.filmId"
-            class="form-control film-select"
-            required
-            :disabled="isUpdate" >
-           <option value="" disabled>Select Film</option>
-
-           <option
-             v-if="isUpdate && currentFilm"
-             :value="currentFilm.id"
-           >
-             {{ currentFilm.title }}
-           </option>
-
-           <template v-else>
-              <option
-                v-for="film in availableFilms"
-                :key="film.id"
-                :value="film.id"
+  <div class="modal-overlay">
+    <div class="review-modal">
+      <form @submit.prevent="onClickSubmit" class="review-form">
+      
+        <div class="form-grid user-info">
+          <!-- Rating Input -->
+          <div class="form-group star-input-group">
+            <label>Rating*</label>
+            <div class="star-input">
+              <span
+                v-for="starIndex in 5"
+                :key="starIndex"
+                @click="setRating(starIndex, $event)"
+                @keydown.enter.space="setRating(starIndex, $event)"
+                tabindex="0"
+                role="radio"
+                :aria-checked="itemForm.evaluation >= starIndex"
+                :aria-label="`${starIndex} stars`"
+                class="star-wrapper"
+                :title="`${starIndex} stars`"
               >
-                {{ film.title }}
+                <i class="bi star-icon" :class="getStarClass(starIndex)"></i>
+              </span>
+              <span class="rating-display" v-if="itemForm.evaluation > 0">
+                ({{ itemForm.evaluation.toFixed(1) }}/5.0)
+              </span>
+            </div>
+          </div>
+      
+          <!-- Film Select -->
+          <div class="form-group film-select-group">
+            <label for="filmSelect">Film*</label>
+            <select
+              id="filmSelect"
+              v-model="itemForm.filmId"
+              class="form-control film-select"
+              required
+              :disabled="isUpdate"
+            >
+              <option value="" disabled>Select Film</option>
+              <option v-if="isUpdate && currentFilm" :value="currentFilm.id">
+                {{ currentFilm.title }}
               </option>
-           </template>
-
-         </select>
-         <small v-if="!isUpdate && isFilmReviewed(itemForm.filmId)" class="text-danger error-inline">
-             You have already reviewed this film.
-         </small>
-      </div>
+              <template v-else>
+                <option
+                  v-for="film in availableFilms"
+                  :key="film.id"
+                  :value="film.id"
+                >
+                  {{ film.title }}
+                </option>
+              </template>
+            </select>
+            <small v-if="!isUpdate && isFilmReviewed(itemForm.filmId)" class="text-danger error-inline">
+              You have already reviewed this film.
+            </small>
+          </div>
+        </div>
+      
+        <!-- Optional Review Comment -->
+        <div class="form-group">
+          <label for="reviewContent">Review Comment (Optional)</label>
+          <textarea
+            id="reviewContent"
+            v-model="itemForm.content"
+            class="form-control review-input"
+            placeholder="Share your thoughts..."
+            rows="5"
+          ></textarea>
+        </div>
+      
+        <!-- Form Action -->
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="btn btn-submit"
+            :disabled="isSubmitting || !validateForm()"
+          >
+            <span v-if="isSubmitting">
+              <span class="spinner" role="status" aria-hidden="true"></span> Saving...
+            </span>
+            <span v-else>Save Review</span>
+          </button>
+        </div>
+      </form>
     </div>
-
-    <div class="form-group">
-       <label for="reviewContent">Review Comment (Optional)</label>
-        <textarea
-          id="reviewContent"
-          v-model="itemForm.content"
-          class="form-control review-input"
-          placeholder="Share your thoughts..."
-          rows="5"
-        ></textarea>
-    </div>
-
-
-    <div class="form-actions">
-      <button
-        type="submit"
-        class="btn btn-submit"
-        :disabled="isSubmitting || !validateForm()"
-      >
-        <span v-if="isSubmitting">
-            <span class="spinner" role="status" aria-hidden="true"></span> Saving...
-        </span>
-        <span v-else>Save Review</span>
-      </button>
-    </div>
-  </form>
+  </div>
 </template>
 
 <script>
-// Script remains largely the same, ensure props are passed correctly from parent
 export default {
   name: "ReviewForm",
   props: {
-    itemForm: { // This object should be reactive (ref or reactive) in the parent
+    itemForm: {
       type: Object,
       required: true,
-      default: () => ({
-        filmId: "",
-        evaluation: 0,
-        userId: null, // Make sure userId is passed in
-        content: "",
-      }),
+      default: () => ({ filmId: "", evaluation: 0, userId: null, content: "" }),
     },
-    films: { // Full list of films
-      type: Array,
-      default: () => [],
-    },
-    favourites: { // User's existing reviews/favourites
-      type: Array,
-      default: () => [],
-    },
-    isUpdate: { // Flag to indicate if this is an update or new review
-        type: Boolean,
-        default: false
-    }
-    // Removed username prop as it's not used here
+    films: { type: Array, default: () => [] },
+    favourites: { type: Array, default: () => [] },
+    isUpdate: { type: Boolean, default: false },
   },
   data() {
     return {
-      isSubmitting: false, // Local submitting state
+      isSubmitting: false,
     };
   },
   computed: {
-    // Films available for selection (excluding already reviewed ones, only for NEW reviews)
     availableFilms() {
-      if (this.isUpdate || !Array.isArray(this.films) || !Array.isArray(this.favourites)) {
-        // In update mode, we don't need to filter here, the select is disabled.
-        // Return all films just in case, though it won't be used for selection.
+      if (
+        this.isUpdate ||
+        !Array.isArray(this.films) ||
+        !Array.isArray(this.favourites)
+      ) {
         return this.films;
       }
-      // Filter out films already reviewed by the current user
       const reviewedFilmIds = new Set(
-          this.favourites
-            .filter(fav => fav.userId === this.itemForm.userId) // Filter by current user
-            .map(fav => fav.filmId)
+        this.favourites
+          .filter((fav) => fav.userId === this.itemForm.userId)
+          .map((fav) => fav.filmId)
       );
       return this.films.filter((film) => !reviewedFilmIds.has(film.id));
     },
-    // Get the currently selected film details (useful for displaying title in update mode)
     currentFilm() {
-        // Find the film matching the itemForm.filmId from the main films list
-        if (this.itemForm.filmId && Array.isArray(this.films)) {
-            return this.films.find(f => f.id === this.itemForm.filmId);
-        }
-        return null;
-    }
+      if (this.itemForm.filmId && Array.isArray(this.films)) {
+        return this.films.find((f) => f.id === this.itemForm.filmId);
+      }
+      return null;
+    },
   },
   methods: {
-    // Check if a film has already been reviewed by the current user
     isFilmReviewed(filmId) {
-        // This check is mainly relevant when adding a *new* review
-        if (this.isUpdate || !filmId) return false; // Don't show error if updating or no film selected
-
-        return this.favourites.some(
-            (fav) => fav.filmId === filmId && fav.userId === this.itemForm.userId
-        );
+      if (this.isUpdate || !filmId) return false;
+      return this.favourites.some(
+        (fav) => fav.filmId === filmId && fav.userId === this.itemForm.userId
+      );
     },
-    // Determine CSS class for star icons based on current evaluation
     getStarClass(starIndex) {
       const evalValue = this.itemForm.evaluation || 0;
-      // Use bi icons classes
       if (evalValue >= starIndex) return "bi-star-fill";
       if (evalValue >= starIndex - 0.5) return "bi-star-half";
       return "bi-star";
     },
-    // Set the rating based on star click (allows half-star)
     setRating(starIndex, event) {
-      // Simple toggle logic: click full star -> full, click again -> half
-       if (this.itemForm.evaluation === starIndex) {
-           this.itemForm.evaluation = starIndex - 0.5;
-       } else {
-           this.itemForm.evaluation = starIndex;
-       }
-       // Ensure rating is at least 0.5 if clicked
-       this.itemForm.evaluation = Math.max(0.5, this.itemForm.evaluation);
+      if (this.itemForm.evaluation === starIndex) {
+        this.itemForm.evaluation = starIndex - 0.5;
+      } else {
+        this.itemForm.evaluation = starIndex;
+      }
+      this.itemForm.evaluation = Math.max(0.5, this.itemForm.evaluation);
     },
-    // Validate the form before submission
     validateForm() {
-      // Must select a film and provide a rating > 0
-      // Content is optional
       const isValid = this.itemForm.filmId && this.itemForm.evaluation > 0;
-      // Prevent submission if trying to add review for already reviewed film
       if (!this.isUpdate && this.isFilmReviewed(this.itemForm.filmId)) {
-          return false;
+        return false;
       }
       return isValid;
     },
-    // Handle form submission
     onClickSubmit() {
       if (this.isSubmitting || !this.validateForm()) return;
-
       this.isSubmitting = true;
-      // Emit the save event with the current form data
       this.$emit("saveItem", {
         ...this.itemForm,
-        evaluation: Number(this.itemForm.evaluation), // Ensure evaluation is number
-        content: this.itemForm.content?.trim() || null, // Send null if empty/whitespace
+        evaluation: Number(this.itemForm.evaluation),
+        content: this.itemForm.content?.trim() || null,
       });
-
-      // Reset submitting state after a short delay (or parent should handle it)
       setTimeout(() => {
         this.isSubmitting = false;
-      }, 1000); // Example delay
+      }, 1000);
     },
   },
 };
 </script>
 
 <style scoped>
-/* === Define Theme Variables (Consistent with other components) === */
+/* Modal overlay with blur effect on background */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+/* Main container for the review form with enhanced border and shadow */
+.review-modal {
+  width: 90%;
+  max-width: 600px;
+  background: var(--bg-secondary, #1f1f1f);
+  border: 2px solid var(--border-color, #383838);
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  padding: 2rem;
+}
+
+/* === Define Theme Variables === */
 .review-form {
   --bg-base: #111;
   --bg-primary: #1f1f1f;
@@ -226,95 +219,105 @@ export default {
 
 /* === Form Container === */
 .review-form {
-  background: transparent; /* Form background should match modal content bg */
-  padding: 1rem 0; /* Padding adjusted for modal context */
+  background: transparent;
+  padding: 0;
   color: var(--text-secondary);
-  border: none; /* Remove previous border */
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-/* === Form Row & Groups === */
-.form-row {
-  display: flex;
-  flex-wrap: wrap; /* Allow wrapping on smaller screens */
-  gap: 1.5rem; /* Spacing between groups */
-  margin-bottom: 1rem;
-  align-items: flex-end; /* Align items to bottom for better label alignment */
+/* === Grid Layout for Top Sections === */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem 1.5rem;
+  align-items: end;
 }
 
 .form-group {
-  margin-bottom: 0; /* Remove bottom margin, rely on row gap */
-  flex: 1; /* Allow groups to grow */
-  min-width: 150px; /* Minimum width for wrapping */
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-group label {
   display: block;
-  font-size: 0.9rem;
-  color: var(--text-muted); /* Muted label color */
+  font-size: 0.85rem;
+  color: var(--text-muted);
   font-weight: 600;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* === Star Rating Input === */
 .star-input-group {
-    flex-basis: 100%; /* Take full width initially */
-    min-width: 200px; /* Ensure enough space */
+  grid-column: 1 / -1;
 }
 @media (min-width: 576px) {
-    .star-input-group {
-        flex-basis: auto; /* Allow shrinking on larger screens */
-    }
+  .star-input-group {
+    grid-column: auto;
+  }
 }
 
 .star-input {
   display: flex;
   align-items: center;
-  gap: 0.3rem; /* Spacing between stars */
-  margin-top: 0.25rem; /* Align with input fields */
+  gap: 0.2rem;
+  background-color: var(--bg-primary);
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  min-height: 40px;
+  box-sizing: border-box;
 }
 
 .star-wrapper {
-    display: inline-block;
-    cursor: pointer;
-    padding: 2px; /* Add padding for easier clicking */
-    line-height: 1; /* Prevent extra space */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 1px 2px;
+  line-height: 1;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+.star-wrapper:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.star-wrapper:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus-ring-color);
 }
 
 .star-icon {
-  font-size: 1.8rem; /* Larger stars */
-  color: var(--text-muted); /* Default star color (empty) */
+  font-size: 1.6rem;
+  color: var(--text-muted);
   transition: transform 0.2s ease, color 0.2s ease;
 }
 .star-icon.bi-star-fill,
 .star-icon.bi-star-half {
-  color: var(--accent-gold); /* Gold for filled/half stars */
+  color: var(--accent-gold);
 }
 .star-wrapper:hover .star-icon {
-  transform: scale(1.2); /* Scale effect on hover */
+  transform: scale(1.15);
 }
-.star-wrapper:focus {
-    outline: 2px solid var(--focus-ring-color); /* Accessibility focus */
-    border-radius: 2px;
-}
-
 
 .rating-display {
-  font-weight: bold;
+  font-weight: 600;
   margin-left: 0.75rem;
   font-size: 0.9rem;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 /* === Film Select Dropdown === */
-.film-select-group {
-    flex-grow: 1; /* Allow select to take remaining space */
-}
-/* Apply form-control styles */
+.film-select-group {}
 .film-select {
   width: 100%;
-  padding: 10px 12px;
+  padding: 8px 12px;
   font-size: 1rem;
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
   border-radius: 4px;
@@ -327,6 +330,7 @@ export default {
   background-position: right 0.75rem center;
   background-size: 1em 1em;
   padding-right: 2.5rem;
+  min-height: 40px;
 }
 .film-select:focus {
   outline: none;
@@ -334,27 +338,25 @@ export default {
   box-shadow: 0 0 0 3px var(--focus-ring-color);
 }
 .film-select:disabled {
-    background-color: var(--bg-tertiary);
-    opacity: 0.7;
-    cursor: not-allowed;
+  background-color: var(--bg-tertiary);
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 .film-select option {
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
-/* Disabled options within select are handled by browser, but we can hint */
 .film-select option:disabled {
   color: var(--text-muted);
   font-style: italic;
 }
 
 /* === Textarea Input === */
-/* Apply form-control styles */
 .review-input {
   width: 100%;
   padding: 10px 12px;
   font-size: 1rem;
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
   border-radius: 4px;
@@ -364,79 +366,99 @@ export default {
   resize: vertical;
   margin-top: 0;
 }
-.review-input::placeholder { color: var(--text-muted); }
+.review-input::placeholder {
+  color: var(--text-muted);
+}
 .review-input:focus {
   outline: none;
   border-color: var(--accent-gold);
   box-shadow: 0 0 0 3px var(--focus-ring-color);
 }
 
-
 /* === Form Actions === */
 .form-actions {
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   display: flex;
-  justify-content: flex-end; /* Align button to the right */
+  justify-content: flex-end;
   padding-top: 1rem;
-  border-top: 1px solid var(--border-color); /* Separator line */
+  border-top: 1px solid var(--border-color);
 }
 
-/* === Submit Button === */
-/* Base button styles should be inherited or defined globally/in modal */
+/* === Buttons === */
 .btn {
-  padding: 10px 16px; font-size: 1rem; font-weight: 700; border: none; border-radius: 4px;
-  cursor: pointer; transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
-  text-align: center; line-height: 1.4; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+  text-align: center;
+  line-height: 1.4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
-.btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn:hover:not(:disabled) { transform: translateY(-1px); }
-.btn:active:not(:disabled) { transform: translateY(0px); }
-
-/* Submit button specific style */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.btn:active:not(:disabled) {
+  transform: translateY(0px);
+}
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus-ring-color);
+}
 .btn-submit {
-    background-color: var(--accent-gold);
-    color: var(--bg-primary); /* Dark text */
+  background-color: var(--accent-gold);
+  color: var(--bg-primary);
 }
 .btn-submit:hover:not(:disabled) {
-    background-color: #ffc107; /* Lighter gold */
-    box-shadow: 0 4px 10px rgba(255, 215, 0, 0.4);
+  background-color: #ffc107;
+  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.4);
 }
-/* Cancel button style (if added) */
 .btn-cancel {
-    background-color: #6c757d; color: white;
+  background-color: #6c757d;
+  color: white;
 }
 .btn-cancel:hover:not(:disabled) {
-    background-color: #5a6268;
+  background-color: #5a6268;
 }
-
-/* === Spinner inside Button === */
 .btn .spinner {
-  width: 1em; /* Size relative to button font size */
+  width: 1em;
   height: 1em;
-  border: 2px solid currentColor; /* Use button text color */
-  border-right-color: transparent !important; /* Hide one side for spin effect */
+  border: 2px solid currentColor;
+  border-right-color: transparent !important;
   border-radius: 50%;
   display: inline-block;
   vertical-align: middle;
   animation: spin 0.6s linear infinite;
-  margin-right: 0.5em; /* Space between spinner and text */
+  margin-right: 0.5em;
 }
 
-/* === Inline error text === */
+/* === Error Text === */
 .error-inline {
-    display: block;
-    font-size: 0.8rem;
-    margin-top: 0.25rem;
-    font-weight: normal; /* Normal weight for inline errors */
+  display: block;
+  font-size: 0.8rem;
+  margin-top: 0.35rem;
+  font-weight: normal;
 }
 .text-danger {
-    color: var(--accent-red);
+  color: var(--accent-red);
 }
 
-/* Spinner animation */
+/* Spinner Animation */
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
-
 </style>

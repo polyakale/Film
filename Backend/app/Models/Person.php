@@ -16,9 +16,4 @@ class Person extends Model
     {
         return ['gender' => 'boolean'];
     }
-
-    public function tasks()
-    {
-        return $this->hasMany(Task::class, 'personId');
-    }
 }
