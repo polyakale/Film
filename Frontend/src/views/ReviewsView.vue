@@ -163,8 +163,8 @@
                 <tr>
                   <th>Film</th>
                   <th class="text-center">Evaluation</th>
-                  <th>Created</th>
-                  <th>Updated</th>
+                  <th class="text-center">Created</th>
+                  <th class="text-center">Updated</th>
                   <th class="text-center">Operations</th>
                 </tr>
               </thead>
@@ -193,10 +193,16 @@
                       </small>
                     </div>
                   </td>
-                  <td data-label="Created" class="date-cell">
+                  <td
+                    data-label="Created"
+                    class="text-center fst-italic date-cell"
+                  >
                     {{ formatDate(favourite.created_at) }}
                   </td>
-                  <td data-label="Updated" class="date-cell">
+                  <td
+                    data-label="Updated"
+                    class="text-center fst-italic date-cell"
+                  >
                     {{ formatDate(favourite.updated_at) }}
                   </td>
                   <td
@@ -330,26 +336,13 @@
 
     <!-- Modal for Delete/Update Operations -->
     <div v-show="isModalVisible">
-      <Modal
-        ref="modalRef"
-        :title="modalTitle"
-        :yes="modalYes"
-        :no="modalNo"
-        :size="modalSize"
-        @yesEvent="yesEventHandler"
-        @close="closeModal"
-      >
-        <div v-if="modalState === 'Delete'" class="modal-delete-message">
-          {{ modalMessageYesNo }}
-        </div>
-        <ReviewForm
-          v-if="modalState === 'Update'"
-          :itemForm="modalItem"
-          :films="films"
-          :isUpdate="true"
-          @saveItem="saveItemHandler"
-        />
-      </Modal>
+      <ReviewForm
+        v-if="modalState === 'Update'"
+        :itemForm="modalItem"
+        :films="films"
+        :isUpdate="true"
+        @saveItem="saveItemHandler"
+      />
     </div>
   </div>
 </template>
@@ -361,18 +354,17 @@ import { BASE_URL } from "../helpers/baseUrls";
 import { nextTick } from "vue";
 
 // Import Child Components
-import Modal from "@/components/Modal.vue";
 import Paginator from "@/components/Paginator.vue";
 import OperationsCrud from "@/components/OperationsCrud.vue";
 import ReviewForm from "@/components/forms/ReviewForm.vue";
 
 // --- Constants ---
 const DEFAULT_TABLE_ITEMS_PER_PAGE = 10;
-const FIXED_CARD_WIDTH_PX = 320; // Fallback card width
+const FIXED_CARD_WIDTH_PX = 330; // Fallback card width
 
 export default {
   name: "ReviewsView",
-  components: { Paginator, OperationsCrud, Modal, ReviewForm },
+  components: { Paginator, OperationsCrud, ReviewForm },
   data() {
     return {
       authStore: null,
@@ -605,8 +597,8 @@ export default {
       this.modalMessageYesNo = `Are you sure you want to delete your review for "${
         item.filmTitle || "this film"
       }"? This action cannot be undone.`;
-      this.modalYes = "Yes, Delete";
-      this.modalNo = "No, Cancel";
+      this.modalYes = "Yes";
+      this.modalNo = "No";
       this.modalSize = null;
       this.selectedRowId = item.id;
       this.isModalVisible = true;
@@ -619,6 +611,7 @@ export default {
         item.filmTitle || "Unknown Film"
       }"`;
       this.modalYes = null;
+      this.modalNo = null;
       this.modalSize = "lg";
       this.isModalVisible = true;
     },
@@ -1340,16 +1333,23 @@ export default {
   margin: 0 1px;
 }
 
-.evaluation-text,
+.evaluation-text {
+  padding-left: 0.2rem;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
 .date-cell {
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  font-size: 0.75rem !important;
+  font-weight: italic;
+  color: var(--text-muted) !important;
 }
 
 /* === Grid (Review Card) Styles === */
 .reviews-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 0.8rem;
   padding-bottom: 0.5rem;
 }
@@ -1365,7 +1365,6 @@ export default {
     max-height 0.4s ease-in-out;
   overflow: hidden;
   color: var(--text-primary);
-  text-align: left;
 }
 
 .review-card:hover {
@@ -1381,7 +1380,7 @@ export default {
 }
 
 .review-author {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
 }
 
@@ -1392,8 +1391,8 @@ export default {
 }
 
 .review-film-title {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1.05rem;
+  font-weight: 650;
   color: var(--accent-gold);
 }
 

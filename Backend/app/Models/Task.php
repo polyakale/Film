@@ -12,19 +12,4 @@ class Task extends Model
     use HasFactory, Notifiable;
     public $timestamps = false;
     protected $fillable = ['id', 'filmId', 'personId', 'roleId'];
-
-    public function film()
-    {
-        return $this->belongsTo(Film::class, 'filmId');
-    }
-
-    public function person()
-    {
-        return $this->belongsTo(Person::class, 'personId');
-    }
-
-    public function role()
-    {
-        return $this->belongsTo(Role::class, 'roleId');
-    }
 }

@@ -17,19 +17,4 @@ class Film extends Model
     {
         return ['presentation' => 'date'];
     }
-
-    public function videos()
-    {
-        return $this->hasMany(Video::class, 'filmId');
-    }
-
-    public function tasks()
-    {
-        return $this->hasMany(Task::class, 'filmId');
-    }
-
-    public function favourites()
-    {
-        return $this->hasMany(Favourite::class, 'filmId');
-    }
 }
