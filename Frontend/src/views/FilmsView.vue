@@ -111,7 +111,9 @@
 
             <button
               type="button"
-              v-if="isAdmin && (stateCastCrew == 'new' || stateCastCrew == 'edit')"
+              v-if="
+                isAdmin && (stateCastCrew == 'new' || stateCastCrew == 'edit')
+              "
               class="ms-2 btn btn-outline-primary btn-sm"
               @click="onClickSavePerson()"
             >
@@ -119,16 +121,18 @@
             </button>
             <button
               type="button"
-              v-if="isAdmin && (stateCastCrew == 'new' || stateCastCrew == 'edit')"
+              v-if="
+                isAdmin && (stateCastCrew == 'new' || stateCastCrew == 'edit')
+              "
               class="btn btn-outline-warning btn-sm"
               @click="onClickCancelPerson()"
             >
-            <i class="bi bi-x-square-fill"></i>
+              <i class="bi bi-x-square-fill"></i>
             </button>
 
             <!-- People list -->
             <select
-              v-if="stateCastCrew == 'new'"
+              v-if="stateCastCrew == 'new' || stateCastCrew == 'edit'"
               class="form-select ms-2"
               aria-label="Default select example"
               v-model="currentTask.personId"
@@ -143,7 +147,7 @@
             </select>
             <!-- Roles list -->
             <select
-              v-if="stateCastCrew == 'new'"
+              v-if="stateCastCrew == 'new' || stateCastCrew == 'edit'"
               class="form-select ms-2"
               aria-label="Default select example"
               v-model="currentTask.roleId"
@@ -165,40 +169,14 @@
               </button>
               {{ item.name }} - {{ item.role }}
 
-              <button 
-              type="button"
-              v-if="isAdmin"
-              class="me-2 btn btn-outline-primary"
-              @click="onClickSavePerson(item.id)"
+              <button
+                type="button"
+                v-if="isAdmin"
+                class="me-2 btn btn-outline-primary"
+                @click="onClickEditTask(item)"
               >
                 <i class="bi bi-pen-fill"></i>
               </button>
-
-              <select
-              v-if="stateCastCrew == 'new'"
-              class="form-select ms-2"
-              aria-label="Default select example"
-              v-model="currentTask.personId"
-            >
-              <option
-                v-for="person in peopleAZ"
-                :key="person.id"
-                :value="person.id"
-              >
-                {{ person.name }}
-              </option>
-            </select>
-            <!-- Roles list -->
-            <select
-              v-if="stateCastCrew == 'new'"
-              class="form-select ms-2"
-              aria-label="Default select example"
-              v-model="currentTask.roleId"
-            >
-              <option v-for="role in rolesAZ" :key="role.id" :value="role.id">
-                {{ role.role }}
-              </option>
-            </select>
             </div>
           </div>
           <!-- Admin/ Cast&Crew szerkesztő -->
@@ -331,7 +309,7 @@ export default {
       },
 
       currentTask: new Task(),
-      editingPerson: null,
+      editingPerson: null, //szerkesztett ember
       editingFilm: null, // Szerkesztett film
       currentFilm: null, // Aktuálisan kiválasztott film
       currentRating: 0, // Aktuális értékelés
@@ -340,6 +318,7 @@ export default {
       existingCommentId: null, // Létező komment ID
       selectedFilm: null, // Nagyított film
       stateCastCrew: "read",
+      selectedTask: null,
     };
   },
 
@@ -401,13 +380,13 @@ export default {
       }
     },
 
-    onClickCancelPerson(){
-      this.stateCastCrew = 'read';
+    onClickCancelPerson() {
+      this.stateCastCrew = "read";
     },
 
     // Filmhez tartozó szerepkörök és személyek betöltése
     async fetchFilmPeopleRoles(filmId) {
-      this.stateCastCrew = 'read';
+      this.stateCastCrew = "read";
       try {
         const response = await axios.get(
           `${BASE_URL}/filmPeopleRoles/${filmId}`
@@ -497,15 +476,12 @@ export default {
       try {
         const url = this.urlApi;
         const headers = {
-          Accept: 'application/json',
+          Accept: "application/json",
           "Content-Type": "application/json",
           Authorization: `Bearer ${this.stateAuth.token}`,
         };
         const data = this.newFilm;
-        await axios.post(
-            url, 
-            data, 
-            {headers: headers});
+        await axios.post(url, data, { headers: headers });
         await this.fetchFilmsFromBackend();
         this.closeAddFilmModal();
       } catch (error) {
@@ -518,22 +494,27 @@ export default {
         const url = `${BASE_URL}/tasks`;
 
         const headers = {
-          Accept: 'application/json',
+          Accept: "application/json",
           "Content-Type": "application/json",
           Authorization: `Bearer ${this.stateAuth.token}`,
         };
         const data = this.currentTask;
         data.filmId = this.selectedFilm.id;
-        await axios.post(
-            url, 
-            data, 
-            {headers: headers});
+        await axios.post(url, data, { headers: headers });
         await this.fetchFilmPeopleRoles(this.selectedFilm.id);
-        
       } catch (error) {
         console.error("Error adding film:", error);
       }
     },
+
+    onClickEditTask(item) {
+      this.selectedTask = item;
+      this.stateCastCrew = "edit";
+      this.currentTask = item;
+      console.log("Selected task", this.selectedTask);
+      
+    },
+
     // Film szerkesztése modal megnyitása
     openEditFilmModal(film) {
       this.editingFilm = { ...film };
@@ -560,16 +541,21 @@ export default {
         this.submitEditedPerson();
       }
       this.stateCastCrew = "read";
-
     },
 
-    async submitEditedPerson(){
+    async submitEditedPerson() {
       try {
-        await axios.patch(
-          `${BASE_URL}/tasks`,
-          this.editingPerson.id,
-          { headers: { Authorization: `Bearer ${this.stateAuth.token}` } }
-        );
+        const url = `${BASE_URL}/tasks/${this.selectedTask.id}`;
+        const headers = {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.stateAuth.token}`,
+        };
+        const data ={
+          personId: this.currentTask.personId,
+          roleId: this.currentTask.roleId
+        };
+        await axios.patch(url, data, { headers });
         await this.fetchFilmPeopleRoles(this.selectedFilm.id);
       } catch (error) {
         console.error("Error editing person:", error);

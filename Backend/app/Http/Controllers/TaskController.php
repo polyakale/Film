@@ -33,7 +33,7 @@ class TaskController extends Controller
     {
         //natív SQL
         $query =
-           'SELECT f.title, p.name, r.role, f.id filmId, r.id roleId, p.id peopleId from tasks t
+           'SELECT t.id, f.title, p.name, r.role, f.id filmId, r.id roleId, p.id personId from tasks t
             JOIN people p ON t.personId = p.id
             JOIN films f  ON t.filmId = f.id
             JOIN roles r  ON t.roleId = r.id
