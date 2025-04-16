@@ -181,16 +181,16 @@ Authorization: Bearer {{token}}
 }
 
 ### patch tasks
-PATCH {{host}}/api/tasks/1206
+PATCH {{host}}/api/tasks/10259
 Accept: application/json
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "filmId": 11,
-    "personId": 73,
-    "roleId": 3,
+    "personId": 56,
+    "roleId": 2
 }
+
 ### delete tasks by id
 DELETE {{host}}/api/tasks/1
 Accept: application/json
