@@ -103,7 +103,7 @@
             <button
               type="button"
               v-if="isAdmin && stateCastCrew != 'new'"
-              class="ms-2 btn btn-outline-success"
+              class="ms-2 btn btn-outline-success btn-sm"
               @click="onClickNewPerson()"
             >
               <i class="bi bi-person-fill-add"></i>
@@ -111,17 +111,25 @@
 
             <button
               type="button"
-              v-if="isAdmin && stateCastCrew == 'new'"
-              class="ms-2 btn btn-outline-primary"
+              v-if="isAdmin && (stateCastCrew == 'new' || stateCastCrew == 'edit')"
+              class="ms-2 btn btn-outline-primary btn-sm"
               @click="onClickSavePerson()"
             >
               <i class="bi bi-floppy-fill"></i>
+            </button>
+            <button
+              type="button"
+              v-if="isAdmin && (stateCastCrew == 'new' || stateCastCrew == 'edit')"
+              class="btn btn-outline-warning btn-sm"
+              @click="onClickCancelPerson()"
+            >
+            <i class="bi bi-x-square-fill"></i>
             </button>
 
             <!-- People list -->
             <select
               v-if="stateCastCrew == 'new'"
-              class="form-select"
+              class="form-select ms-2"
               aria-label="Default select example"
               v-model="currentTask.personId"
             >
@@ -136,7 +144,7 @@
             <!-- Roles list -->
             <select
               v-if="stateCastCrew == 'new'"
-              class="form-select"
+              class="form-select ms-2"
               aria-label="Default select example"
               v-model="currentTask.roleId"
             >
@@ -156,6 +164,41 @@
                 <i class="bi bi-person-x-fill"></i>
               </button>
               {{ item.name }} - {{ item.role }}
+
+              <button 
+              type="button"
+              v-if="isAdmin"
+              class="me-2 btn btn-outline-primary"
+              @click="onClickSavePerson(item.id)"
+              >
+                <i class="bi bi-pen-fill"></i>
+              </button>
+
+              <select
+              v-if="stateCastCrew == 'new'"
+              class="form-select ms-2"
+              aria-label="Default select example"
+              v-model="currentTask.personId"
+            >
+              <option
+                v-for="person in peopleAZ"
+                :key="person.id"
+                :value="person.id"
+              >
+                {{ person.name }}
+              </option>
+            </select>
+            <!-- Roles list -->
+            <select
+              v-if="stateCastCrew == 'new'"
+              class="form-select ms-2"
+              aria-label="Default select example"
+              v-model="currentTask.roleId"
+            >
+              <option v-for="role in rolesAZ" :key="role.id" :value="role.id">
+                {{ role.role }}
+              </option>
+            </select>
             </div>
           </div>
           <!-- Admin/ Cast&Crew szerkesztő -->
@@ -250,8 +293,7 @@
 
 <script>
 class Task {
-  constructor(id = null, filmId = null, personId = null, roleId = null) {
-    this.id = id;
+  constructor(filmId = null, personId = null, roleId = null) {
     this.filmId = filmId;
     this.personId = personId;
     this.roleId = roleId;
@@ -287,7 +329,9 @@ export default {
         presentation: "",
         imdbLink: "",
       },
+
       currentTask: new Task(),
+      editingPerson: null,
       editingFilm: null, // Szerkesztett film
       currentFilm: null, // Aktuálisan kiválasztott film
       currentRating: 0, // Aktuális értékelés
@@ -296,7 +340,6 @@ export default {
       existingCommentId: null, // Létező komment ID
       selectedFilm: null, // Nagyított film
       stateCastCrew: "read",
-      
     };
   },
 
@@ -358,8 +401,13 @@ export default {
       }
     },
 
+    onClickCancelPerson(){
+      this.stateCastCrew = 'read';
+    },
+
     // Filmhez tartozó szerepkörök és személyek betöltése
     async fetchFilmPeopleRoles(filmId) {
+      this.stateCastCrew = 'read';
       try {
         const response = await axios.get(
           `${BASE_URL}/filmPeopleRoles/${filmId}`
@@ -367,7 +415,6 @@ export default {
         this.filmPeopleRoles = Array.isArray(response.data.data)
           ? response.data.data
           : [];
-        console.log("Valami", this.filmPeopleRoles);
       } catch (error) {
         console.error("Error loading film people:", error);
       }
@@ -448,18 +495,45 @@ export default {
     // Új film mentése
     async submitNewFilm() {
       try {
-        await axios.post(BASE_URL, this.newFilm, {
-          headers: { 
-            Accept: application/json,
-            Authorization: `Bearer ${this.stateAuth.token}` },
-        });
+        const url = this.urlApi;
+        const headers = {
+          Accept: 'application/json',
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.stateAuth.token}`,
+        };
+        const data = this.newFilm;
+        await axios.post(
+            url, 
+            data, 
+            {headers: headers});
         await this.fetchFilmsFromBackend();
         this.closeAddFilmModal();
       } catch (error) {
         console.error("Error adding film:", error);
       }
     },
+    //Új task mentése
+    async submitNewTask() {
+      try {
+        const url = `${BASE_URL}/tasks`;
 
+        const headers = {
+          Accept: 'application/json',
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.stateAuth.token}`,
+        };
+        const data = this.currentTask;
+        data.filmId = this.selectedFilm.id;
+        await axios.post(
+            url, 
+            data, 
+            {headers: headers});
+        await this.fetchFilmPeopleRoles(this.selectedFilm.id);
+        
+      } catch (error) {
+        console.error("Error adding film:", error);
+      }
+    },
     // Film szerkesztése modal megnyitása
     openEditFilmModal(film) {
       this.editingFilm = { ...film };
@@ -474,10 +548,32 @@ export default {
 
     onClickNewPerson() {
       this.stateCastCrew = "new";
+      this.currentTask = new Task();
     },
 
     onClickSavePerson() {
+      if (this.stateCastCrew === "new") {
+        //Új ember felvétele
+        this.submitNewTask();
+      } else {
+        //Ember Módosiítása
+        this.submitEditedPerson();
+      }
       this.stateCastCrew = "read";
+
+    },
+
+    async submitEditedPerson(){
+      try {
+        await axios.patch(
+          `${BASE_URL}/tasks`,
+          this.editingPerson.id,
+          { headers: { Authorization: `Bearer ${this.stateAuth.token}` } }
+        );
+        await this.fetchFilmPeopleRoles(this.selectedFilm.id);
+      } catch (error) {
+        console.error("Error editing person:", error);
+      }
     },
 
     // Film mentése szerkesztés után

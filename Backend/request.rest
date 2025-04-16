@@ -13,12 +13,13 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    
     "email": "admin@example.com",
     "password": "admin123"
 }
+
 ###
 @token = {{login.response.body.data.token}}
+
 ### logout user
 POST  {{host}}/api/users/logout
 Accept: application/json
@@ -174,10 +175,11 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "filmId": 11,
-    "personId": 74,
-    "roleId": 3,
+    "filmId": 608,
+    "personId": 1552,
+    "roleId": 2
 }
+
 ### patch tasks
 PATCH {{host}}/api/tasks/1206
 Accept: application/json

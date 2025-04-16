@@ -154,7 +154,6 @@ export default {
         Accept: "application/json",
         Authorization: `Bearer ${this.stateAuth.token}`, // Include auth token
       };
-
       this.loading = true; // Set loading state
       try {
         // Send POST request to logout endpoint
@@ -170,6 +169,7 @@ export default {
       } finally {
         // Reset loading state regardless of success or failure
         this.loading = false;
+        this.stateAuth.clearStoredData();
       }
     },
   },
