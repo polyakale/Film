@@ -18,6 +18,7 @@ class TaskController extends Controller
         ];
         return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
+    
     public function store(StoreTaskRequest $request)
     {
         $row = Task::create($request->all());
@@ -78,6 +79,7 @@ class TaskController extends Controller
         }
         return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
+
     public function update(UpdateTaskRequest $request,  $id)
     {
         //Keresd meg az adott product-ot
@@ -98,6 +100,7 @@ class TaskController extends Controller
         }
         return response()->json($data, options: JSON_UNESCAPED_UNICODE);
     }
+
     public function destroy(int $id)
     {
         $row = Task::find($id);
