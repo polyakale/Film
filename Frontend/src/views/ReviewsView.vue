@@ -363,7 +363,6 @@ const DEFAULT_TABLE_ITEMS_PER_PAGE = 10;
 const FIXED_CARD_WIDTH_PX = 330; // Fallback card width
 
 export default {
-  name: "ReviewsView",
   components: { Paginator, OperationsCrud, ReviewForm },
   data() {
     return {
@@ -1321,7 +1320,8 @@ export default {
 }
 
 .custom-table .operations-cell {
-  min-width: 90px;
+  min-width: 75px;
+  padding: 0;
 }
 
 .star-rating {

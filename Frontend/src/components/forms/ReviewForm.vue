@@ -2,7 +2,6 @@
   <div class="modal-overlay">
     <div class="review-modal">
       <form @submit.prevent="onClickSubmit" class="review-form">
-      
         <div class="form-grid user-info">
           <!-- Rating Input -->
           <div class="form-group star-input-group">
@@ -27,7 +26,7 @@
               </span>
             </div>
           </div>
-      
+
           <!-- Film Select -->
           <div class="form-group film-select-group">
             <label for="filmSelect">Film*</label>
@@ -52,12 +51,15 @@
                 </option>
               </template>
             </select>
-            <small v-if="!isUpdate && isFilmReviewed(itemForm.filmId)" class="text-danger error-inline">
+            <small
+              v-if="!isUpdate && isFilmReviewed(itemForm.filmId)"
+              class="text-danger error-inline"
+            >
               You have already reviewed this film.
             </small>
           </div>
         </div>
-      
+
         <!-- Optional Review Comment -->
         <div class="form-group">
           <label for="reviewContent">Review Comment (Optional)</label>
@@ -69,19 +71,31 @@
             rows="5"
           ></textarea>
         </div>
-      
+
         <!-- Form Action -->
         <div class="form-actions">
-          <button
-            type="submit"
-            class="btn btn-submit"
-            :disabled="isSubmitting || !validateForm()"
-          >
-            <span v-if="isSubmitting">
-              <span class="spinner" role="status" aria-hidden="true"></span> Saving...
-            </span>
-            <span v-else>Save Review</span>
-          </button>
+          <div>
+            <button
+              type="submit"
+              class="btn btn-submit"
+              :disabled="isSubmitting || !validateForm()"
+            >
+              <span v-if="isSubmitting">
+                <span class="spinner" role="status" aria-hidden="true"></span>
+                Saving...
+              </span>
+              <span v-else>Save Review</span>
+            </button>
+          </div>
+          <div class="cancel-button">
+            <button
+              type="button"
+              class="btn btn-cancel"
+              @click="$emit('closeModal')"
+            >
+              <span>Cancel</span>
+            </button>
+          </div>
         </div>
       </form>
     </div>
@@ -90,7 +104,6 @@
 
 <script>
 export default {
-  name: "ReviewForm",
   props: {
     itemForm: {
       type: Object,
@@ -312,7 +325,6 @@ export default {
 }
 
 /* === Film Select Dropdown === */
-.film-select-group {}
 .film-select {
   width: 100%;
   padding: 8px 12px;
@@ -379,7 +391,7 @@ export default {
 .form-actions {
   margin-top: 1rem;
   display: flex;
-  justify-content: flex-end;
+  /* justify-content: flex-start; */
   padding-top: 1rem;
   border-top: 1px solid var(--border-color);
 }
@@ -392,7 +404,8 @@ export default {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease,
+    transform 0.1s ease;
   text-align: center;
   line-height: 1.4;
   display: inline-flex;
@@ -414,6 +427,9 @@ export default {
   outline: none;
   box-shadow: 0 0 0 3px var(--focus-ring-color);
 }
+.submit-button {
+  margin-right: auto;
+}
 .btn-submit {
   background-color: var(--accent-gold);
   color: var(--bg-primary);
@@ -422,12 +438,17 @@ export default {
   background-color: #ffc107;
   box-shadow: 0 4px 10px rgba(255, 215, 0, 0.4);
 }
+.cancel-button {
+  margin-left: auto;
+}
 .btn-cancel {
-  background-color: #6c757d;
+  background-color: #252525;
+  border: #737373 1px solid;
   color: white;
 }
 .btn-cancel:hover:not(:disabled) {
-  background-color: #5a6268;
+  background-color: #474747;
+  box-shadow: 0 4px 10px rgba(100, 100, 100, 0.4);
 }
 .btn .spinner {
   width: 1em;

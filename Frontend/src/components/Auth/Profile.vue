@@ -12,7 +12,7 @@
               <p>
                 <strong>Name:</strong> {{ user }}
                 <i
-                  class="bi bi-pencil-square edit-icon"
+                  class="bi bi-pencil edit-icon"
                   @click="startEditing"
                   title="Edit Name"
                 ></i>
@@ -514,10 +514,9 @@ export default {
   margin: 0;
 }
 .edit-icon {
-  margin-left: 0.5rem;
   cursor: pointer;
   color: #ffd700;
-  font-size: 1rem;
+  font-size: 0.95rem;
   transition: color 0.25s ease;
 }
 .edit-icon:hover {
