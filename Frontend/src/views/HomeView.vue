@@ -1,151 +1,202 @@
-<script setup>
-// Assuming filmBgImage is correctly imported from your assets
-import filmBgImage from "@/assets/filmBgImage.png";
-</script>
-
 <template>
-  <main class="home-container">
-    <div class="hero-content">
-      <div class="image-wrapper">
-        <img
-          :src="filmBgImage"
-          alt="Vintage Hungarian film reel and projector"
-          loading="lazy"
-          decoding="async"
-          class="img-fluid hero-image"
-        />
-      </div>
-
-      <section class="header-section header-overlay">
-        <h1 class="main-title">Hungarian Interwar Film Archive (HIFA)</h1>
-        <p class="subtitle-text">
-          Dedicated to preserving and celebrating Hungarian films from the interwar period (1929–1945)
+  <main class="container">
+    <div class="screen">
+      <img
+        src="../assets/filmBgImage.png"
+        alt="Vintage Hungarian film reel and projector"
+        loading="lazy"
+        decoding="async"
+        class="film-image"
+      />
+      <section class="title-overlay">
+        <h1>Hungarian Interwar Film Archive (HIFA)</h1>
+        <p>
+          Dedicated to preserving and celebrating Hungarian films from the interwar period
+          (1929–1945)
         </p>
       </section>
+      <div class="projector"></div>
+      <div class="scratches"></div>
     </div>
   </main>
 </template>
 
 <style scoped>
-/* === Theme Variables === */
-.home-container {
-  /* Using variables assumed to be defined globally or inherited */
-  --overlay-bg: rgba(31, 31, 31, 0.85); /* Darker overlay from your version */
-}
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap');
 
-/* === Base Container Styles === */
-.home-container {
-  height: 90vh; /* Full viewport height */
-  overflow: hidden; /* Prevent scrolling */
-  background-color: var(--bg-primary, #1f1f1f); /* Fallback color */
-  color: var(--text-primary, #ffffff); /* Fallback color */
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  /* Reintroduce padding for breathing room */
-  padding: 1rem;
-  display: flex; /* Use flexbox for centering */
+/* === Main Container === */
+.container {
+  min-height: 91vh;
+  /* Faded red wallpaper effect (semi-transparent) */
+  background: linear-gradient(135deg, rgba(168, 50, 50, 0.2), rgba(92, 13, 13, 0.1));
+  display: flex;
   justify-content: center;
   align-items: center;
+  padding: 1rem;
+  overflow: hidden;
   box-sizing: border-box;
 }
 
-/* === Hero Content Wrapper === */
-.hero-content {
-  position: relative; /* Positioning context for overlay */
-  max-width: 1200px; /* Max content width */
+/* === Projection Screen === */
+.screen {
+  --white: #f0f0f0;
+  --dark: #1c1c1c;
+  --gray1: #901e1e;
+  --gray2: #5c0d0d;
+
+  width: 90%;
+  max-width: 900px;
+  aspect-ratio: 4/3;
+  background: var(--gray1);
+  position: relative;
+  border-radius: 5px;
+  box-shadow: inset 0 0 30px var(--dark), 0 15px 40px var(--dark);
+  overflow: hidden;
+}
+
+/* Grain effect */
+.screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/png;base64,...");
+  opacity: 0.2;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* === Film Image === */
+.film-image {
   width: 100%;
-  max-height: 100%; /* Ensure it fits within padded container */
-  display: flex; /* Use flex to help center image within */
-  justify-content: center;
-  align-items: center;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: grayscale(100%) contrast(120%);
+  animation: flicker 4s infinite;
+  z-index: 1;
 }
 
-/* === Image Section === */
-.image-wrapper {
-  width: 100%;
-  max-height: 100%;
-  display: flex; /* Center image if it's smaller than wrapper */
-  justify-content: center;
-  align-items: center;
-}
-
-.hero-image {
-  display: block; /* Remove extra space below image */
-  width: 100%; /* Scale width */
-  height: auto; /* Maintain aspect ratio */
-  object-fit: contain; /* Fit without cropping, maintain aspect ratio */
-  object-position: center; /* Ensure centered if letterboxed */
-  /* Adjust max-height based on container padding (1rem top + 1rem bottom) */
-  max-height: calc(100vh - 2rem);
-}
-
-/* === Overlay Improvements === */
-.header-overlay {
+/* === Text Overlay === */
+.title-overlay {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: min(90%, 800px); /* Responsive width */
-  background-color: var(--overlay-bg);
-  backdrop-filter: blur(4px); /* Keep blur effect */
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6); /* Keep enhanced shadow */
   text-align: center;
-  color: var(--text-primary, #ffffff); /* Ensure text color contrasts with overlay */
-  /* Add fade-in animation */
-  animation: fadeInOverlay 0.8s ease-out forwards;
-  opacity: 0; /* Start hidden for animation */
+  width: 85%;
+  max-width: 600px;
+  padding: 1rem;
+  z-index: 3;
+  animation: weave 2s infinite, flicker 0.03s infinite;
 }
 
-/* === Typography Enhancements === */
-.main-title {
-  font-family: 'Cinzel Decorative', serif, system-ui; /* Keep distinctive font */
-  font-size: clamp(1.8rem, 4vw, 2.5rem); /* Fluid typography */
-  color: var(--accent-gold, #ffd700); /* Accent color */
-  text-shadow: 0 0 8px rgba(255, 215, 0, 0.4); /* Text shadow for pop */
-  line-height: 1.2;
-  margin-bottom: 1rem;
+/* Thicker text shadow for both h1 and p */
+h1, p {
+  font-family: 'Cinzel Decorative', serif;
+  color: var(--white);
+  text-shadow: 
+    -3px -3px 6px rgba(0, 0, 0, 0.95),
+     3px -3px 6px rgba(0, 0, 0, 0.95),
+    -3px  3px 6px rgba(0, 0, 0, 0.95),
+     3px  3px 6px rgba(0, 0, 0, 0.95),
+     0 0 30px rgba(0, 0, 0, 1);
+     -webkit-text-stroke: 0.8px black; 
+     animation: jitter 0.3s infinite;
 }
 
-.subtitle-text {
-  font-size: clamp(0.9rem, 2vw, 1.1rem); /* Fluid typography */
-  line-height: 1.5;
-  color: var(--text-primary, #ffffff); /* Ensure readability */
+h1 {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  margin-bottom: 0.5em;
+  letter-spacing: 1.5px;
+  font-weight: 650;
 }
 
-/* === Keyframes for Animation === */
-@keyframes fadeInOverlay {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -45%); /* Start slightly higher */
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%); /* End centered */
-  }
+p {
+  font-size: clamp(1.1rem, 3.7vw, 2rem);
+  letter-spacing: 1.2px;
+  font-weight: 900;
 }
 
+/* === Projector Beam === */
+.projector {
+  position: absolute;
+  inset: -50% 0 0 50%;
+  transform: translate(-50%) perspective(500px) rotateX(20deg);
+  background: radial-gradient(
+    ellipse at top center,
+    rgba(255, 240, 200, 0.2) 0%,
+    rgba(255, 240, 200, 0.1) 30%,
+    transparent 70%
+  );
+  mix-blend-mode: soft-light;
+  animation: pan 15s infinite alternate;
+  z-index: 1;
+}
 
-/* === Responsive Refinements === */
+/* === Film Scratches Effect === */
+.scratches {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px 98%,
+    rgba(255, 255, 255, 0.08) 98% 100%
+  );
+  background-size: 100% 4px;
+  animation: move 3s linear infinite;
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* === Animations === */
+@keyframes flicker {
+  0%, 100% { opacity: 1; filter: brightness(1); }
+  50% { opacity: 0.9; filter: brightness(0.9); }
+}
+
+@keyframes weave {
+  0%, 100% { transform: translate(-50%, -50%); }
+  33% { transform: translate(-50%, -50%) translateX(1px); }
+  66% { transform: translate(-50%, -50%) translateX(-1px); }
+}
+
+@keyframes jitter {
+  50% { transform: translateY(0.5px); }
+}
+
+@keyframes pan {
+  to { transform: translate(-50%) perspective(500px) rotateX(20deg) rotateZ(2deg); }
+}
+
+@keyframes move {
+  to { background-position: 0 600px; }
+}
+
+/* === Responsive Improvements === */
 @media (max-width: 768px) {
-  .home-container {
-    padding: 0.5rem; /* Reduce padding */
+  .screen {
+    width: 95%;
   }
-  .hero-image {
-     /* Adjust max-height for new padding (0.5rem top + 0.5rem bottom) */
-     max-height: calc(90vh - 1rem);
-   }
-  .header-overlay {
-    padding: 1.5rem;
-    width: min(95%, 600px); /* Adjust width */
+  .title-overlay {
+    max-width: 90%;
+    padding: 0.5rem;
   }
 }
 
 @media (max-width: 480px) {
-  .header-overlay {
-    padding: 1.25rem;
-    border-radius: 6px; /* Slightly smaller radius */
+  .screen {
+    aspect-ratio: 4/3;
   }
-  /* Font sizes adjusted via clamp(), specific overrides likely not needed */
+  .title-overlay {
+    width: 95%;
+    padding: 0.5rem;
+  }
+  h1 {
+    font-size: 2rem;
+  }
+  p {
+    font-size: 1.1rem;
+  }
 }
 </style>
