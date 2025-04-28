@@ -72,4 +72,10 @@ SELECT role, id FROM roles
 
 
 #filmPeopleRoles
-SELECT roleId, personId, filmId FROM tasks
+SELECT roleId, personId, filmId FROM tasks;
+
+
+  Select films.title, filmId, personId, roleId, count(*) db FROM tasks
+    inner JOIN films on tasks.filmId = films.id
+    group BY films.title, filmId, personId, roleId
+    having db > 1;
