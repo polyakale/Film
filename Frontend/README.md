@@ -203,16 +203,3 @@ Mindkét projekt tartalmazhat automatizált teszteket a kód helyes működésé
   ```
 ---
 Ezzel az útmutatóval készen állsz a Vue.js és Laravel (hungarianfilms) projektek alapvető beállítására és elindítására. Sok sikert!
-
-# Roadmap / To-Do List
-
-- [x] **Completing Home page.**
-- [ ] **Have all Tests done for all tables in backend.**
-- [ ] **Possible Frontend test.**
-- [ ] **Have the admin-only dropdown menu to access all tables in a table form for each entity.**
-- [ ] **Make separate components for "My Reviews" and "All Reviews".**
-- [ ] **Refine "Show more / Show less" functionality: limit output to two lines with a focus on usability and error prevention.**
-- [ ] **Make "My Reviews" responsive (similar to "All Reviews", with its own tweaks).**
-- [ ] **Modify the Search and Filter interface: opt for a side panel instead of a dropdown menu.**
-- [ ] **Ensure the styles for People & Films align uniformly with the overall website design.**
-- [ ] **Enhance the README: add a guide for the installation of the "Vizsgaremek".**
