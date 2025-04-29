@@ -83,7 +83,7 @@
             @click.prevent="showPasswordChangeForm = true"
             class="toggle-link"
           >
-            New password?
+            Change password?
           </a>
         </div>
 
