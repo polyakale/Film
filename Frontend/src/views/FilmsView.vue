@@ -607,7 +607,11 @@ export default {
 
     // Ellenőrzi, hogy a felhasználó értékelte-e a filmet
     rated(film, userId) {
+    if (userId) {
+
       return film.usersId?.split(",").includes(userId.toString());
+    }
+    return true;
     },
 
     // Értékelés modal megnyitása
