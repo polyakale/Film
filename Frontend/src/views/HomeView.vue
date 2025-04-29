@@ -1,5 +1,15 @@
 <template>
   <main class="container">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
     <div class="screen">
       <img
         src="../assets/filmBgImage.png"
@@ -9,10 +19,10 @@
         class="film-image"
       />
       <section class="title-overlay">
-        <h1>Hungarian Interwar Film Archive (HIFA)</h1>
+        <h1>Hungarian Interwar Film Archive (H.I.F.A.)</h1>
         <p>
-          Dedicated to preserving and celebrating Hungarian films from the interwar period
-          (1929–1945)
+          Dedicated to preserving and celebrating Hungarian films from the
+          interwar period (1929–1945)
         </p>
       </section>
       <div class="projector"></div>
@@ -22,13 +32,17 @@
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap");
 
 /* === Main Container === */
 .container {
   min-height: 91vh;
   /* Faded red wallpaper effect (semi-transparent) */
-  background: linear-gradient(135deg, rgba(168, 50, 50, 0.2), rgba(92, 13, 13, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(168, 50, 50, 0.2),
+    rgba(92, 13, 13, 0.1)
+  );
   display: flex;
   justify-content: center;
   align-items: center;
@@ -91,31 +105,32 @@
   animation: weave 2s infinite, flicker 0.03s infinite;
 }
 
-/* Thicker text shadow for both h1 and p */
-h1, p {
-  font-family: 'Cinzel Decorative', serif;
+h1,
+p {
+  font-family: "Old Standard TT", serif;
   color: var(--white);
-  text-shadow: 
-    -3px -3px 6px rgba(0, 0, 0, 0.95),
-     3px -3px 6px rgba(0, 0, 0, 0.95),
-    -3px  3px 6px rgba(0, 0, 0, 0.95),
-     3px  3px 6px rgba(0, 0, 0, 0.95),
-     0 0 30px rgba(0, 0, 0, 1);
-     -webkit-text-stroke: 0.8px black; 
-     animation: jitter 0.3s infinite;
+  /* Adjusted text-shadow for a less thick effect */
+  text-shadow: 1px 1px 0 #000, 2px 2px 1px rgba(0, 0, 0, 0.9); /* Reduced layers and spread */
+  /* Kept text-stroke, adjust if needed */
+  -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.7); /* Slightly reduced stroke */
+  animation: jitter 0.3s infinite; /* Keep animation */
+  font-style: normal;
 }
 
 h1 {
-  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-size: clamp(2rem, 5.6vw, 3.6rem);
   margin-bottom: 0.5em;
   letter-spacing: 1.5px;
   font-weight: 650;
+  text-shadow: 1px 1px 0 #000, 2px 2px 0 #000, 3px 3px 0 #000,
+    4px 4px 2px rgba(0, 0, 0, 0.9);
+  -webkit-text-stroke: 1px rgba(0, 0, 0, 0.9);
 }
 
 p {
-  font-size: clamp(1.1rem, 3.7vw, 2rem);
-  letter-spacing: 1.2px;
-  font-weight: 900;
+  font-size: clamp(1.1rem, 3.3vw, 2.1rem);
+  letter-spacing: 1.3px;
+  font-weight: bold;
 }
 
 /* === Projector Beam === */
@@ -151,26 +166,46 @@ p {
 
 /* === Animations === */
 @keyframes flicker {
-  0%, 100% { opacity: 1; filter: brightness(1); }
-  50% { opacity: 0.9; filter: brightness(0.9); }
+  0%,
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.9;
+    filter: brightness(0.9);
+  }
 }
 
 @keyframes weave {
-  0%, 100% { transform: translate(-50%, -50%); }
-  33% { transform: translate(-50%, -50%) translateX(1px); }
-  66% { transform: translate(-50%, -50%) translateX(-1px); }
+  0%,
+  100% {
+    transform: translate(-50%, -50%);
+  }
+  33% {
+    transform: translate(-50%, -50%) translateX(1px);
+  }
+  66% {
+    transform: translate(-50%, -50%) translateX(-1px);
+  }
 }
 
 @keyframes jitter {
-  50% { transform: translateY(0.5px); }
+  50% {
+    transform: translateY(0.5px);
+  }
 }
 
 @keyframes pan {
-  to { transform: translate(-50%) perspective(500px) rotateX(20deg) rotateZ(2deg); }
+  to {
+    transform: translate(-50%) perspective(500px) rotateX(20deg) rotateZ(2deg);
+  }
 }
 
 @keyframes move {
-  to { background-position: 0 600px; }
+  to {
+    background-position: 0 600px;
+  }
 }
 
 /* === Responsive Improvements === */

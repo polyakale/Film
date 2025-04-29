@@ -2,24 +2,43 @@
   <div class="profile-container">
     <div class="profile-card">
       <div class="profile-header">
-        <h2>🎭 User Profile</h2>
+        <h2><i class="bi bi-person-circle me-2"></i> User Profile</h2>
       </div>
       <div class="profile-body">
         <div class="profile-info">
-          <h3 class="section-title">👤 Account Details</h3>
-          <div class="name-section">
-            <div v-if="!isEditingName" class="name-display">
-              <p>
-                <strong>Name:</strong> {{ user }}
-                <i
-                  class="bi bi-pencil edit-icon"
-                  @click="startEditing"
-                  title="Edit Name"
-                ></i>
-              </p>
+          <h3 class="section-title">
+            <div class="title-text-wrapper">
+              <i class="bi bi-info-circle"></i>
+              <span>Account Details</span>
+            </div>
+            <div class="delete-account-section">
+              <button
+                type="button"
+                class="btn btn-delete"
+                @click="deleteAccount"
+                title="Delete Account"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </h3>
+
+          <div class="info-item">
+            <strong class="info-label">Name:</strong>
+            <div v-if="!isEditingName" class="name-display info-value">
+              <span>{{ user }}</span>
+              <i
+                class="bi bi-pencil edit-icon ms-2"
+                @click="startEditing"
+                title="Edit Name"
+              ></i>
             </div>
 
-            <form v-else class="name-edit-form" @submit.prevent="saveName">
+            <form
+              v-else
+              class="name-edit-form info-value"
+              @submit.prevent="saveName"
+            >
               <div class="input-group">
                 <input
                   type="text"
@@ -41,20 +60,42 @@
                   </button>
                 </div>
               </div>
-              <p v-if="nameError" class="status-message error-message">
+              <p v-if="nameError" class="status-message error-message mt-2">
                 {{ nameError }}
               </p>
             </form>
           </div>
-          <p><strong>Email:</strong> {{ email }}</p>
-          <p><strong>Role:</strong> {{ roleName }}</p>
+
+          <div class="info-item">
+            <strong class="info-label">Email:</strong>
+            <span class="info-value">{{ email }}</span>
+          </div>
+
+          <div class="info-item">
+            <strong class="info-label">Role:</strong>
+            <span class="info-value">{{ roleName }}</span>
+          </div>
         </div>
 
-        <div class="password-section">
-          <h3 class="section-title">🔒 Change Password</h3>
+        <div v-if="!showPasswordChangeForm" class="password-change-toggle">
+          <a
+            href="#"
+            @click.prevent="showPasswordChangeForm = true"
+            class="toggle-link"
+          >
+            Change password?
+          </a>
+        </div>
+
+        <div v-else class="password-section">
+          <h3 class="section-title">
+            <i class="bi bi-key me-2"></i> Change Password
+          </h3>
           <form @submit.prevent="changePassword" class="password-form">
             <div class="form-group">
-              <label for="current-password">Current Password</label>
+              <label for="current-password" class="form-label"
+                >Current Password</label
+              >
               <div class="input-container">
                 <input
                   id="current-password"
@@ -80,7 +121,9 @@
             </div>
 
             <div class="form-group">
-              <label for="new-password">New Password (8-16 characters)</label>
+              <label for="new-password" class="form-label"
+                >New Password (8-16 characters)</label
+              >
               <div class="input-container">
                 <input
                   id="new-password"
@@ -109,19 +152,36 @@
               <div class="password-strength-meter" v-if="password.new">
                 <div
                   class="strength-bar"
-                  :class="{ active: passwordStrength >= 1 }"
+                  :class="{
+                    active: passwordStrength >= 1,
+                    moderate: passwordStrength >= 2,
+                    strong: passwordStrength >= 3,
+                    'very-strong': passwordStrength >= 4,
+                  }"
                 ></div>
                 <div
                   class="strength-bar"
-                  :class="{ active: passwordStrength >= 2 }"
+                  :class="{
+                    active: passwordStrength >= 2,
+                    moderate: passwordStrength >= 2,
+                    strong: passwordStrength >= 3,
+                    'very-strong': passwordStrength >= 4,
+                  }"
                 ></div>
                 <div
                   class="strength-bar"
-                  :class="{ active: passwordStrength >= 3 }"
+                  :class="{
+                    active: passwordStrength >= 3,
+                    strong: passwordStrength >= 3,
+                    'very-strong': passwordStrength >= 4,
+                  }"
                 ></div>
                 <div
                   class="strength-bar"
-                  :class="{ active: passwordStrength >= 4 }"
+                  :class="{
+                    active: passwordStrength >= 4,
+                    'very-strong': passwordStrength >= 4,
+                  }"
                 ></div>
                 <div class="strength-text" id="password-strength-text">
                   {{ strengthText }}
@@ -130,7 +190,9 @@
             </div>
 
             <div class="form-group">
-              <label for="confirm-password">Confirm New Password</label>
+              <label for="confirm-password" class="form-label"
+                >Confirm New Password</label
+              >
               <div class="input-container">
                 <input
                   id="confirm-password"
@@ -173,19 +235,24 @@
                   ></div>
                 </button>
               </div>
-              <div class="delete-account-section">
-                <button
-                  type="button"
-                  class="btn btn-delete"
-                  @click="deleteAccount"
-                  title="Delete Account"
-                >
-                  Delete Account
-                </button>
-              </div>
+              <button
+                type="button"
+                class="btn btn-cancel"
+                @click="cancelPasswordChange"
+              >
+                Cancel
+              </button>
             </div>
 
             <p v-if="message" :class="['status-message', messageClass]">
+              <i
+                v-if="messageClass === 'error-message'"
+                class="bi bi-exclamation-triangle-fill me-2"
+              ></i>
+              <i
+                v-if="messageClass === 'success-message'"
+                class="bi bi-check-circle-fill me-2"
+              ></i>
               {{ message }}
             </p>
           </form>
@@ -223,6 +290,7 @@ export default {
         new: false,
         confirm: false,
       },
+      showPasswordChangeForm: false, // New state to control password form visibility
     };
   },
   computed: {
@@ -343,6 +411,7 @@ export default {
         this.showMessage("Password changed successfully!", "success-message");
         this.password = { current: "", new: "", confirm: "" }; // Reset password fields
         this.passwordVisible = { current: false, new: false, confirm: false }; // Hide passwords
+        this.showPasswordChangeForm = false; // Hide the form again on success
       } catch (error) {
         console.error("Password change error:", error);
         // Extract error message from response or provide a default
@@ -353,6 +422,14 @@ export default {
       } finally {
         this.loading = false; // Hide loading indicator
       }
+    },
+    // Cancel password change and hide the form
+    cancelPasswordChange() {
+      this.password = { current: "", new: "", confirm: "" }; // Reset password fields
+      this.passwordVisible = { current: false, new: false, confirm: false }; // Hide passwords
+      this.message = ""; // Clear any messages
+      this.messageClass = "";
+      this.showPasswordChangeForm = false; // Hide the form
     },
     // Handle account deletion
     async deleteAccount() {
@@ -447,257 +524,368 @@ export default {
   justify-content: center;
   align-items: center;
   min-height: 90vh;
-  background-color: #111;
-  background-image: url("https://source.unsplash.com/1600x900/?dark,abstract,texture");
+  background-color: #1a1a1a; /* Slightly lighter base background */
+  background-image: url("https://source.unsplash.com/1600x900/?dark,abstract,texture,subtle"); /* Added subtle texture keyword */
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  padding: 1rem;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  padding: 1.5rem; /* Increased padding */
+  font-family: "Roboto", sans-serif, system-ui; /* Changed font */
 }
 
 .profile-card {
-  background: #1f1f1f;
-  border: 1px solid #383838;
-  padding: 1.5rem 2rem;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
-  color: #fefefe;
+  background: rgba(
+    40,
+    40,
+    40,
+    0.9
+  ); /* Lighter card background with more transparency */
+  border: 1px solid #555; /* Softer border */
+  padding: 2rem 2.5rem; /* Adjusted padding */
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6); /* Softer, wider shadow */
+  color: #e0e0e0; /* Lighter text color */
   width: 100%;
-  max-width: 480px;
-  border-radius: 6px;
+  max-width: 600px; /* Increased max width */
+  border-radius: 10px; /* More rounded corners */
+  backdrop-filter: blur(8px); /* Stronger blur effect */
+  overflow: hidden; /* Ensure content stays within rounded corners */
 }
 
 /* === Header === */
 .profile-header {
   text-align: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #383838;
+  margin-bottom: 2rem; /* Increased margin */
+  padding-bottom: 1rem; /* Increased padding */
+  border-bottom: 2px solid #ffd700; /* Thicker yellow border */
 }
 .profile-header h2 {
-  font-family: "Cinzel Decorative", serif, system-ui;
-  font-size: 1.6rem;
-  color: #ffd700;
-  text-shadow: 0 0 6px rgba(255, 215, 0, 0.4);
+  font-family: "Montserrat", sans-serif, system-ui; /* Changed font */
+  font-size: 2rem; /* Adjusted font size */
+  color: #ffd700; /* Yellow accent color */
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.7); /* Yellow glow */
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 1.5px; /* Increased letter spacing */
 }
 
 /* === Profile Info === */
 .profile-body {
-  padding-top: 0.5rem;
+  padding-top: 1rem; /* Increased padding */
 }
 .profile-info {
-  font-size: 0.95rem;
-  margin-bottom: 1rem;
+  font-size: 1rem; /* Slightly larger font size */
+  margin-bottom: 2rem; /* Increased margin */
+  padding: 1.5rem; /* Added padding */
+  background: rgba(50, 50, 50, 0.7); /* Distinct background */
+  border-radius: 8px;
+  border: 1px solid #666; /* Border for the info block */
 }
-.profile-info p {
-  margin: 0.4rem 0;
-  line-height: 1.4;
+.info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem; /* Increased margin between items */
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.1); /* Dashed separator */
 }
-.profile-info strong {
-  color: #ffd700;
+.info-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+.info-label {
+  color: #ffd700; /* Yellow color for labels */
   font-weight: 700;
-  margin-right: 0.25em;
+  margin-right: 1rem; /* Increased margin */
+  min-width: 80px; /* Ensure labels align */
+}
+.info-value {
+  color: #e0e0e0; /* Lighter text color */
+  flex-grow: 1;
+  word-break: break-word; /* Prevent long words from overflowing */
 }
 
 /* === Name Editing Section === */
-.name-section {
-  margin-bottom: 0.75rem;
+.name-section .info-value {
+  display: flex;
+  align-items: center;
 }
 .name-display {
   display: flex;
   align-items: center;
+  flex-grow: 1;
 }
-.name-display p {
-  margin: 0;
+.name-display span {
+  flex-grow: 1;
 }
 .edit-icon {
   cursor: pointer;
-  color: #ffd700;
-  font-size: 0.95rem;
+  color: #ffd700; /* Yellow edit icon */
+  font-size: 1.1rem; /* Slightly larger icon */
   transition: color 0.25s ease;
 }
 .edit-icon:hover {
-  color: #ffc107;
+  color: #ffc107; /* Lighter yellow on hover */
 }
 .name-edit-form {
-  margin-top: 0.5rem;
+  margin-top: 0; /* Remove top margin */
+  flex-grow: 1;
 }
 .input-group {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.5rem; /* Increased gap */
   align-items: center;
   flex-wrap: wrap;
 }
 .input-group .form-control {
   flex: 1;
-  min-width: 120px;
+  min-width: 150px; /* Increased min width */
+  background: #333; /* Darker input background */
+  border: 1px solid #666; /* Softer border */
+  color: #fff;
+  padding: 10px 12px; /* Adjusted padding */
+  font-size: 1rem; /* Adjusted font size */
 }
 .button-group {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.5rem; /* Increased gap */
+}
+
+/* === Password Change Toggle === */
+.password-change-toggle {
+  text-align: center;
+  margin-top: 1.5rem; /* Space above the link */
+  margin-bottom: 1.5rem; /* Space below the link */
+}
+
+.toggle-link {
+  color: #ffd700; /* Yellow link color */
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.toggle-link:hover {
+  color: #ffc107; /* Lighter yellow on hover */
+  text-decoration: underline;
 }
 
 /* === Section Titles === */
 .section-title {
-  font-family: "Poppins", sans-serif, system-ui;
-  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: "Montserrat", sans-serif;
+  font-size: 1.4rem; /* Slightly larger for improved readability */
   font-weight: 700;
-  color: #ffd700;
-  margin: 0.75rem 0;
-  padding-bottom: 0.25rem;
-  border-bottom: 1px solid #383838;
+  color: #ffd700; /* Classic yellow accent */
+  margin: 0 0 1rem;
+  padding-bottom: 0.3rem; /* Reduced padding for a sleeker look */
+  border-bottom: 2px dashed #555; /* Dashed border for a refined, less heavy feel */
 }
 
+.title-text-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Space between icon and text */
+}
+
+.title-text-wrapper i {
+  /* Optional: adjust the icon size or margin as needed */
+  font-size: 1.2em;
+}
+
+.delete-account-section {
+  margin-left: auto; /* Ensures the delete button is pushed to the far right */
+  /* Removed flex-grow and min-width from here */
+}
 /* === Forms & Inputs === */
-.password-form,
-.name-edit-form {
-  padding-top: 0.25rem;
+.password-form {
+  padding-top: 0.5rem; /* Adjusted padding */
 }
 .form-group {
-  margin-bottom: 0.75rem;
+  margin-bottom: 1.2rem; /* Increased margin */
 }
-label {
+.form-label {
+  /* Explicitly style label class */
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.9rem; /* Adjusted font size */
   color: #ccc;
   font-weight: 700;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.4rem; /* Adjusted margin */
 }
+
 .input-container {
   position: relative;
 }
 .form-control {
   width: 100%;
-  padding: 8px 36px 8px 10px;
-  font-size: 0.95rem;
-  background: #2a2a2a;
-  border: 1px solid #383838;
+  padding: 10px 38px 10px 12px; /* Adjusted padding */
+  font-size: 1rem; /* Adjusted font size */
+  background: #333; /* Darker input background */
+  border: 1px solid #666; /* Softer border */
   color: #fff;
   border-radius: 4px;
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  box-sizing: border-box;
 }
 .form-control::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.6); /* Lighter placeholder */
 }
 .form-control:focus {
   outline: none;
-  border-color: #ffd700;
-  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.3);
+  border-color: #ffd700; /* Yellow focus color */
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.4); /* Yellow focus glow */
 }
 .eye-icon {
   position: absolute;
-  right: 10px;
+  right: 12px; /* Adjusted position */
   top: 50%;
   transform: translateY(-50%);
-  color: #ffd700;
-  cursor: pointer;
-  font-size: 1rem;
+  color: #ffd700; /* Yellow eye icon */
+  font-size: 1.1rem; /* Adjusted size */
   z-index: 2;
+  cursor: pointer;
   transition: color 0.25s ease;
 }
 .eye-icon:hover {
-  color: #ffc107;
+  color: #ffc107; /* Lighter yellow on hover */
 }
 
 /* === Password Strength Meter === */
 .password-strength-meter {
   display: flex;
   align-items: center;
-  gap: 2px;
-  height: 16px;
-  margin-top: 0.25rem;
+  gap: 3px; /* Increased gap */
+  height: 18px; /* Increased height */
+  margin-top: 0.5rem; /* Increased margin */
+  background: rgba(50, 50, 50, 0.7); /* Background for meter container */
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #666;
 }
 .password-strength-meter .strength-bar {
   flex: 1;
-  height: 4px;
-  background: #383838;
-  border-radius: 2px;
-  transition: background-color 0.25s ease;
+  height: 6px; /* Increased height */
+  background: #555; /* Darker inactive color */
+  border-radius: 3px; /* More rounded */
+  transition: background-color 0.4s ease; /* Slower transition */
 }
 .password-strength-meter .strength-bar.active {
-  background: #ffd700;
+  background: #ff4500; /* Orange for weak */
 }
+.password-strength-meter .strength-bar.moderate {
+  background: #ffd700; /* Gold for moderate */
+}
+.password-strength-meter .strength-bar.strong {
+  background: #ffd700; /* Yellow for strong - Cohesive with accent */
+}
+.password-strength-meter .strength-bar.very-strong {
+  background: #00bfff; /* Deep Sky Blue for very strong */
+}
+
 .password-strength-meter .strength-text {
-  font-size: 0.75rem;
+  font-size: 0.85rem; /* Slightly larger font size */
   font-weight: bold;
-  min-width: 50px;
+  min-width: 70px; /* Increased min width */
   text-align: right;
-  color: #ffd700;
+  color: #e0e0e0; /* Lighter text color */
 }
 
 /* === Buttons === */
 .btn {
-  padding: 8px 14px;
-  font-size: 0.9rem;
+  padding: 10px 16px; /* Adjusted padding */
+  font-size: 1rem; /* Adjusted font size */
   font-weight: 700;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
   text-align: center;
   line-height: 1.4;
-}
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.btn-save,
-.btn-submit {
-  background: #ffd700;
-  color: #1f1f1f;
-  min-width: 80px;
-}
-.btn-save:hover:not(:disabled),
-.btn-submit:hover:not(:disabled) {
-  background: #ffc107;
-  box-shadow: 0 2px 6px rgba(255, 215, 0, 0.3);
-}
-.btn-cancel {
-  background: #2a2a2a;
-  color: #ccc;
-  border: 1px solid #383838;
-  min-width: 80px;
-}
-.btn-cancel:hover:not(:disabled) {
-  background: #383838;
-  color: #fff;
-}
-.btn-delete {
-  background: #cc181e;
-  color: #fff;
-  padding: 8px 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-save,
+.btn-submit {
+  background: #ffd700; /* Yellow save/submit button */
+  color: #1f1f1f;
+  min-width: 90px; /* Increased min width */
+  box-shadow: 0 2px 6px rgba(255, 215, 0, 0.3); /* Yellow shadow */
+}
+.btn-save:hover:not(:disabled),
+.btn-submit:hover:not(:disabled) {
+  background: #ffc107; /* Lighter yellow on hover */
+  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.5); /* Stronger yellow shadow */
+  transform: translateY(-1px);
+}
+.btn-save:active:not(:disabled),
+.btn-submit:active:not(:disabled) {
+  transform: translateY(0px);
+  box-shadow: 0 1px 3px rgba(255, 215, 0, 0.3); /* Smaller active shadow */
+}
+
+.btn-cancel {
+  background: #555; /* Darker cancel button */
+  color: #ccc;
+  border: 1px solid #666; /* Softer border */
+  min-width: 90px; /* Increased min width */
+}
+.btn-cancel:hover:not(:disabled) {
+  background: #666; /* Lighter dark on hover */
+  color: #fff;
+}
+.btn-delete {
+  background: transparent; /* Transparent background */
+  color: #e53e3e; /* Red icon color */
+  padding: 0.5rem; /* Adjusted padding for icon button */
+  font-size: 1.2rem; /* Increased icon size */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none; /* Remove border */
+  box-shadow: none; /* Remove shadow */
+  transition: color 0.2s ease, transform 0.1s ease;
+}
 .btn-delete:hover:not(:disabled) {
-  background: #a30f13;
-  box-shadow: 0 2px 6px rgba(204, 24, 30, 0.3);
+  color: #ff8a80; /* Lighter red on hover */
+  transform: translateY(-1px); /* Slight lift on hover */
+  box-shadow: none;
+}
+.btn-delete:active:not(:disabled) {
+  transform: translateY(0px);
+  box-shadow: none;
 }
 
 /* Layout for action buttons */
 .action-buttons-row {
-  margin-top: 1rem;
+  margin-top: 1.5rem; /* Increased margin */
   display: flex;
-  gap: 0.5rem;
+  gap: 1rem; /* Increased gap */
   align-items: center;
+  flex-wrap: wrap; /* Allow wrapping on small screens */
+  justify-content: center; /* Center buttons when wrapped */
 }
 .submit-group {
   flex-grow: 1;
+  min-width: 180px; /* Ensure submit button has minimum width */
 }
+/* Removed flex-grow and min-width from delete-account-section here */
 
 /* === Loading Spinner === */
 .spinner {
   width: 20px;
   height: 20px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  border: 3px solid rgba(255, 255, 255, 0.4);
   border-radius: 50%;
-  border-top-color: #ffd700;
+  border-top-color: #ffd700; /* Yellow spinner color */
   animation: spin 0.8s linear infinite;
   display: inline-block;
+  vertical-align: middle;
 }
 @keyframes spin {
   0% {
@@ -710,158 +898,110 @@ label {
 
 /* === Status Messages === */
 .status-message {
-  margin-top: 0.75rem;
-  padding: 0.5rem;
+  margin-top: 1rem; /* Increased margin */
+  padding: 0.8rem; /* Increased padding */
   border-radius: 4px;
-  font-size: 0.9rem;
+  font-size: 0.95rem; /* Adjusted font size */
   text-align: center;
   font-weight: bold;
   border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 .status-message.error-message {
-  color: #cc181e;
-  background-color: rgba(204, 24, 30, 0.1);
-  border-color: #cc181e;
+  color: #ff8a80; /* Softer red */
+  background-color: rgba(229, 62, 62, 0.15);
+  border-color: rgba(229, 62, 62, 0.5);
 }
 .status-message.success-message {
-  color: #28a745;
-  background-color: rgba(40, 167, 69, 0.1);
-  border-color: #28a745;
-}
-
-/* === Profile Table & Reviews Grid === */
-.table-section,
-.public-reviews-section {
-  flex-grow: 1;
-  overflow: hidden;
-}
-.table-wrapper {
-  flex-grow: 1;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-.custom-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 0.5rem;
-}
-.custom-table th,
-.custom-table td {
-  padding: 0.5rem;
-  border: 1px solid #444444;
-  text-align: left;
-}
-.custom-table th {
-  background: #2a2a2a;
-  color: #ffd700;
-  font-weight: 600;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-}
-.custom-table td {
-  background: #1f1f1f;
-  color: #fff;
-}
-.custom-table tbody tr:hover {
-  background-color: #2f2f2f;
-  transition: background-color 0.3s ease;
-}
-
-/* Reviews Grid */
-.reviews-wrapper {
-  flex-grow: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 4px;
-}
-.reviews-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 0.75rem;
-  padding-bottom: 0.75rem;
-}
-.review-card {
-  background: #333333;
-  border: 1px solid #444444;
-  border-radius: 6px;
-  padding: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  color: #fff;
-  text-align: left;
-  overflow: hidden;
-}
-.review-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-}
-.review-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-.review-film-title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #ffd700;
-}
-.review-meta {
-  font-size: 0.75rem;
-  color: #aaaaaa;
-}
-.review-content {
-  font-size: 0.85rem;
-  line-height: 1.4;
-}
-
-/* === Pagination Wrapper === */
-.pagination-wrapper {
-  padding: 0.5rem 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-top: 1px solid #444444;
-  background: #1f1f1f;
+  color: #a5d6a7; /* Softer green */
+  background-color: rgba(72, 187, 120, 0.15);
+  border-color: rgba(72, 187, 120, 0.5);
 }
 
 /* === Responsive Adjustments === */
 @media (max-width: 576px) {
   .profile-card {
     max-width: 100%;
-    padding: 1.25rem;
+    padding: 1.5rem; /* Adjusted padding */
   }
   .profile-header h2 {
-    font-size: 1.4rem;
+    font-size: 1.6rem; /* Adjusted font size */
+    letter-spacing: 1px;
   }
   .section-title {
-    font-size: 1rem;
-    margin-top: 0.75rem;
+    font-size: 1.1rem; /* Adjusted font size */
+    margin-top: 1rem;
   }
-  .form-control {
-    padding: 6px 30px 6px 8px;
-    font-size: 0.9rem;
+  .profile-info {
+    padding: 1rem; /* Adjusted padding */
   }
-  .btn {
-    padding: 7px 12px;
-    font-size: 0.85rem;
+  .info-item {
+    flex-direction: column; /* Stack info items */
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
   }
-  .action-buttons-row {
-    flex-direction: column;
-    gap: 0.5rem;
+  .info-label {
+    margin-right: 0;
+    margin-bottom: 0.25rem; /* Space below label */
+    min-width: auto;
   }
   .input-group {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.25rem;
   }
   .button-group {
     margin-top: 0.5rem;
-    justify-content: flex-end;
+    justify-content: stretch; /* Stretch buttons */
+    gap: 0.25rem;
+  }
+  .button-group .btn {
+    flex-grow: 1; /* Allow buttons to grow */
+  }
+  .form-control {
+    padding: 8px 34px 8px 10px; /* Adjusted padding */
+    font-size: 0.95rem; /* Adjusted font size */
+  }
+  .eye-icon {
+    right: 10px; /* Adjusted position */
+    font-size: 1rem; /* Adjusted size */
+  }
+  .btn {
+    padding: 8px 14px; /* Adjusted padding */
+    font-size: 0.9rem; /* Adjusted font size */
+  }
+  .action-buttons-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .submit-group {
+    width: 100%; /* Make submit button full width */
+    min-width: unset; /* Remove min-width on small screens */
+  }
+  .delete-account-section {
+    width: 100%; /* Make delete button section full width */
+    /* Removed min-width from here */
+  }
+  .btn-delete {
+    width: 100%; /* Make delete button full width */
+    padding: 0.5rem 0; /* Adjust padding for full-width icon button */
+  }
+  .password-strength-meter {
+    flex-wrap: wrap; /* Allow meter to wrap */
+    height: auto;
+    padding: 6px;
+  }
+  .password-strength-meter .strength-bar {
+    height: 4px;
+  }
+  .password-strength-meter .strength-text {
+    width: 100%; /* Make text full width */
+    text-align: left;
+    margin-top: 4px;
   }
 }
 </style>
-

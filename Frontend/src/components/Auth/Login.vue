@@ -7,7 +7,7 @@
       <div class="login-body">
         <form @submit.prevent="userAuth">
           <div class="form-group">
-            <label for="email">Email</label>
+            <label for="email" class="form-label">Email</label>
             <input
               id="email"
               type="email"
@@ -20,7 +20,7 @@
           </div>
 
           <div class="form-group">
-            <label for="password">Password</label>
+            <label for="password" class="form-label">Password</label>
             <div class="input-container">
               <input
                 id="password"
@@ -159,86 +159,81 @@ const userAuth = async () => {
 }
 
 .login-card {
-  background: rgba(31, 31, 31, 0.9);
-  border: 1px solid #383838;
-  /* Increased padding */
-  padding: 2rem 2.5rem;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+  background: rgba(31, 31, 31, 0.95); /* Slightly less transparent */
+  border: 1px solid #444; /* Slightly lighter border */
+  padding: 2.5rem 3rem; /* Increased padding */
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8); /* Stronger shadow */
   color: #fefefe;
   width: 100%;
-  /* Increased max-width */
-  max-width: 500px;
-  border-radius: 6px;
+  max-width: 500px; /* Keep larger size */
+  border-radius: 8px; /* Slightly larger border radius */
   text-align: center;
+  backdrop-filter: blur(5px); /* Added blur effect */
 }
 
 /* === Header === */
 .login-header {
   text-align: center;
-  margin-bottom: 2rem; /* Increased margin */
-  padding-bottom: 1rem; /* Increased padding */
-  border-bottom: 1px solid #383838;
+  margin-bottom: 2.5rem; /* Increased margin */
+  padding-bottom: 1.2rem; /* Increased padding */
+  border-bottom: 2px solid #ffd700; /* Thicker gold border */
 }
 .login-header h2 {
   font-family: "Cinzel Decorative", serif, system-ui;
-  /* Increased font size */
-  font-size: 2.1rem;
+  font-size: 2.2rem; /* Slightly larger font size */
   color: #ffd700;
-  text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.7); /* Stronger glow */
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px; /* Increased letter spacing */
 }
 
 /* === Login Body/Form === */
 .login-body {
-  padding-top: 0.5rem;
+  padding-top: 1rem; /* Increased padding */
 }
 
 /* === Forms & Inputs === */
 .form-group {
-  margin-bottom: 1.25rem; /* Increased margin */
+  margin-bottom: 1.5rem; /* Increased margin */
   text-align: left;
 }
 label {
   display: block;
-  /* Increased font size */
-  font-size: 0.9rem;
+  font-size: 0.95rem; /* Slightly larger font size */
   color: #ccc;
   font-weight: 700;
-  margin-bottom: 0.4rem; /* Increased space */
+  margin-bottom: 0.5rem; /* Increased space */
 }
 .input-container {
   position: relative;
 }
 .form-control {
   width: 100%;
-  /* Increased padding */
-  padding: 12px 45px 12px 14px;
-  /* Increased font size */
-  font-size: 1.05rem;
+  padding: 14px 45px 14px 16px; /* Increased padding */
+  font-size: 1.1rem; /* Slightly larger font size */
   background: #2a2a2a;
-  border: 1px solid #383838;
+  border: 1px solid #444; /* Match card border */
   color: #fff;
   border-radius: 4px;
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
   box-sizing: border-box;
 }
 .form-control::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.6); /* Slightly lighter placeholder */
 }
 .form-control:focus {
   outline: none;
   border-color: #ffd700;
-  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.4); /* Stronger focus glow */
 }
 .eye-icon {
   position: absolute;
-  right: 14px; /* Adjusted position */
+  right: 16px; /* Adjusted position */
   top: 50%;
   transform: translateY(-50%);
   color: #ffd700;
   cursor: pointer;
-  font-size: 1.2rem; /* Adjusted size */
+  font-size: 1.3rem; /* Slightly larger size */
   z-index: 2;
   transition: color 0.25s ease;
 }
@@ -249,10 +244,8 @@ label {
 
 /* === Buttons === */
 .btn {
-  /* Increased padding */
-  padding: 12px 18px;
-  /* Increased font size */
-  font-size: 1.1rem;
+  padding: 14px 20px; /* Increased padding */
+  font-size: 1.15rem; /* Slightly larger font size */
   font-weight: 700;
   border: none;
   border-radius: 4px;
@@ -266,20 +259,22 @@ label {
   width: 100%;
 }
 .btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5; /* Slightly more opaque */
   cursor: not-allowed;
 }
 .btn-submit {
   background: #ffd700;
   color: #1f1f1f;
+  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3); /* Initial shadow */
 }
 .btn-submit:hover:not(:disabled) {
   background: #ffc107;
-  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.4);
-  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(255, 215, 0, 0.5); /* Stronger hover shadow */
+  transform: translateY(-2px); /* More pronounced lift */
 }
 .btn-submit:active:not(:disabled) {
     transform: translateY(0px);
+    box-shadow: 0 2px 5px rgba(255, 215, 0, 0.3); /* Smaller active shadow */
 }
 
 .submit-group {
@@ -289,9 +284,9 @@ label {
 
 /* === Loading Spinner === */
 .spinner {
-  width: 20px;
-  height: 20px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  width: 22px; /* Slightly larger spinner */
+  height: 22px;
+  border: 3px solid rgba(255, 255, 255, 0.4); /* Slightly more visible spinner border */
   border-radius: 50%;
   border-top-color: #ffd700;
   animation: spin 0.8s linear infinite;
@@ -313,36 +308,35 @@ label {
 
 /* === Status Messages === */
 .status-message {
-  margin-top: 1.25rem; /* Increased space */
-  padding: 0.8rem; /* Increased padding */
+  margin-top: 1.5rem; /* Increased margin */
+  padding: 1rem; /* Increased padding */
   border-radius: 4px;
-  /* Increased font size */
-  font-size: 0.95rem;
+  font-size: 1rem; /* Slightly larger font size */
   text-align: center;
   font-weight: bold;
   border: 1px solid transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.6rem; /* Increased gap */
 }
 .status-message.error-message {
-  color: #e53e3e;
-  background-color: rgba(229, 62, 62, 0.1);
-  border-color: rgba(229, 62, 62, 0.4);
+  color: #ff8a80; /* Softer red */
+  background-color: rgba(229, 62, 62, 0.15); /* Slightly more opaque background */
+  border-color: rgba(229, 62, 62, 0.5); /* Slightly more opaque border */
 }
 .status-message.success-message {
-  color: #48bb78;
-  background-color: rgba(72, 187, 120, 0.1);
-  border-color: rgba(72, 187, 120, 0.4);
+  color: #a5d6a7; /* Softer green */
+  background-color: rgba(72, 187, 120, 0.15); /* Slightly more opaque background */
+  border-color: rgba(72, 187, 120, 0.5); /* Slightly more opaque border */
 }
+
 
 /* === Responsive Adjustments === */
 @media (max-width: 576px) {
   .login-card {
-    /* Use original smaller size on small screens */
-    max-width: 420px;
-    padding: 1.5rem 1.5rem; /* Adjust padding */
+    max-width: 95%;
+    padding: 1.5rem 1rem; /* Adjust padding */
   }
   .login-header h2 {
     font-size: 1.8rem; /* Adjust font size */

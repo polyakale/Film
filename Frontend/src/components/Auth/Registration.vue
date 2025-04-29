@@ -7,12 +7,12 @@
       <div class="registration-body">
         <form @submit.prevent="userRegister">
           <div class="form-group">
-            <label for="name" class="form-label">Name*</label>
+            <label for="name" class="form-label">Username*</label>
             <input
               id="name"
               type="text"
               v-model="user.name"
-              placeholder="Enter your name"
+              placeholder="Make a username..."
               class="form-control"
               required
               aria-label="Name input"
@@ -34,15 +34,24 @@
           </div>
           <div class="form-group">
             <label for="password" class="form-label">Password*</label>
-            <input
-              id="password"
-              type="password"
-              v-model="user.password"
-              placeholder="Enter your password (min 6 chars)"
-              class="form-control"
-              required
-              aria-label="Password input"
-            />
+            <div class="input-container">
+              <input
+                id="password"
+                :type="showPassword ? 'text' : 'password'"
+                v-model="user.password"
+                placeholder="Make a password (min 6 chars)"
+                class="form-control"
+                required
+                aria-label="Password input"
+              />
+               <span
+                @click="showPassword = !showPassword"
+                class="eye-icon"
+                title="Toggle password visibility"
+              >
+                <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+              </span>
+            </div>
             <small v-if="passwordError" class="text-danger error-inline">{{ passwordError }}</small>
           </div>
 
@@ -79,10 +88,13 @@ import { useAuthStore } from "@/stores/useAuthStore";
 const router = useRouter();
 const store = useAuthStore();
 
+// Reactive state for password visibility
+const showPassword = ref(false); // Added showPassword state
+
 // Reactive state for registration form
 const user = ref({
   name: "",
-  email: "guest@example.com", // Default/Test values
+  email: "guest0@example.com", // Default/Test values
   password: "guest123",      // Default/Test values
   positionId: 2, // Default role: Guest
 });
@@ -105,7 +117,7 @@ const validateForm = () => {
 
   // Validate name
   if (!user.value.name.trim()) {
-    nameError.value = "Name is required.";
+    nameError.value = "Username is required.";
     valid = false;
   }
 
@@ -201,90 +213,108 @@ const userRegister = async () => {
 }
 
 .registration-card { /* Renamed */
-  background: rgba(31, 31, 31, 0.9);
-  border: 1px solid #383838;
-  padding: 2rem 2.5rem; /* Keep larger size */
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+  background: rgba(31, 31, 31, 0.95); /* Slightly less transparent */
+  border: 1px solid #444; /* Slightly lighter border */
+  padding: 2.5rem 3rem; /* Increased padding */
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8); /* Stronger shadow */
   color: #fefefe;
   width: 100%;
-  max-width: 500px; /* Keep larger size */
-  border-radius: 6px;
+  max-width: 500px;
+  border-radius: 8px; /* Slightly larger border radius */
   text-align: center;
+  backdrop-filter: blur(5px); /* Added blur effect */
 }
 
 /* === Header === */
 .registration-header { /* Renamed */
   text-align: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #383838;
+  margin-bottom: 2.5rem; /* Increased margin */
+  padding-bottom: 1.2rem; /* Increased padding */
+  border-bottom: 2px solid #ffd700; /* Thicker gold border */
 }
 .registration-header h2 { /* Renamed */
   font-family: "Cinzel Decorative", serif, system-ui;
-  font-size: 2.1rem; /* Keep larger size */
+  font-size: 2.2rem; /* Slightly larger font size */
   color: #ffd700;
-  text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.7); /* Stronger glow */
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px; /* Increased letter spacing */
 }
 
 /* === Registration Body/Form === */
 .registration-body { /* Renamed */
-  padding-top: 0.5rem;
+  padding-top: 1rem; /* Increased padding */
 }
 
 /* === Forms & Inputs === */
 .form-group {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem; /* Increased margin */
   text-align: left;
 }
 /* Style for label element directly */
 label {
   display: block;
-  font-size: 0.9rem; /* Keep larger size */
+  font-size: 0.95rem; /* Slightly larger font size */
   color: #ccc;
   font-weight: 700;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.5rem; /* Increased space */
 }
-/* Removed .input-container and .eye-icon styles as they are not used here */
+
+/* Added input container and eye icon styles */
+.input-container {
+  position: relative;
+}
+
 .form-control {
   width: 100%;
-  /* Adjusted padding (no eye icon needed) */
-  padding: 12px 14px;
-  font-size: 1.05rem; /* Keep larger size */
+  padding: 14px 45px 14px 16px; /* Increased padding */
+  font-size: 1.1rem; /* Slightly larger font size */
   background: #2a2a2a;
-  border: 1px solid #383838;
+  border: 1px solid #444; /* Match card border */
   color: #fff;
   border-radius: 4px;
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
   box-sizing: border-box;
 }
 .form-control::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.6); /* Slightly lighter placeholder */
 }
 .form-control:focus {
   outline: none;
   border-color: #ffd700;
-  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.4); /* Stronger focus glow */
 }
+
+.eye-icon {
+  position: absolute;
+  right: 16px; /* Adjusted position */
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ffd700;
+  cursor: pointer;
+  font-size: 1.3rem; /* Slightly larger size */
+  z-index: 2;
+  transition: color 0.25s ease;
+}
+.eye-icon:hover {
+  color: #ffc107;
+}
+
 
 /* Style for inline error messages */
 .error-inline {
-    display: block; /* Ensure it takes its own line */
-    font-size: 0.8rem; /* Smaller font size */
-    margin-top: 0.25rem; /* Space above */
+    display: block;
+    font-size: 0.85rem; /* Slightly larger font size */
+    margin-top: 0.3rem; /* Increased space above */
     font-weight: bold;
-}
-/* Inherit text-danger color */
-.text-danger {
-    color: #e53e3e; /* Match status message error color */
+    color: #e57373; /* Slightly softer red */
 }
 
 
 /* === Buttons === */
 .btn {
-  padding: 12px 18px; /* Keep larger size */
-  font-size: 1.1rem; /* Keep larger size */
+  padding: 14px 20px; /* Increased padding */
+  font-size: 1.15rem; /* Slightly larger font size */
   font-weight: 700;
   border: none;
   border-radius: 4px;
@@ -298,20 +328,22 @@ label {
   width: 100%;
 }
 .btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5; /* Slightly more opaque */
   cursor: not-allowed;
 }
 .btn-submit {
   background: #ffd700;
   color: #1f1f1f;
+  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3); /* Initial shadow */
 }
 .btn-submit:hover:not(:disabled) {
   background: #ffc107;
-  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.4);
-  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(255, 215, 0, 0.5); /* Stronger hover shadow */
+  transform: translateY(-2px); /* More pronounced lift */
 }
 .btn-submit:active:not(:disabled) {
     transform: translateY(0px);
+    box-shadow: 0 2px 5px rgba(255, 215, 0, 0.3); /* Smaller active shadow */
 }
 
 .submit-group {
@@ -321,9 +353,9 @@ label {
 
 /* === Loading Spinner === */
 .spinner {
-  width: 20px;
-  height: 20px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  width: 22px; /* Slightly larger spinner */
+  height: 22px;
+  border: 3px solid rgba(255, 255, 255, 0.4); /* Slightly more visible spinner border */
   border-radius: 50%;
   border-top-color: #ffd700;
   animation: spin 0.8s linear infinite;
@@ -345,42 +377,42 @@ label {
 
 /* === Status Messages === */
 .status-message {
-  margin-top: 1.25rem;
-  padding: 0.8rem; /* Keep larger size */
+  margin-top: 1.5rem; /* Increased margin */
+  padding: 1rem; /* Increased padding */
   border-radius: 4px;
-  font-size: 0.95rem; /* Keep larger size */
+  font-size: 1rem; /* Slightly larger font size */
   text-align: center;
   font-weight: bold;
   border: 1px solid transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.6rem; /* Increased gap */
 }
 /* Use text-danger class from script */
 .status-message.text-danger {
-  color: #e53e3e;
-  background-color: rgba(229, 62, 62, 0.1);
-  border-color: rgba(229, 62, 62, 0.4);
+  color: #ff8a80; /* Softer red */
+  background-color: rgba(229, 62, 62, 0.15); /* Slightly more opaque background */
+  border-color: rgba(229, 62, 62, 0.5); /* Slightly more opaque border */
 }
 /* Use text-success class from script */
 .status-message.text-success {
-  color: #48bb78;
-  background-color: rgba(72, 187, 120, 0.1);
-  border-color: rgba(72, 187, 120, 0.4);
+  color: #a5d6a7; /* Softer green */
+  background-color: rgba(72, 187, 120, 0.15); /* Slightly more opaque background */
+  border-color: rgba(72, 187, 120, 0.5); /* Slightly more opaque border */
 }
 
 /* === Responsive Adjustments === */
 @media (max-width: 576px) {
   .registration-card { /* Renamed */
-    max-width: 95%; /* Allow slightly wider on small screens */
+    max-width: 95%;
     padding: 1.5rem 1rem; /* Adjust padding */
   }
   .registration-header h2 { /* Renamed */
     font-size: 1.8rem; /* Adjust font size */
   }
   .form-control {
-    padding: 10px 12px; /* Revert padding */
+    padding: 10px 40px 10px 12px; /* Revert padding */
     font-size: 1rem; /* Revert font size */
   }
   .btn {
