@@ -7,12 +7,12 @@
       <div class="registration-body">
         <form @submit.prevent="userRegister">
           <div class="form-group">
-            <label for="name" class="form-label">Name*</label>
+            <label for="name" class="form-label">Username*</label>
             <input
               id="name"
               type="text"
               v-model="user.name"
-              placeholder="Enter your name"
+              placeholder="Make a username..."
               class="form-control"
               required
               aria-label="Name input"
@@ -34,15 +34,24 @@
           </div>
           <div class="form-group">
             <label for="password" class="form-label">Password*</label>
-            <input
-              id="password"
-              type="password"
-              v-model="user.password"
-              placeholder="Enter your password (min 6 chars)"
-              class="form-control"
-              required
-              aria-label="Password input"
-            />
+            <div class="input-container">
+              <input
+                id="password"
+                :type="showPassword ? 'text' : 'password'"
+                v-model="user.password"
+                placeholder="Make a password (min 6 chars)"
+                class="form-control"
+                required
+                aria-label="Password input"
+              />
+               <span
+                @click="showPassword = !showPassword"
+                class="eye-icon"
+                title="Toggle password visibility"
+              >
+                <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+              </span>
+            </div>
             <small v-if="passwordError" class="text-danger error-inline">{{ passwordError }}</small>
           </div>
 
@@ -79,10 +88,13 @@ import { useAuthStore } from "@/stores/useAuthStore";
 const router = useRouter();
 const store = useAuthStore();
 
+// Reactive state for password visibility
+const showPassword = ref(false); // Added showPassword state
+
 // Reactive state for registration form
 const user = ref({
   name: "",
-  email: "guest@example.com", // Default/Test values
+  email: "guest0@example.com", // Default/Test values
   password: "guest123",      // Default/Test values
   positionId: 2, // Default role: Guest
 });
@@ -105,7 +117,7 @@ const validateForm = () => {
 
   // Validate name
   if (!user.value.name.trim()) {
-    nameError.value = "Name is required.";
+    nameError.value = "Username is required.";
     valid = false;
   }
 
@@ -246,11 +258,16 @@ label {
   font-weight: 700;
   margin-bottom: 0.4rem;
 }
-/* Removed .input-container and .eye-icon styles as they are not used here */
+
+/* Added input container and eye icon styles */
+.input-container {
+  position: relative;
+}
+
 .form-control {
   width: 100%;
-  /* Adjusted padding (no eye icon needed) */
-  padding: 12px 14px;
+  /* Adjusted padding to make space for the eye icon */
+  padding: 12px 45px 12px 14px;
   font-size: 1.05rem; /* Keep larger size */
   background: #2a2a2a;
   border: 1px solid #383838;
@@ -267,6 +284,22 @@ label {
   border-color: #ffd700;
   box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
 }
+
+.eye-icon {
+  position: absolute;
+  right: 14px; /* Adjusted position */
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ffd700;
+  cursor: pointer;
+  font-size: 1.2rem; /* Adjusted size */
+  z-index: 2;
+  transition: color 0.25s ease;
+}
+.eye-icon:hover {
+  color: #ffc107;
+}
+
 
 /* Style for inline error messages */
 .error-inline {
@@ -380,7 +413,7 @@ label {
     font-size: 1.8rem; /* Adjust font size */
   }
   .form-control {
-    padding: 10px 12px; /* Revert padding */
+    padding: 10px 40px 10px 12px; /* Revert padding */
     font-size: 1rem; /* Revert font size */
   }
   .btn {
