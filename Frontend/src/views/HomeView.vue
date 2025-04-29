@@ -109,14 +109,11 @@ h1,
 p {
   font-family: "Old Standard TT", serif;
   color: var(--white);
-  /* 1930s movie-style layered drop shadow */
-  text-shadow: 
-    1px 1px 0 #000,
-    2px 2px 0 #000,
-    3px 3px 0 #000,
-    4px 4px 2px rgba(0, 0, 0, 0.9);
-  -webkit-text-stroke: 1px rgba(0, 0, 0, 0.9);
-  animation: jitter 0.3s infinite;
+  /* Adjusted text-shadow for a less thick effect */
+  text-shadow: 1px 1px 0 #000, 2px 2px 1px rgba(0, 0, 0, 0.9); /* Reduced layers and spread */
+  /* Kept text-stroke, adjust if needed */
+  -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.7); /* Slightly reduced stroke */
+  animation: jitter 0.3s infinite; /* Keep animation */
   font-style: normal;
 }
 
@@ -125,12 +122,15 @@ h1 {
   margin-bottom: 0.5em;
   letter-spacing: 1.5px;
   font-weight: 650;
+  text-shadow: 1px 1px 0 #000, 2px 2px 0 #000, 3px 3px 0 #000,
+    4px 4px 2px rgba(0, 0, 0, 0.9);
+  -webkit-text-stroke: 1px rgba(0, 0, 0, 0.9);
 }
 
 p {
   font-size: clamp(1.1rem, 3.3vw, 2.1rem);
   letter-spacing: 1.3px;
-  font-weight: 1000;
+  font-weight: bold;
 }
 
 /* === Projector Beam === */
