@@ -40,11 +40,12 @@
     - Az guest szerepkörű személy kedve szerint törölheti és szerkesztheti a véleményét, értékelését.
     - De aki nincs bejelentkezve az nem tud véleményezni vagy bármely hasonló jogot igénybe venni
 
-![](DokumentacioKepek/reviews-all.png)
-- All Reviews
 
-![](DokumentacioKepek/reviews-my.png)
+- All Reviews
+![](DokumentacioKepek/reviews-all.png)
+
 - My Reviews
+![](DokumentacioKepek/reviews-my.png)
 
 
 # Hitelesítés
@@ -74,4 +75,10 @@
 ![](DokumentacioKepek/profil.png)
 
 - A profil szerkesztésének felülete
-![](DokumentacioKepek/profil2.png)
+![](DokumentacioKepek/profile2.png)
+
+- A jelszó változtatásához rá kell kattintani a kérdésre: Change password?
+![](DokumentacioKepek/profile3.png)
+
+- Ha rányomtunk akkor tudjuk változtatni a jelszavat
+![](DokumentacioKepek/profilet4.png)
