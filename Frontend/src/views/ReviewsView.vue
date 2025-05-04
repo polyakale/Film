@@ -3,86 +3,42 @@
     <!-- HEADER: Tabs, Search & Filter Controls -->
     <div class="header-container" ref="headerContainerRef">
       <div class="tabs-wrapper">
-        <h3
-          class="title-text clickable"
-          :class="{ 'active-tab': activeTab === 'all' || !isLoggedIn }"
-          @click="switchTab('all')"
-          role="tab"
-          :aria-selected="activeTab === 'all' || !isLoggedIn"
-          tabindex="0"
-        >
+        <h3 class="title-text clickable" :class="{ 'active-tab': activeTab === 'all' || !isLoggedIn }"
+          @click="switchTab('all')" role="tab" :aria-selected="activeTab === 'all' || !isLoggedIn" tabindex="0">
           All Reviews
         </h3>
-        <h3
-          v-if="isLoggedIn"
-          class="title-text clickable"
-          :class="{ 'active-tab': activeTab === 'my' }"
-          @click="switchTab('my')"
-          role="tab"
-          :aria-selected="activeTab === 'my'"
-          tabindex="0"
-        >
+        <h3 v-if="isLoggedIn" class="title-text clickable" :class="{ 'active-tab': activeTab === 'my' }"
+          @click="switchTab('my')" role="tab" :aria-selected="activeTab === 'my'" tabindex="0">
           My Reviews
         </h3>
       </div>
       <div class="controls-container">
         <div class="control-buttons">
-          <div
-            class="control-item"
-            @click="toggleControl('search')"
-            title="Search Reviews"
-            aria-label="Toggle Search Input"
-            :aria-expanded="showSearch"
-            role="button"
-            tabindex="0"
-          >
+          <div class="control-item" @click="toggleControl('search')" title="Search Reviews"
+            aria-label="Toggle Search Input" :aria-expanded="showSearch" role="button" tabindex="0">
             <i class="bi bi-search"></i>
           </div>
-          <div
-            class="control-item"
-            @click="
-              toggleControl(activeTab === 'my' ? 'tableFilter' : 'publicFilter')
-            "
-            title="Filter/Sort Reviews"
-            aria-label="Toggle Filter/Sort Options"
-            :aria-expanded="
-              activeTab === 'my' ? showTableFilter : showPublicFilter
-            "
-            role="button"
-            tabindex="0"
-          >
+          <div class="control-item" @click="
+            toggleControl(activeTab === 'my' ? 'tableFilter' : 'publicFilter')
+            " title="Filter/Sort Reviews" aria-label="Toggle Filter/Sort Options" :aria-expanded="activeTab === 'my' ? showTableFilter : showPublicFilter
+              " role="button" tabindex="0">
             <i class="bi bi-funnel"></i>
           </div>
         </div>
         <transition name="fade-slide">
           <div v-if="showSearch" class="search-container dropdown-panel">
             <div class="search-wrapper">
-              <input
-                type="text"
-                v-model="searchQuery"
-                placeholder="Search reviews..."
-                class="form-control search-input"
-                @input="handleSearch"
-                aria-label="Search Reviews Input"
-              />
+              <input type="text" v-model="searchQuery" placeholder="Search reviews..." class="form-control search-input"
+                @input="handleSearch" aria-label="Search Reviews Input" />
             </div>
           </div>
         </transition>
         <transition name="fade-slide">
-          <div
-            v-if="showTableFilter && isLoggedIn && activeTab === 'my'"
-            class="filter-container dropdown-panel"
-          >
+          <div v-if="showTableFilter && isLoggedIn && activeTab === 'my'" class="filter-container dropdown-panel">
             <div class="filter-wrapper">
-              <label for="tableFilter" class="filter-label"
-                >Sort My Reviews:</label
-              >
-              <select
-                id="tableFilter"
-                v-model="tableReviewFilter"
-                class="form-control custom-filter-select"
-                aria-label="Sort My Reviews"
-              >
+              <label for="tableFilter" class="filter-label">Sort My Reviews:</label>
+              <select id="tableFilter" v-model="tableReviewFilter" class="form-control custom-filter-select"
+                aria-label="Sort My Reviews">
                 <option value="ABC">Film Title (A-Z)</option>
                 <option value="highToLow">Evaluation: High to Low</option>
                 <option value="lowToHigh">Evaluation: Low to High</option>
@@ -93,20 +49,11 @@
           </div>
         </transition>
         <transition name="fade-slide">
-          <div
-            v-if="showPublicFilter && (activeTab === 'all' || !isLoggedIn)"
-            class="filter-container dropdown-panel"
-          >
+          <div v-if="showPublicFilter && (activeTab === 'all' || !isLoggedIn)" class="filter-container dropdown-panel">
             <div class="filter-wrapper">
-              <label for="publicFilter" class="filter-label"
-                >Sort All Reviews:</label
-              >
-              <select
-                id="publicFilter"
-                v-model="publicReviewFilter"
-                class="form-control custom-filter-select"
-                aria-label="Sort All Reviews"
-              >
+              <label for="publicFilter" class="filter-label">Sort All Reviews:</label>
+              <select id="publicFilter" v-model="publicReviewFilter" class="form-control custom-filter-select"
+                aria-label="Sort All Reviews">
                 <option value="ABC">Film Title (A-Z)</option>
                 <option value="highToLow">Evaluation: High to Low</option>
                 <option value="lowToHigh">Evaluation: Low to High</option>
@@ -131,31 +78,21 @@
 
     <!-- MAIN Content Area -->
     <div v-else class="content-area">
-      <div
-        v-if="errorMessages"
-        class="status-message text-danger alert"
-        role="alert"
-      >
+      <div v-if="errorMessages" class="status-message text-danger alert" role="alert">
         <i class="bi bi-exclamation-triangle-fill"></i> {{ errorMessages }}
       </div>
       <div class="data-container">
         <!-- TABLE VIEW (My Reviews) -->
         <div v-show="isLoggedIn && activeTab === 'my'" class="table-section">
           <div class="table-wrapper" ref="tableWrapperRef">
-            <div
-              v-if="
-                !paginatedFavourites.length &&
-                filteredFavourites.length === 0 &&
-                !searchQuery
-              "
-              class="no-data-message"
-            >
+            <div v-if="
+              !paginatedFavourites.length &&
+              filteredFavourites.length === 0 &&
+              !searchQuery
+            " class="no-data-message">
               You haven't added any reviews yet.
             </div>
-            <div
-              v-else-if="!paginatedFavourites.length && searchQuery"
-              class="no-data-message"
-            >
+            <div v-else-if="!paginatedFavourites.length && searchQuery" class="no-data-message">
               No reviews found matching your search criteria.
             </div>
             <table v-else class="custom-table">
@@ -169,99 +106,54 @@
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="favourite in paginatedFavourites"
-                  :key="favourite.id"
-                >
+                <tr v-for="favourite in paginatedFavourites" :key="favourite.id">
                   <td data-label="Film" class="film-title-cell">
                     {{ favourite.filmTitle || "Unknown Film" }}
                   </td>
-                  <td
-                    data-label="Evaluation"
-                    class="text-center evaluation-cell"
-                  >
+                  <td data-label="Evaluation" class="text-center evaluation-cell">
                     <div class="star-rating d-inline-flex align-items-center">
-                      <i
-                        v-for="starIndex in 5"
-                        :key="starIndex"
-                        class="bi star-icon"
-                        :class="getStarClass(favourite, starIndex)"
-                        :aria-label="`Star ${starIndex}`"
-                      ></i>
+                      <i v-for="starIndex in 5" :key="starIndex" class="bi star-icon"
+                        :class="getStarClass(favourite, starIndex)" :aria-label="`Star ${starIndex}`"></i>
                       <small class="evaluation-text">
                         ({{ formatEvaluation(favourite.evaluation) }})
                       </small>
                     </div>
                   </td>
-                  <td
-                    data-label="Created"
-                    class="text-center fst-italic date-cell"
-                  >
+                  <td data-label="Created" class="text-center fst-italic date-cell">
                     {{ formatDate(favourite.created_at) }}
                   </td>
-                  <td
-                    data-label="Updated"
-                    class="text-center fst-italic date-cell"
-                  >
+                  <td data-label="Updated" class="text-center fst-italic date-cell">
                     {{ formatDate(favourite.updated_at) }}
                   </td>
-                  <td
-                    data-label="Operations"
-                    class="text-nowrap text-center operations-cell"
-                  >
-                    <OperationsCrud
-                      @onClickDelete="onClickDelete(favourite)"
-                      @onClickUpdate="onClickUpdate(favourite)"
-                      :data="favourite"
-                    />
+                  <td data-label="Operations" class="text-nowrap text-center operations-cell">
+                    <OperationsCrud @onClickDelete="onClickDelete(favourite)" @onClickUpdate="onClickUpdate(favourite)"
+                      :data="favourite" />
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div
-            class="pagination-wrapper"
-            ref="tablePaginationRef"
-            v-if="totalFavPages > 1"
-          >
-            <Paginator
-              :pageNumber="currentPage"
-              :numberOfPages="totalFavPages"
-              @paging="handlePageChange"
-            />
+          <div class="pagination-wrapper" ref="tablePaginationRef" v-if="totalFavPages > 1">
+            <Paginator :pageNumber="currentPage" :numberOfPages="totalFavPages" @paging="handlePageChange" />
           </div>
         </div>
         <!-- GRID VIEW (All Reviews) -->
-        <div
-          v-show="activeTab === 'all' || !isLoggedIn"
-          class="public-reviews-section"
-        >
+        <div v-show="activeTab === 'all' || !isLoggedIn" class="public-reviews-section">
           <div class="reviews-wrapper" ref="reviewsWrapperRef">
-            <div
-              v-if="
-                !paginatedPublicReviews.length &&
-                filteredPublicReviews.length === 0 &&
-                !searchQuery
-              "
-              class="no-data-message"
-            >
+            <div v-if="
+              !paginatedPublicReviews.length &&
+              filteredPublicReviews.length === 0 &&
+              !searchQuery
+            " class="no-data-message">
               No public reviews available yet.
             </div>
-            <div
-              v-else-if="!paginatedPublicReviews.length && searchQuery"
-              class="no-data-message"
-            >
+            <div v-else-if="!paginatedPublicReviews.length && searchQuery" class="no-data-message">
               No reviews found matching your search criteria.
             </div>
             <div v-else class="reviews-grid">
-              <div
-                v-for="review in paginatedPublicReviews"
-                :key="review.id"
-                class="review-card"
-                :ref="(el) => (cardRefs[review.id] = el)"
-                :class="{ 'is-expanded': isReviewExpanded(review.id) }"
-                :style="getCardStyle(review.id)"
-              >
+              <div v-for="review in paginatedPublicReviews" :key="review.id" class="review-card"
+                :ref="(el) => (cardRefs[review.id] = el)" :class="{ 'is-expanded': isReviewExpanded(review.id) }"
+                :style="getCardStyle(review.id)">
                 <div class="card-inner">
                   <div class="review-header">
                     <span class="review-author">
@@ -271,10 +163,7 @@
                     <span class="review-date">
                       <i class="bi bi-calendar3 me-1"></i>
                       {{ formatDate(review.updated_at) }}
-                      <span
-                        v-if="review.created_at !== review.updated_at"
-                        class="edited-indicator"
-                      >
+                      <span v-if="review.created_at !== review.updated_at" class="edited-indicator">
                         (edited)
                       </span>
                     </span>
@@ -285,13 +174,8 @@
                       {{ review.filmTitle || "Unknown Film" }}
                     </div>
                     <div class="star-rating d-inline-flex align-items-center">
-                      <i
-                        v-for="starIndex in 5"
-                        :key="`star-${review.id}-${starIndex}`"
-                        class="bi star-icon"
-                        :class="getStarClass(review, starIndex)"
-                        :aria-label="`Star ${starIndex}`"
-                      ></i>
+                      <i v-for="starIndex in 5" :key="`star-${review.id}-${starIndex}`" class="bi star-icon"
+                        :class="getStarClass(review, starIndex)" :aria-label="`Star ${starIndex}`"></i>
                       <small class="evaluation-text">
                         ({{ formatEvaluation(review.evaluation) }})
                       </small>
@@ -301,14 +185,8 @@
                     <p :class="{ truncated: !isReviewExpanded(review.id) }">
                       {{ review.content }}
                     </p>
-                    <a
-                      v-if="shouldShowReadMore(review.content)"
-                      @click.prevent="toggleReadMore(review.id)"
-                      class="read-more-link"
-                      role="button"
-                      tabindex="0"
-                      :aria-expanded="isReviewExpanded(review.id)"
-                    >
+                    <a v-if="shouldShowReadMore(review.content)" @click.prevent="toggleReadMore(review.id)"
+                      class="read-more-link" role="button" tabindex="0" :aria-expanded="isReviewExpanded(review.id)">
                       {{
                         isReviewExpanded(review.id) ? "Show less" : "Read more"
                       }}
@@ -318,30 +196,31 @@
               </div>
             </div>
           </div>
-          <div
-            class="pagination-wrapper"
-            ref="publicPaginationRef"
-            v-if="totalPublicPages > 1"
-          >
-            <Paginator
-              :pageNumber="currentPublicPage"
-              :numberOfPages="totalPublicPages"
-              @paging="handlePublicPageChange"
-            />
+          <div class="pagination-wrapper" ref="publicPaginationRef" v-if="totalPublicPages > 1">
+            <Paginator :pageNumber="currentPublicPage" :numberOfPages="totalPublicPages"
+              @paging="handlePublicPageChange" />
           </div>
         </div>
       </div>
     </div>
-
     <!-- Modal for Delete/Update Operations -->
-    <div v-show="isModalVisible">
-      <ReviewForm
-        v-if="modalState === 'Update'"
-        :itemForm="modalItem"
-        :films="films"
-        :isUpdate="true"
-        @saveItem="saveItemHandler"
-      />
+    <div v-show="isModalVisible" class="modal-container">
+      <!-- Delete Modal -->
+      <div v-if="modalState === 'Delete'" class="modal-content delete-modal">
+        <h3 class="modal-title">{{ modalTitle }}</h3>
+        <p class="modal-message">{{ modalMessageYesNo }}</p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-yes" @click="yesEventHandler">Yes</button>
+          <button type="button" class="btn btn-cancel" @click="closeModal">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Update Modal -->
+      <div v-else-if="modalState === 'Update'" class="modal-content update-modal">
+        <!-- Existing Update Form Component -->
+        <ReviewForm :itemForm="modalItem" :films="films" :isUpdate="true" @saveItem="saveItemHandler"
+          @cancel="closeModal" />
+      </div>
     </div>
   </div>
 </template>
@@ -464,11 +343,10 @@ export default {
           `API Error (${method.toUpperCase()} ${url}):`,
           error.response || error
         );
-        this.errorMessages = `Operation failed: ${
-          error.response?.data?.message ||
+        this.errorMessages = `Operation failed: ${error.response?.data?.message ||
           error.message ||
           "An unknown error occurred."
-        }`;
+          }`;
         setTimeout(() => {
           this.errorMessages = null;
         }, 7000);
@@ -586,9 +464,8 @@ export default {
     onClickDelete(item) {
       this.modalState = "Delete";
       this.modalTitle = "Confirm Deletion";
-      this.modalMessageYesNo = `Are you sure you want to delete your review for "${
-        item.filmTitle || "this film"
-      }"? This action cannot be undone.`;
+      this.modalMessageYesNo = `Are you sure you want to delete your review for "${item.filmTitle || "this film"
+        }"? This action cannot be undone.`;
       this.modalYes = "Yes";
       this.modalNo = "No";
       this.modalSize = null;
@@ -599,9 +476,8 @@ export default {
       this.modalState = "Update";
       this.selectedRowId = item.id;
       this.modalItem = { ...item, evaluation: Number(item.evaluation) || 0 };
-      this.modalTitle = `Update Review for "${
-        item.filmTitle || "Unknown Film"
-      }"`;
+      this.modalTitle = `Update Review for "${item.filmTitle || "Unknown Film"
+        }"`;
       this.modalYes = null;
       this.modalNo = null;
       this.modalSize = "lg";
@@ -747,54 +623,36 @@ export default {
     calculateGridItemsPerPage() {
       const container = this.$refs.reviewsWrapperRef;
       if (!container) return DEFAULT_TABLE_ITEMS_PER_PAGE;
-      const { clientWidth: containerWidth, clientHeight: containerHeight } =
-        container;
-      let card = container.querySelector(".review-card");
+
+      const { clientWidth: containerWidth, clientHeight: containerHeight } = container;
+      const card = container.querySelector(".review-card");
+
       if (!card) return DEFAULT_TABLE_ITEMS_PER_PAGE;
-      // Use measured initial height if available
-      const effectiveCardHeight =
-        this.initialCardMaxHeight || card.offsetHeight || 350;
-      const effectiveCardWidth = card.offsetWidth || FIXED_CARD_WIDTH_PX;
-      let gridRowGap = 0,
-        gridColumnGap = 0;
-      const grid = container.querySelector(".reviews-grid");
-      if (grid) {
-        const computedStyles = window.getComputedStyle(grid);
-        gridRowGap = parseFloat(computedStyles.rowGap) || 0;
-        gridColumnGap = parseFloat(computedStyles.columnGap) || 0;
-      }
-      const totalRowUnit = effectiveCardHeight + gridRowGap;
-      const rows = Math.max(
-        1,
-        Math.floor((containerHeight + gridRowGap) / totalRowUnit)
-      );
-      const totalColumnUnit = effectiveCardWidth + gridColumnGap;
-      const columns = Math.max(
-        1,
-        Math.floor((containerWidth + gridColumnGap) / totalColumnUnit)
-      );
-      return rows * columns;
+
+      const cardHeight = card.getBoundingClientRect().height || 350;
+      const cardWidth = card.getBoundingClientRect().width || FIXED_CARD_WIDTH_PX;
+
+      const gridStyles = window.getComputedStyle(container.querySelector(".reviews-grid"));
+      const gridRowGap = parseFloat(gridStyles.rowGap) || 0;
+      const gridColumnGap = parseFloat(gridStyles.columnGap) || 0;
+
+      const totalRowUnit = cardHeight + gridRowGap;
+      const totalColumnUnit = cardWidth + gridColumnGap;
+
+      const rows = Math.max(1, Math.floor((containerHeight + gridRowGap) / totalRowUnit));
+      const columns = Math.max(1, Math.floor((containerWidth + gridColumnGap) / totalColumnUnit));
+
+      return Math.max(1, rows * columns);
     },
     updateItemsPerPage() {
       this.$nextTick(() => {
-        if (
-          (this.activeTab === "all" || !this.isLoggedIn) &&
-          this.$refs.reviewsWrapperRef
-        ) {
+        if ((this.activeTab === "all" || !this.isLoggedIn) && this.$refs.reviewsWrapperRef) {
           const computedItems = this.calculateGridItemsPerPage();
           if (this.itemsPerPage !== computedItems) {
             this.itemsPerPage = computedItems > 0 ? computedItems : 1;
-            if (
-              this.currentPublicPage > this.totalPublicPages &&
-              this.totalPublicPages > 0
-            ) {
-              this.currentPublicPage = this.totalPublicPages;
-            } else if (this.currentPublicPage < 1) {
-              this.currentPublicPage = 1;
-            }
-            nextTick(() => {
-              this.checkAllTruncation();
-            });
+            this.currentPublicPage = Math.min(this.currentPublicPage, this.totalPublicPages || 1);
+            this.currentPublicPage = Math.max(this.currentPublicPage, 1);
+            this.checkAllTruncation();
           }
         } else {
           this.itemsPerPage = DEFAULT_TABLE_ITEMS_PER_PAGE;
@@ -804,13 +662,9 @@ export default {
     debouncedUpdateItemsPerPage() {
       clearTimeout(this.itemsUpdateTimer);
       this.itemsUpdateTimer = setTimeout(() => {
-        if (this.initialCardMaxHeight == null) {
-          this.measureAndSetInitialHeight();
-        }
         this.updateItemsPerPage();
-      }, 250);
+      }, 200);
     },
-
     setupResizeObserver() {
       if (this.resizeObserver) this.resizeObserver.disconnect();
       const container = this.$refs.reviewsWrapperRef;
@@ -1376,6 +1230,103 @@ export default {
   color: var(--text-muted) !important;
 }
 
+/* ---- Modal Container ---- */
+.modal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  /* semi-transparent overlay */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+/* ---- Delete Modal Content ---- */
+.modal-content.delete-modal {
+  background: var(--bg-primary, #1f1f1f);
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+}
+
+/* ---- Modal Content ---- */
+.modal-content {
+  background: var(--bg-primary, #1f1f1f);
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+}
+
+/* ---- Modal Titles & Messages ---- */
+.modal-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.modal-message {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ---- Modal Actions ---- */
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* ---- Button Styles for Modal ---- */
+
+/* Common modal button base style */
+.modal-actions .btn {
+  min-width: 100px;
+  padding: 10px 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Style for the "Yes" button */
+.btn-yes {
+  background: #ffd700;
+  /* yellow background */
+  color: #1f1f1f;
+  box-shadow: 0 2px 6px rgba(255, 215, 0, 0.3);
+}
+
+.btn-yes:hover:not(:disabled) {
+  background: #ffc107;
+  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.5);
+}
+
+/* Style for the "Cancel" button in modal (making it visible and prominent) */
+.btn-cancel {
+  background: #555;
+  /* dark background */
+  color: #fff;
+  border: 1px solid #777;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #666;
+  border-color: #888;
+  color: #fff;
+}
+
 /* === Grid (Review Card) Styles === */
 .reviews-grid {
   display: grid;
@@ -1445,11 +1396,13 @@ export default {
 
 .review-content p.truncated {
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* Limit to two lines */
+  -webkit-line-clamp: 2;
+  /* Limit to two lines */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .review-card.is-expanded .review-content p {
   -webkit-line-clamp: unset;
 }
@@ -1468,6 +1421,7 @@ export default {
 .read-more-link:focus {
   text-decoration: underline;
 }
+
 /* === Pagination === */
 .pagination-wrapper {
   padding: 1rem 0 0.5rem 0;
