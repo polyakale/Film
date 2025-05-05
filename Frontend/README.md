@@ -191,9 +191,6 @@ APP_ENV=testing php artisan db:initdb
 ## 5. További Források
 
 - [Laravel dokumentáció](https://laravel.com/docs)
-- [Vue 3 dokumentáció](https://vuejs.org/)
-- [phpMyAdmin](https://www.phpmyadmin.net/)
-- [TablePlus](https://tableplus.com/)
-- [Stack Overflow](https://stackoverflow.com/)
+- [Vue 3 dokumentáció](https://vuejs.org/guide/introduction.html)
 
 ---
