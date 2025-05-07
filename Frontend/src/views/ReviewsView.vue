@@ -1,88 +1,43 @@
 <template>
   <div class="reviews-container">
-    <!-- HEADER: Tabs, Search & Filter Controls -->
     <div class="header-container" ref="headerContainerRef">
       <div class="tabs-wrapper">
-        <h3
-          class="title-text clickable"
-          :class="{ 'active-tab': activeTab === 'all' || !isLoggedIn }"
-          @click="switchTab('all')"
-          role="tab"
-          :aria-selected="activeTab === 'all' || !isLoggedIn"
-          tabindex="0"
-        >
+        <h3 class="title-text clickable" :class="{ 'active-tab': activeTab === 'all' || !isLoggedIn }"
+          @click="switchTab('all')" role="tab" :aria-selected="activeTab === 'all' || !isLoggedIn" tabindex="0">
           All Reviews
         </h3>
-        <h3
-          v-if="isLoggedIn"
-          class="title-text clickable"
-          :class="{ 'active-tab': activeTab === 'my' }"
-          @click="switchTab('my')"
-          role="tab"
-          :aria-selected="activeTab === 'my'"
-          tabindex="0"
-        >
+        <h3 v-if="isLoggedIn" class="title-text clickable" :class="{ 'active-tab': activeTab === 'my' }"
+          @click="switchTab('my')" role="tab" :aria-selected="activeTab === 'my'" tabindex="0">
           My Reviews
         </h3>
       </div>
       <div class="controls-container">
         <div class="control-buttons">
-          <div
-            class="control-item"
-            @click="toggleControl('search')"
-            title="Search Reviews"
-            aria-label="Toggle Search Input"
-            :aria-expanded="showSearch"
-            role="button"
-            tabindex="0"
-          >
+          <div class="control-item" @click="toggleControl('search')" title="Search Reviews"
+            aria-label="Toggle Search Input" :aria-expanded="showSearch" role="button" tabindex="0">
             <i class="bi bi-search"></i>
           </div>
-          <div
-            class="control-item"
-            @click="
-              toggleControl(activeTab === 'my' ? 'tableFilter' : 'publicFilter')
-            "
-            title="Filter/Sort Reviews"
-            aria-label="Toggle Filter/Sort Options"
-            :aria-expanded="
-              activeTab === 'my' ? showTableFilter : showPublicFilter
-            "
-            role="button"
-            tabindex="0"
-          >
+          <div class="control-item" @click="
+            toggleControl(activeTab === 'my' ? 'tableFilter' : 'publicFilter')
+            " title="Filter/Sort Reviews" aria-label="Toggle Filter/Sort Options" :aria-expanded="activeTab === 'my' ? showTableFilter : showPublicFilter
+              " role="button" tabindex="0">
             <i class="bi bi-funnel"></i>
           </div>
         </div>
         <transition name="fade-slide">
           <div v-if="showSearch" class="search-container dropdown-panel">
             <div class="search-wrapper">
-              <input
-                type="text"
-                v-model="searchQuery"
-                placeholder="Search reviews..."
-                class="form-control search-input"
-                @input="handleSearch"
-                aria-label="Search Reviews Input"
-              />
+              <input type="text" v-model="searchQuery" placeholder="Search reviews..." class="form-control search-input"
+                @input="handleSearch" aria-label="Search Reviews Input" />
             </div>
           </div>
         </transition>
         <transition name="fade-slide">
-          <div
-            v-if="showTableFilter && isLoggedIn && activeTab === 'my'"
-            class="filter-container dropdown-panel"
-          >
+          <div v-if="showTableFilter && isLoggedIn && activeTab === 'my'" class="filter-container dropdown-panel">
             <div class="filter-wrapper">
-              <label for="tableFilter" class="filter-label"
-                >Sort My Reviews:</label
-              >
-              <select
-                id="tableFilter"
-                v-model="tableReviewFilter"
-                class="form-control custom-filter-select"
-                aria-label="Sort My Reviews"
-              >
+              <label for="tableFilter" class="filter-label">Sort My Reviews:</label>
+              <select id="tableFilter" v-model="tableReviewFilter" class="form-control custom-filter-select"
+                aria-label="Sort My Reviews">
                 <option value="ABC">Film Title (A-Z)</option>
                 <option value="highToLow">Evaluation: High to Low</option>
                 <option value="lowToHigh">Evaluation: Low to High</option>
@@ -93,20 +48,11 @@
           </div>
         </transition>
         <transition name="fade-slide">
-          <div
-            v-if="showPublicFilter && (activeTab === 'all' || !isLoggedIn)"
-            class="filter-container dropdown-panel"
-          >
+          <div v-if="showPublicFilter && (activeTab === 'all' || !isLoggedIn)" class="filter-container dropdown-panel">
             <div class="filter-wrapper">
-              <label for="publicFilter" class="filter-label"
-                >Sort All Reviews:</label
-              >
-              <select
-                id="publicFilter"
-                v-model="publicReviewFilter"
-                class="form-control custom-filter-select"
-                aria-label="Sort All Reviews"
-              >
+              <label for="publicFilter" class="filter-label">Sort All Reviews:</label>
+              <select id="publicFilter" v-model="publicReviewFilter" class="form-control custom-filter-select"
+                aria-label="Sort All Reviews">
                 <option value="ABC">Film Title (A-Z)</option>
                 <option value="highToLow">Evaluation: High to Low</option>
                 <option value="lowToHigh">Evaluation: Low to High</option>
@@ -119,7 +65,6 @@
       </div>
     </div>
 
-    <!-- LOADING Overlay -->
     <div v-if="loading" class="loading-overlay">
       <div class="loading-content">
         <div class="spinner" role="status">
@@ -129,33 +74,21 @@
       </div>
     </div>
 
-    <!-- MAIN Content Area -->
     <div v-else class="content-area">
-      <div
-        v-if="errorMessages"
-        class="status-message text-danger alert"
-        role="alert"
-      >
+      <div v-if="errorMessages" class="status-message text-danger alert" role="alert">
         <i class="bi bi-exclamation-triangle-fill"></i> {{ errorMessages }}
       </div>
       <div class="data-container">
-        <!-- TABLE VIEW (My Reviews) -->
         <div v-show="isLoggedIn && activeTab === 'my'" class="table-section">
           <div class="table-wrapper" ref="tableWrapperRef">
-            <div
-              v-if="
-                !paginatedFavourites.length &&
-                filteredFavourites.length === 0 &&
-                !searchQuery
-              "
-              class="no-data-message"
-            >
+            <div v-if="
+              !paginatedFavourites.length &&
+              filteredFavourites.length === 0 &&
+              !searchQuery
+            " class="no-data-message">
               You haven't added any reviews yet.
             </div>
-            <div
-              v-else-if="!paginatedFavourites.length && searchQuery"
-              class="no-data-message"
-            >
+            <div v-else-if="!paginatedFavourites.length && searchQuery" class="no-data-message">
               No reviews found matching your search criteria.
             </div>
             <table v-else class="custom-table">
@@ -169,99 +102,54 @@
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="favourite in paginatedFavourites"
-                  :key="favourite.id"
-                >
+                <tr v-for="favourite in paginatedFavourites" :key="favourite.id">
                   <td data-label="Film" class="film-title-cell">
                     {{ favourite.filmTitle || "Unknown Film" }}
                   </td>
-                  <td
-                    data-label="Evaluation"
-                    class="text-center evaluation-cell"
-                  >
+                  <td data-label="Evaluation" class="text-center evaluation-cell">
                     <div class="star-rating d-inline-flex align-items-center">
-                      <i
-                        v-for="starIndex in 5"
-                        :key="starIndex"
-                        class="bi star-icon"
-                        :class="getStarClass(favourite, starIndex)"
-                        :aria-label="`Star ${starIndex}`"
-                      ></i>
+                      <i v-for="starIndex in 5" :key="starIndex" class="bi star-icon"
+                        :class="getStarClass(favourite, starIndex)" :aria-label="`Star ${starIndex}`"></i>
                       <small class="evaluation-text">
                         ({{ formatEvaluation(favourite.evaluation) }})
                       </small>
                     </div>
                   </td>
-                  <td
-                    data-label="Created"
-                    class="text-center fst-italic date-cell"
-                  >
+                  <td data-label="Created" class="text-center fst-italic date-cell">
                     {{ formatDate(favourite.created_at) }}
                   </td>
-                  <td
-                    data-label="Updated"
-                    class="text-center fst-italic date-cell"
-                  >
+                  <td data-label="Updated" class="text-center fst-italic date-cell">
                     {{ formatDate(favourite.updated_at) }}
                   </td>
-                  <td
-                    data-label="Operations"
-                    class="text-nowrap text-center operations-cell"
-                  >
-                    <OperationsCrud
-                      @onClickDelete="onClickDelete(favourite)"
-                      @onClickUpdate="onClickUpdate(favourite)"
-                      :data="favourite"
-                    />
+                  <td data-label="Operations" class="text-nowrap text-center operations-cell">
+                    <OperationsCrud @onClickDelete="onClickDelete(favourite)" @onClickUpdate="onClickUpdate(favourite)"
+                      :data="favourite" />
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div
-            class="pagination-wrapper"
-            ref="tablePaginationRef"
-            v-if="totalFavPages > 1"
-          >
-            <Paginator
-              :pageNumber="currentPage"
-              :numberOfPages="totalFavPages"
-              @paging="handlePageChange"
-            />
+          <div class="pagination-wrapper" ref="tablePaginationRef" v-if="totalFavPages > 1">
+            <Paginator :pageNumber="currentPage" :numberOfPages="totalFavPages" @paging="handlePageChange" />
           </div>
         </div>
-        <!-- GRID VIEW (All Reviews) -->
-        <div
-          v-show="activeTab === 'all' || !isLoggedIn"
-          class="public-reviews-section"
-        >
-          <div class="reviews-wrapper" ref="reviewsWrapperRef">
-            <div
-              v-if="
-                !paginatedPublicReviews.length &&
-                filteredPublicReviews.length === 0 &&
-                !searchQuery
-              "
-              class="no-data-message"
-            >
+
+        <div v-show="activeTab === 'all' || !isLoggedIn" class="public-reviews-section" ref="reviewsWrapperRef">
+          <div class="reviews-scroll-content">
+            <div v-if="
+              !paginatedPublicReviews.length &&
+              filteredPublicReviews.length === 0 &&
+              !searchQuery
+            " class="no-data-message">
               No public reviews available yet.
             </div>
-            <div
-              v-else-if="!paginatedPublicReviews.length && searchQuery"
-              class="no-data-message"
-            >
+            <div v-else-if="!paginatedPublicReviews.length && searchQuery" class="no-data-message">
               No reviews found matching your search criteria.
             </div>
             <div v-else class="reviews-grid">
-              <div
-                v-for="review in paginatedPublicReviews"
-                :key="review.id"
-                class="review-card"
-                :ref="(el) => (cardRefs[review.id] = el)"
-                :class="{ 'is-expanded': isReviewExpanded(review.id) }"
-                :style="getCardStyle(review.id)"
-              >
+              <div v-for="review in paginatedPublicReviews" :key="review.id" class="review-card"
+                :ref="(el) => (cardRefs[review.id] = el)" :class="{ 'is-expanded': isReviewExpanded(review.id) }"
+                :style="getCardStyle(review.id)">
                 <div class="card-inner">
                   <div class="review-header">
                     <span class="review-author">
@@ -271,10 +159,7 @@
                     <span class="review-date">
                       <i class="bi bi-calendar3 me-1"></i>
                       {{ formatDate(review.updated_at) }}
-                      <span
-                        v-if="review.created_at !== review.updated_at"
-                        class="edited-indicator"
-                      >
+                      <span v-if="review.created_at !== review.updated_at" class="edited-indicator">
                         (edited)
                       </span>
                     </span>
@@ -285,30 +170,19 @@
                       {{ review.filmTitle || "Unknown Film" }}
                     </div>
                     <div class="star-rating d-inline-flex align-items-center">
-                      <i
-                        v-for="starIndex in 5"
-                        :key="`star-${review.id}-${starIndex}`"
-                        class="bi star-icon"
-                        :class="getStarClass(review, starIndex)"
-                        :aria-label="`Star ${starIndex}`"
-                      ></i>
+                      <i v-for="starIndex in 5" :key="`star-${review.id}-${starIndex}`" class="bi star-icon"
+                        :class="getStarClass(review, starIndex)" :aria-label="`Star ${starIndex}`"></i>
                       <small class="evaluation-text">
                         ({{ formatEvaluation(review.evaluation) }})
                       </small>
                     </div>
                   </div>
-                  <div class="review-content">
-                    <p :class="{ truncated: !isReviewExpanded(review.id) }">
+                  <div class="review-content" :ref="(el) => (reviewContentRefs[review.id] = el)">
+                    <p :class="{ truncated: !isReviewExpanded(review.id) && doesReviewNeedTruncation(review.id) }">
                       {{ review.content }}
                     </p>
-                    <a
-                      v-if="shouldShowReadMore(review.content)"
-                      @click.prevent="toggleReadMore(review.id)"
-                      class="read-more-link"
-                      role="button"
-                      tabindex="0"
-                      :aria-expanded="isReviewExpanded(review.id)"
-                    >
+                    <a v-if="doesReviewNeedTruncation(review.id)" @click.prevent="toggleReadMore(review.id)"
+                      class="read-more-link" role="button" tabindex="0" :aria-expanded="isReviewExpanded(review.id)">
                       {{
                         isReviewExpanded(review.id) ? "Show less" : "Read more"
                       }}
@@ -318,49 +192,30 @@
               </div>
             </div>
           </div>
-          <div
-            class="pagination-wrapper"
-            ref="publicPaginationRef"
-            v-if="totalPublicPages > 1"
-          >
-            <Paginator
-              :pageNumber="currentPublicPage"
-              :numberOfPages="totalPublicPages"
-              @paging="handlePublicPageChange"
-            />
+          <div class="pagination-wrapper" ref="publicPaginationRef" v-if="totalPublicPages > 1">
+            <Paginator :pageNumber="currentPublicPage" :numberOfPages="totalPublicPages"
+              @paging="handlePublicPageChange" />
           </div>
         </div>
       </div>
     </div>
-    <!-- Modal for Delete/Update Operations -->
-    <div v-show="isModalVisible" class="modal-container">
-      <!-- Delete Modal -->
-      <div v-if="modalState === 'Delete'" class="modal-content delete-modal">
-        <h3 class="modal-title">{{ modalTitle }}</h3>
-        <p class="modal-message">{{ modalMessageYesNo }}</p>
-        <div class="modal-actions">
-          <button type="button" class="btn btn-yes" @click="yesEventHandler">
-            Yes
-          </button>
-          <button type="button" class="btn btn-cancel" @click="closeModal">
-            Cancel
-          </button>
-        </div>
+
+    <div v-if="isModalVisible" class="modal-container" @click.self="closeModal">
+      <div v-if="modalState === 'Update'" class="modal-content modal-content-form" role="dialog" aria-modal="true"
+        :aria-labelledby="modalFormTitleId">
+        <h3 :id="modalFormTitleId" class="visually-hidden">{{ modalTitle || 'Update Review' }}</h3>
+        <ReviewForm :itemForm="modalItem" :films="films" :isUpdate="true" @saveItem="saveItemHandler"
+          @closeModal="closeModal" />
       </div>
 
-      <!-- Update Modal -->
-      <div
-        v-else-if="modalState === 'Update'"
-        class="modal-content update-modal"
-      >
-        <!-- Existing Update Form Component -->
-        <ReviewForm
-          :itemForm="modalItem"
-          :films="films"
-          :isUpdate="true"
-          @saveItem="saveItemHandler"
-          @cancel="closeModal"
-        />
+      <div v-else-if="modalState === 'Delete'" class="modal-content delete-modal" role="dialog" aria-modal="true"
+        :aria-labelledby="modalConfirmTitleId" aria-describedby="modalConfirmDescId">
+        <h5 class="modal-title" :id="modalConfirmTitleId">{{ modalTitle }}</h5>
+        <p class="modal-message" :id="modalConfirmDescId">{{ modalMessageYesNo }}</p>
+        <div class="modal-actions">
+          <button @click="yesEventHandler" class="btn btn-yes">{{ modalYes || 'Yes' }}</button>
+          <button @click="closeModal" class="btn btn-cancel">{{ modalNo || 'Cancel' }}</button>
+        </div>
       </div>
     </div>
   </div>
@@ -370,7 +225,7 @@
 import axios from "axios";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { BASE_URL } from "../helpers/baseUrls";
-import { nextTick } from "vue";
+import { nextTick, ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
 
 // Import Child Components
 import Paginator from "@/components/Paginator.vue";
@@ -379,98 +234,111 @@ import ReviewForm from "@/components/forms/ReviewForm.vue";
 
 // --- Constants ---
 const DEFAULT_TABLE_ITEMS_PER_PAGE = 10;
-const FIXED_CARD_WIDTH_PX = 330; // Fallback card width
+const DEFAULT_GRID_ITEMS_PER_PAGE = 12;
 
 export default {
   components: { Paginator, OperationsCrud, ReviewForm },
-  data() {
-    return {
-      authStore: null,
-      loading: false,
-      errorMessages: null,
-      activeTab: "my",
-      tableReviewFilter: "newest",
-      publicReviewFilter: "newest",
-      searchQuery: "",
-      debounceTimer: null,
-      itemsUpdateTimer: null,
-      resizeObserver: null,
-      films: [],
-      favourites: [],
-      publicReviews: [],
-      currentPage: 1,
-      currentPublicPage: 1,
-      itemsPerPage: DEFAULT_TABLE_ITEMS_PER_PAGE,
-      showSearch: false,
-      showTableFilter: false,
-      showPublicFilter: false,
-      isModalVisible: false,
-      modalItem: {},
-      modalMessageYesNo: null,
-      modalState: "Read",
-      modalTitle: null,
-      modalYes: null,
-      modalNo: null,
-      modalSize: null,
-      selectedRowId: null,
-      // Read More / Truncation State
-      cardRefs: {},
-      reviewContentRefs: {},
-      expandedState: {},
-      truncatedState: {},
-      initialCardMaxHeight: null,
-    };
-  },
-  computed: {
-    isLoggedIn() {
-      return !!this.authStore?.id;
-    },
-    filteredFavourites() {
-      return this.filterAndSortReviews(
-        this.favourites,
-        this.searchQuery,
-        this.tableReviewFilter,
+  setup() {
+    // --- Refs for DOM elements ---
+    const headerContainerRef = ref(null);
+    const tableWrapperRef = ref(null);
+    const reviewsWrapperRef = ref(null);
+    const tablePaginationRef = ref(null);
+    const publicPaginationRef = ref(null);
+    const cardRefs = ref({});
+    const reviewContentRefs = ref({});
+
+    // --- Reactive State ---
+    const authStore = useAuthStore();
+    const loading = ref(false);
+    const errorMessages = ref(null);
+    const activeTab = ref(authStore?.id ? "my" : "all");
+    const tableReviewFilter = ref("newest");
+    const publicReviewFilter = ref("newest");
+    const searchQuery = ref("");
+    const films = ref([]);
+    const favourites = ref([]);
+    const publicReviews = ref([]);
+    const currentPage = ref(1);
+    const currentPublicPage = ref(1);
+    const itemsPerPage = ref(authStore?.id ? DEFAULT_TABLE_ITEMS_PER_PAGE : DEFAULT_GRID_ITEMS_PER_PAGE);
+    const showSearch = ref(false);
+    const showTableFilter = ref(false);
+    const showPublicFilter = ref(false);
+    const isModalVisible = ref(false);
+    const modalItem = ref({});
+    const modalMessageYesNo = ref(null);
+    const modalState = ref("Read"); // Possible states: Read, Update, Delete
+    const modalTitle = ref(null);
+    const modalYes = ref(null); // Text for 'Yes' button in confirmation
+    const modalNo = ref(null);  // Text for 'No' button in confirmation
+    // modalSize is no longer used directly as CSS handles sizing
+    const selectedRowId = ref(null);
+    const expandedState = ref({});
+    const truncatedState = ref({});
+
+    // Accessibility refs for modals
+    const modalFormTitleId = 'modal-form-title';
+    const modalConfirmTitleId = 'modal-confirm-title';
+    const modalConfirmDescId = 'modal-confirm-description';
+
+
+    // --- Timers ---
+    let debounceTimer = null;
+
+    // --- Computed Properties ---
+    const isLoggedIn = computed(() => !!authStore?.id);
+
+    const filteredFavourites = computed(() => {
+      return filterAndSortReviews(
+        favourites.value,
+        searchQuery.value,
+        tableReviewFilter.value,
         false
       );
-    },
-    filteredPublicReviews() {
-      const filtered = this.filterAndSortReviews(
-        this.publicReviews,
-        this.searchQuery,
-        this.publicReviewFilter,
+    });
+
+    const filteredPublicReviews = computed(() => {
+      return filterAndSortReviews(
+        publicReviews.value,
+        searchQuery.value,
+        publicReviewFilter.value,
         true
       );
-      return filtered;
-    },
-    totalFavPages() {
-      const tableItemsPerPage = DEFAULT_TABLE_ITEMS_PER_PAGE;
-      return Math.ceil(this.filteredFavourites.length / tableItemsPerPage);
-    },
-    paginatedFavourites() {
-      const tableItemsPerPage = DEFAULT_TABLE_ITEMS_PER_PAGE;
-      const start = (this.currentPage - 1) * tableItemsPerPage;
-      const end = start + tableItemsPerPage;
-      return this.filteredFavourites.slice(start, end);
-    },
-    totalPublicPages() {
-      return Math.ceil(this.filteredPublicReviews.length / this.itemsPerPage);
-    },
-    paginatedPublicReviews() {
-      const start = (this.currentPublicPage - 1) * this.itemsPerPage;
-      const end = start + this.itemsPerPage;
-      const paginated = this.filteredPublicReviews.slice(start, end);
+    });
+
+    const totalFavPages = computed(() => {
+      return Math.ceil(filteredFavourites.value.length / DEFAULT_TABLE_ITEMS_PER_PAGE);
+    });
+
+    const paginatedFavourites = computed(() => {
+      const start = (currentPage.value - 1) * DEFAULT_TABLE_ITEMS_PER_PAGE;
+      const end = start + DEFAULT_TABLE_ITEMS_PER_PAGE;
+      return filteredFavourites.value.slice(start, end);
+    });
+
+    const totalPublicPages = computed(() => {
+      const perPage = Math.max(1, itemsPerPage.value);
+      return Math.ceil(filteredPublicReviews.value.length / perPage);
+    });
+
+    const paginatedPublicReviews = computed(() => {
+      const perPage = Math.max(1, itemsPerPage.value);
+      const start = (currentPublicPage.value - 1) * perPage;
+      const end = start + perPage;
+      const paginated = filteredPublicReviews.value.slice(start, end);
+      nextTick(() => checkAllTruncation(paginated));
       return paginated;
-    },
-  },
-  methods: {
-    async _fetchApi(url, config = {}, method = "get", data = null) {
-      this.loading = true;
-      this.errorMessages = null;
-      const token = this.authStore?.token;
+    });
+
+    // --- Methods ---
+    const _fetchApi = async (url, config = {}, method = "get", data = null) => {
+      loading.value = true;
+      errorMessages.value = null;
+      const token = authStore?.token;
       const headers = {
         Accept: "application/json",
-        ...(method !== "get" &&
-          method !== "delete" && { "Content-Type": "application/json" }),
+        ...(method !== "get" && method !== "delete" && { "Content-Type": "application/json" }),
         ...(token && { Authorization: `Bearer ${token}` }),
         ...config.headers,
       };
@@ -480,47 +348,40 @@ export default {
         const response = await axios(axiosConfig);
         return response.data;
       } catch (error) {
-        console.error(
-          `API Error (${method.toUpperCase()} ${url}):`,
-          error.response || error
-        );
-        this.errorMessages = `Operation failed: ${
-          error.response?.data?.message ||
-          error.message ||
-          "An unknown error occurred."
-        }`;
-        setTimeout(() => {
-          this.errorMessages = null;
-        }, 7000);
+        console.error(`API Error (${method.toUpperCase()} ${url}):`, error.response || error);
+        errorMessages.value = `Operation failed: ${error.response?.data?.message || error.message || "An unknown error occurred."}`;
+        setTimeout(() => { errorMessages.value = null; }, 7000);
         return null;
       } finally {
-        this.loading = false;
+        loading.value = false;
       }
-    },
-    async fetchFavourites() {
-      if (!this.isLoggedIn) return;
-      const userId = this.authStore.id;
-      const responseData = await this._fetchApi(
-        `${BASE_URL}/favouritesByUserId/${userId}`
-      );
+    };
+
+    const fetchFavourites = async () => {
+      if (!isLoggedIn.value) return;
+      const userId = authStore.id;
+      const responseData = await _fetchApi(`${BASE_URL}/favouritesByUserId/${userId}`);
       if (responseData?.data) {
-        this.favourites = responseData.data.map((fav) => ({
+        favourites.value = responseData.data.map((fav) => ({
           ...fav,
           evaluation: Number(fav.evaluation) || 0,
         }));
       } else {
-        this.favourites = [];
+        favourites.value = [];
       }
-      if (this.currentPage > this.totalFavPages && this.totalFavPages > 0) {
-        this.currentPage = this.totalFavPages;
-      } else if (this.currentPage < 1) {
-        this.currentPage = 1;
+      if (currentPage.value > totalFavPages.value && totalFavPages.value > 0) {
+        currentPage.value = totalFavPages.value;
+      } else if (currentPage.value < 1 && filteredFavourites.value.length > 0) {
+        currentPage.value = 1;
+      } else if (filteredFavourites.value.length === 0) {
+        currentPage.value = 1;
       }
-    },
-    async fetchAllReviews() {
-      const responseData = await this._fetchApi(`${BASE_URL}/favourites`);
+    };
+
+    const fetchAllReviews = async () => {
+      const responseData = await _fetchApi(`${BASE_URL}/favourites`);
       if (responseData?.data) {
-        this.publicReviews = responseData.data.map((review) => ({
+        publicReviews.value = responseData.data.map((review) => ({
           ...review,
           userName: review.userName || "Anonymous",
           filmTitle: review.filmTitle || "Unknown Film",
@@ -528,495 +389,362 @@ export default {
           content: review.content,
         }));
       } else {
-        this.publicReviews = [];
+        publicReviews.value = [];
       }
-      this.updateItemsPerPage();
-      if (
-        this.currentPublicPage > this.totalPublicPages &&
-        this.totalPublicPages > 0
-      ) {
-        this.currentPublicPage = this.totalPublicPages;
-      } else if (this.currentPublicPage < 1) {
-        this.currentPublicPage = 1;
+      updateItemsPerPage();
+      if (currentPublicPage.value > totalPublicPages.value && totalPublicPages.value > 0) {
+        currentPublicPage.value = totalPublicPages.value;
+      } else if (currentPublicPage.value < 1 && filteredPublicReviews.value.length > 0) {
+        currentPublicPage.value = 1;
+      } else if (filteredPublicReviews.value.length === 0) {
+        currentPublicPage.value = 1;
       }
-      await nextTick();
-      this.measureAndSetInitialHeight();
-      this.checkAllTruncation();
-    },
-    async fetchFilms() {
-      const responseData = await this._fetchApi(`${BASE_URL}/films`);
-      this.films = (responseData && responseData.data) || [];
-    },
-    switchTab(tab) {
-      if (tab === "my" && !this.isLoggedIn) return;
-      if (this.activeTab === tab) return;
-      this.activeTab = tab;
-      this.searchQuery = "";
-      this.errorMessages = null;
-      this.showSearch = false;
-      this.showTableFilter = false;
-      this.showPublicFilter = false;
-      this.expandedState = {};
-      this.truncatedState = {};
-      this.initialCardMaxHeight = null;
-      if (tab === "all") {
-        this.currentPublicPage = 1;
-        if (this.publicReviews.length === 0) {
-          this.fetchAllReviews();
-        } else {
-          this.updateItemsPerPage();
-          nextTick(() => {
-            this.measureAndSetInitialHeight();
-            this.checkAllTruncation();
-          });
-        }
-      } else if (tab === "my") {
-        this.currentPage = 1;
-        if (this.favourites.length === 0 && this.isLoggedIn) {
-          this.fetchFavourites();
-        }
-        this.itemsPerPage = DEFAULT_TABLE_ITEMS_PER_PAGE;
+    };
+
+    const fetchFilms = async () => {
+      const responseData = await _fetchApi(`${BASE_URL}/films`);
+      films.value = (responseData && responseData.data) || [];
+    };
+
+    const updateItemsPerPage = () => {
+      if (activeTab.value === "all" || !isLoggedIn.value) {
+        itemsPerPage.value = DEFAULT_GRID_ITEMS_PER_PAGE;
+      } else {
+        itemsPerPage.value = DEFAULT_TABLE_ITEMS_PER_PAGE;
       }
       nextTick(() => {
-        this.setupResizeObserver();
+        if (activeTab.value === 'all' || !isLoggedIn.value) {
+          if (currentPublicPage.value > totalPublicPages.value && totalPublicPages.value > 0) {
+            currentPublicPage.value = totalPublicPages.value;
+          } else if (currentPublicPage.value < 1 && totalPublicPages.value > 0) {
+            currentPublicPage.value = 1;
+          } else if (totalPublicPages.value === 0) {
+            currentPublicPage.value = 1;
+          }
+        } else {
+          if (currentPage.value > totalFavPages.value && totalFavPages.value > 0) {
+            currentPage.value = totalFavPages.value;
+          } else if (currentPage.value < 1 && totalFavPages.value > 0) {
+            currentPage.value = 1;
+          } else if (totalFavPages.value === 0) {
+            currentPage.value = 1;
+          }
+        }
       });
-    },
-    handleSearch() {
-      clearTimeout(this.debounceTimer);
-      this.debounceTimer = setTimeout(() => {
-        this.currentPage = 1;
-        this.currentPublicPage = 1;
-      }, 300);
-    },
-    toggleControl(type) {
-      if (type === "search") {
-        this.showSearch = !this.showSearch;
-        this.showTableFilter = false;
-        this.showPublicFilter = false;
-      } else if (type === "tableFilter") {
-        this.showTableFilter = !this.showTableFilter;
-        this.showSearch = false;
-        this.showPublicFilter = false;
-      } else if (type === "publicFilter") {
-        this.showPublicFilter = !this.showPublicFilter;
-        this.showSearch = false;
-        this.showTableFilter = false;
+    };
+
+
+    const switchTab = async (tab) => {
+      if (tab === "my" && !isLoggedIn.value) return;
+      if (activeTab.value === tab) return;
+
+      activeTab.value = tab;
+      searchQuery.value = "";
+      errorMessages.value = null;
+      showSearch.value = false;
+      showTableFilter.value = false;
+      showPublicFilter.value = false;
+      expandedState.value = {};
+      truncatedState.value = {};
+
+      updateItemsPerPage();
+
+      if (tab === "all") {
+        currentPublicPage.value = 1;
+        if (publicReviews.value.length === 0) {
+          await fetchAllReviews();
+        }
+      } else if (tab === "my") {
+        currentPage.value = 1;
+        if (favourites.value.length === 0 && isLoggedIn.value) {
+          await fetchFavourites();
+        }
       }
-    },
-    onClickDelete(item) {
-      this.modalState = "Delete";
-      this.modalTitle = "Confirm Deletion";
-      this.modalMessageYesNo = `Are you sure you want to delete your review for "${
-        item.filmTitle || "this film"
-      }"? This action cannot be undone.`;
-      this.modalYes = "Yes";
-      this.modalNo = "No";
-      this.modalSize = null;
-      this.selectedRowId = item.id;
-      this.isModalVisible = true;
-    },
-    onClickUpdate(item) {
-      this.modalState = "Update";
-      this.selectedRowId = item.id;
-      this.modalItem = { ...item, evaluation: Number(item.evaluation) || 0 };
-      this.modalTitle = `Update Review for "${
-        item.filmTitle || "Unknown Film"
-      }"`;
-      this.modalYes = null;
-      this.modalNo = null;
-      this.modalSize = "lg";
-      this.isModalVisible = true;
-    },
-    async deleteReview() {
-      if (!this.selectedRowId) return;
-      const result = await this._fetchApi(
-        `${BASE_URL}/favourites/${this.selectedRowId}`,
+    };
+
+    const handleSearch = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        currentPage.value = 1;
+        currentPublicPage.value = 1;
+      }, 300);
+    };
+
+    const toggleControl = (type) => {
+      if (type === "search") {
+        showSearch.value = !showSearch.value;
+        showTableFilter.value = false;
+        showPublicFilter.value = false;
+      } else if (type === "tableFilter") {
+        showTableFilter.value = !showTableFilter.value;
+        showSearch.value = false;
+        showPublicFilter.value = false;
+      } else if (type === "publicFilter") {
+        showPublicFilter.value = !showPublicFilter.value;
+        showSearch.value = false;
+        showTableFilter.value = false;
+      }
+    };
+
+    const onClickDelete = (item) => {
+      modalState.value = "Delete";
+      modalTitle.value = "Confirm Deletion";
+      modalMessageYesNo.value = `Are you sure you want to delete your review for "${item.filmTitle || "this film"}"? This action cannot be undone.`;
+      modalYes.value = "Yes"; // User's CSS uses "Yes"
+      modalNo.value = "Cancel"; // User's CSS uses "Cancel"
+      selectedRowId.value = item.id;
+      isModalVisible.value = true;
+    };
+
+    const onClickUpdate = (item) => {
+      modalState.value = "Update";
+      selectedRowId.value = item.id;
+      modalItem.value = { ...item, evaluation: Number(item.evaluation) || 0 };
+      modalTitle.value = `Update Review for "${item.filmTitle || "Unknown Film"}"`;
+      // modalSize.value = "lg"; // No longer used, CSS handles size
+      isModalVisible.value = true;
+    };
+
+    const deleteReview = async () => {
+      if (!selectedRowId.value) return;
+      const result = await _fetchApi(
+        `${BASE_URL}/favourites/${selectedRowId.value}`,
         {},
         "delete"
       );
       if (result !== null) {
-        await this.fetchFavourites();
+        await fetchFavourites();
       }
-      this.closeModal();
-    },
-    async saveItemHandler(formData) {
-      if (this.modalState !== "Update" || !this.selectedRowId) return;
+      closeModal();
+    };
+
+    const saveItemHandler = async (formData) => {
+      if (modalState.value !== "Update" || !selectedRowId.value) return;
       const payload = {
-        evaluation: formData.evaluation,
+        evaluation: Number(formData.evaluation),
         filmId: formData.filmId,
         content: formData.content,
       };
-      const result = await this._fetchApi(
-        `${BASE_URL}/favourites/${this.selectedRowId}`,
+      const result = await _fetchApi(
+        `${BASE_URL}/favourites/${selectedRowId.value}`,
         {},
         "patch",
         payload
       );
       if (result !== null) {
-        await this.fetchFavourites();
+        await fetchFavourites();
+        // Optionally refetch all reviews if the updated one could appear there
+        // if (publicReviews.value.some(r => r.id === selectedRowId.value)) {
+        //   await fetchAllReviews();
+        // }
       }
-      this.closeModal();
-    },
-    yesEventHandler() {
-      if (this.modalState === "Delete") {
-        this.deleteReview();
+      closeModal();
+    };
+
+    const yesEventHandler = () => {
+      if (modalState.value === "Delete") {
+        deleteReview();
       }
-    },
-    closeModal() {
-      this.isModalVisible = false;
+    };
+
+    const closeModal = () => {
+      isModalVisible.value = false;
+      // It's good practice to reset modal related states after it closes,
+      // especially if the modal content depends on them.
+      // A timeout can be used if there's a closing animation.
       setTimeout(() => {
-        this.modalState = "Read";
-        this.modalItem = {};
-        this.selectedRowId = null;
-        this.modalTitle = null;
-        this.modalMessageYesNo = null;
-        this.modalYes = null;
-        this.modalNo = null;
-        this.modalSize = null;
-      }, 300);
-    },
-    filterAndSortReviews(sourceArray, query, filterType, isPublic = false) {
+        modalState.value = "Read"; // Reset to a neutral state
+        modalItem.value = {};
+        selectedRowId.value = null;
+        modalTitle.value = null;
+        modalMessageYesNo.value = null;
+        modalYes.value = null;
+        modalNo.value = null;
+      }, 300); // Match CSS transition if any, or remove if no transition
+    };
+
+    const filterAndSortReviews = (sourceArray, query, filterType, isPublic = false) => {
       let filtered = [...sourceArray];
       if (query) {
-        const lowerQuery = query.toLowerCase();
-        filtered = filtered.filter((review) => {
-          const titleMatch = (review.filmTitle || "")
-            .toLowerCase()
-            .includes(lowerQuery);
-          const userMatch = (review.userName || "")
-            .toLowerCase()
-            .includes(lowerQuery);
-          const contentMatch =
-            !isPublic &&
-            (review.content || "").toLowerCase().includes(lowerQuery);
-          return titleMatch || userMatch || contentMatch;
-        });
+        const lowerQuery = query.toLowerCase().trim();
+        if (lowerQuery) {
+          filtered = filtered.filter((review) => {
+            const titleMatch = (review.filmTitle || "").toLowerCase().includes(lowerQuery);
+            const userMatch = isPublic && (review.userName || "").toLowerCase().includes(lowerQuery);
+            const contentMatch = !isPublic && (review.content || "").toLowerCase().includes(lowerQuery);
+            return titleMatch || userMatch || contentMatch;
+          });
+        }
       }
       switch (filterType) {
         case "ABC":
-          filtered.sort((a, b) =>
-            (a.filmTitle || "").localeCompare(b.filmTitle || "")
-          );
+          filtered.sort((a, b) => (a.filmTitle || "").localeCompare(b.filmTitle || "", undefined, { sensitivity: 'base' }));
           break;
         case "highToLow":
-          filtered.sort(
-            (a, b) => (Number(b.evaluation) || 0) - (Number(a.evaluation) || 0)
-          );
+          filtered.sort((a, b) => (Number(b.evaluation) || 0) - (Number(a.evaluation) || 0));
           break;
         case "lowToHigh":
-          filtered.sort(
-            (a, b) => (Number(a.evaluation) || 0) - (Number(b.evaluation) || 0)
-          );
+          filtered.sort((a, b) => (Number(a.evaluation) || 0) - (Number(b.evaluation) || 0));
           break;
         case "newest":
-          filtered.sort(
-            (a, b) =>
-              new Date(b.updated_at || b.created_at) -
-              new Date(a.updated_at || a.created_at)
-          );
+          filtered.sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at));
           break;
         case "oldest":
-          filtered.sort(
-            (a, b) =>
-              new Date(a.created_at || a.updated_at) -
-              new Date(b.created_at || b.updated_at)
-          );
+          filtered.sort((a, b) => new Date(a.created_at || a.updated_at) - new Date(b.created_at || b.updated_at));
           break;
       }
       return filtered;
-    },
-    getStarClass(item, starIndex) {
+    };
+
+    const getStarClass = (item, starIndex) => {
       const evaluation = Number(item.evaluation) || 0;
       if (evaluation >= starIndex) return "bi-star-fill";
       if (evaluation >= starIndex - 0.5) return "bi-star-half";
       return "bi-star";
-    },
-    formatEvaluation(value) {
+    };
+
+    const formatEvaluation = (value) => {
       const num = Number(value);
       return isNaN(num) ? "N/A" : num.toFixed(1);
-    },
-    formatDate(dateString) {
+    };
+
+    const formatDate = (dateString) => {
       if (!dateString) return "N/A";
       try {
         const date = new Date(dateString);
         if (isNaN(date.getTime())) return "Invalid Date";
-        return date.toLocaleDateString("en-CA", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        });
+        return date.toLocaleDateString("en-CA", { year: "numeric", month: "2-digit", day: "2-digit" });
       } catch (e) {
         console.warn("Error formatting date:", dateString, e);
         return "N/A";
       }
-    },
-    handlePageChange(pageInfo) {
-      if (typeof pageInfo.pageNumber === "number") {
-        this.currentPage = pageInfo.pageNumber;
+    };
+
+    const handlePageChange = (pageInfo) => {
+      if (typeof pageInfo.pageNumber === "number" && pageInfo.pageNumber !== currentPage.value) {
+        currentPage.value = pageInfo.pageNumber;
       }
-    },
-    handlePublicPageChange(pageInfo) {
-      if (typeof pageInfo.pageNumber === "number") {
-        this.currentPublicPage = pageInfo.pageNumber;
-      }
-      nextTick(() => {
-        this.checkAllTruncation();
-      });
-    },
-    // --- Improved "Items Per Page" Calculation ---
-    calculateGridItemsPerPage() {
-      const container = this.$refs.reviewsWrapperRef;
-      if (!container) return DEFAULT_TABLE_ITEMS_PER_PAGE;
+    };
 
-      const { clientWidth: containerWidth, clientHeight: containerHeight } =
-        container;
-      const card = container.querySelector(".review-card");
-
-      if (!card) return DEFAULT_TABLE_ITEMS_PER_PAGE;
-
-      const cardHeight = card.getBoundingClientRect().height || 350;
-      const cardWidth =
-        card.getBoundingClientRect().width || FIXED_CARD_WIDTH_PX;
-
-      const gridStyles = window.getComputedStyle(
-        container.querySelector(".reviews-grid")
-      );
-      const gridRowGap = parseFloat(gridStyles.rowGap) || 0;
-      const gridColumnGap = parseFloat(gridStyles.columnGap) || 0;
-
-      const totalRowUnit = cardHeight + gridRowGap;
-      const totalColumnUnit = cardWidth + gridColumnGap;
-
-      const rows = Math.max(
-        1,
-        Math.floor((containerHeight + gridRowGap) / totalRowUnit)
-      );
-      const columns = Math.max(
-        1,
-        Math.floor((containerWidth + gridColumnGap) / totalColumnUnit)
-      );
-
-      return Math.max(1, rows * columns);
-    },
-    updateItemsPerPage() {
-      this.$nextTick(() => {
-        if (
-          (this.activeTab === "all" || !this.isLoggedIn) &&
-          this.$refs.reviewsWrapperRef
-        ) {
-          const computedItems = this.calculateGridItemsPerPage();
-          if (this.itemsPerPage !== computedItems) {
-            this.itemsPerPage = computedItems > 0 ? computedItems : 1;
-            this.currentPublicPage = Math.min(
-              this.currentPublicPage,
-              this.totalPublicPages || 1
-            );
-            this.currentPublicPage = Math.max(this.currentPublicPage, 1);
-            this.checkAllTruncation();
-          }
-        } else {
-          this.itemsPerPage = DEFAULT_TABLE_ITEMS_PER_PAGE;
-        }
-      });
-    },
-    debouncedUpdateItemsPerPage() {
-      clearTimeout(this.itemsUpdateTimer);
-      this.itemsUpdateTimer = setTimeout(() => {
-        this.updateItemsPerPage();
-      }, 200);
-    },
-    setupResizeObserver() {
-      if (this.resizeObserver) this.resizeObserver.disconnect();
-      const container = this.$refs.reviewsWrapperRef;
-      if (!container) return;
-
-      let lastWidth = container.offsetWidth;
-      this.resizeObserver = new ResizeObserver((entries) => {
-        const currentWidth = entries[0].contentRect.width;
-        if (currentWidth !== lastWidth) {
-          lastWidth = currentWidth;
-          this.debouncedUpdateItemsPerPage();
-        }
-      });
-      this.resizeObserver.observe(container);
-    },
-    // --- Read More / Less Methods ---
-    measureAndSetInitialHeight() {
-      // ── bail out if we’ve already measured ──
-      if (this.initialCardMaxHeight != null) return;
-
-      if (this.activeTab === "all" || !this.isLoggedIn) {
-        const first = this.paginatedPublicReviews[0];
-        if (first) {
-          const el = this.cardRefs[first.id];
-          if (el) {
-            const orig = el.style.maxHeight;
-            el.style.maxHeight = "none";
-            void el.offsetHeight; // force reflow
-            this.initialCardMaxHeight = el.offsetHeight || 350;
-            el.style.maxHeight = orig;
-          } else {
-            this.initialCardMaxHeight = 350;
-          }
-        } else {
-          this.initialCardMaxHeight = 350;
-        }
-      } else {
-        this.initialCardMaxHeight = null;
-      }
-
-      // ── once we have it, stop observing entirely ──
-      if (this.resizeObserver) {
-        this.resizeObserver.disconnect();
-        this.resizeObserver = null;
-      }
-    },
-    getCardStyle(reviewId) {
-      if (
-        !this.initialCardMaxHeight ||
-        (this.activeTab !== "all" && this.isLoggedIn)
-      )
-        return {};
-      const expanded = this.isReviewExpanded(reviewId);
-      let maxHeight = expanded ? "10000px" : `${this.initialCardMaxHeight}px`;
-      if (expanded) {
-        const cardElement = this.cardRefs[reviewId];
-        if (cardElement) {
-          maxHeight = `${cardElement.scrollHeight}px`;
-        }
-      }
-      return { maxHeight, transition: "max-height 0.4s ease-in-out" };
-    },
-    isReviewExpanded(reviewId) {
-      return !!this.expandedState[reviewId];
-    },
-    doesReviewNeedTruncation(reviewId) {
-      return !!this.truncatedState[reviewId];
-    },
-    toggleReadMore(reviewId) {
-      this.expandedState[reviewId] = !this.isReviewExpanded(reviewId);
-    },
-    shouldShowReadMore(content) {
-      // Only show the read more link if the content exceeds the defined threshold.
-      const THRESHOLD = 150; // Adjust this threshold as needed.
-      return content && content.length > THRESHOLD;
-    },
-    checkTruncation(reviewId) {
-      const contentElement = this.reviewContentRefs[reviewId];
-      if (contentElement) {
-        const needsTruncation =
-          contentElement.scrollHeight > contentElement.clientHeight + 1;
-        if (this.truncatedState[reviewId] !== needsTruncation) {
-          this.truncatedState[reviewId] = needsTruncation;
-        }
-      } else {
-        this.truncatedState[reviewId] = false;
-      }
-    },
-    checkAllTruncation() {
-      const newTruncatedState = {};
-      this.paginatedPublicReviews.forEach((review) => {
-        const contentEl = this.reviewContentRefs[review.id];
-        newTruncatedState[review.id] = contentEl
-          ? contentEl.scrollHeight > contentEl.clientHeight + 1
-          : false;
-      });
-
-      // Only update if changed
-      if (
-        JSON.stringify(newTruncatedState) !==
-        JSON.stringify(this.truncatedState)
-      ) {
-        this.truncatedState = newTruncatedState;
-      }
-    },
-  },
-  watch: {
-    paginatedPublicReviews: {
-      handler() {
-        this.$nextTick(() => {
-          const newState = {};
-          this.paginatedPublicReviews.forEach((r) => {
-            const el = this.reviewContentRefs[r.id];
-            newState[r.id] = el ? el.scrollHeight > el.clientHeight + 1 : false;
-          });
-          // only write if something actually changed
-          if (
-            JSON.stringify(newState) !== JSON.stringify(this.truncatedState)
-          ) {
-            this.truncatedState = newState;
+    const handlePublicPageChange = (pageInfo) => {
+      if (typeof pageInfo.pageNumber === "number" && pageInfo.pageNumber !== currentPublicPage.value) {
+        currentPublicPage.value = pageInfo.pageNumber;
+        nextTick(() => {
+          if (reviewsWrapperRef.value) {
+            const scrollContent = reviewsWrapperRef.value.querySelector('.reviews-scroll-content');
+            if (scrollContent) scrollContent.scrollTop = 0;
+            else reviewsWrapperRef.value.scrollTop = 0;
           }
         });
-      },
-      flush: "post",
-    },
-    isLoggedIn() {
-      this.expandedState = {};
-      this.truncatedState = {};
-      this.initialCardMaxHeight = null;
-      nextTick(() => {
-        this.setupResizeObserver();
-      });
-    },
-    tableReviewFilter() {
-      this.currentPage = 1;
-    },
-    publicReviewFilter() {
-      this.currentPublicPage = 1;
-    },
-    itemsPerPage() {
-      nextTick(() => {
-        this.checkAllTruncation();
-      });
-    },
-  },
-  beforeUpdate() {
-    this.cardRefs = {};
-    this.reviewContentRefs = {};
-  },
-  updated() {
-    if (
-      (this.activeTab === "all" || !this.isLoggedIn) &&
-      !this.initialCardMaxHeight &&
-      this.paginatedPublicReviews.length > 0
-    ) {
-      this.measureAndSetInitialHeight();
-    }
-  },
-  mounted() {
-    this.authStore = useAuthStore();
-    this.activeTab = this.authStore?.id ? "my" : "all";
-    this.itemsPerPage =
-      this.activeTab === "my" ? DEFAULT_TABLE_ITEMS_PER_PAGE : 1;
-    this.fetchFilms();
-    const fetchInitialData = async () => {
-      if (this.activeTab === "my" && this.isLoggedIn) {
-        await this.fetchFavourites();
-      } else {
-        await this.fetchAllReviews();
       }
-      this.setupResizeObserver();
-      nextTick(() => {
-        if (
-          (this.activeTab === "all" || !this.isLoggedIn) &&
-          !this.initialCardMaxHeight
-        ) {
-          this.measureAndSetInitialHeight();
-          this.checkAllTruncation();
-          this.updateItemsPerPage();
+    };
+
+    // --- Read More / Less Methods ---
+    const isReviewExpanded = (reviewId) => !!expandedState.value[reviewId];
+    const doesReviewNeedTruncation = (reviewId) => !!truncatedState.value[reviewId];
+    const toggleReadMore = (reviewId) => { expandedState.value[reviewId] = !expandedState.value[reviewId]; };
+
+    const checkTruncation = (reviewId) => {
+      const contentElement = reviewContentRefs.value[reviewId];
+      if (contentElement) {
+        const needsTruncation = contentElement.scrollHeight > contentElement.clientHeight + 1;
+        if (truncatedState.value[reviewId] !== needsTruncation) {
+          truncatedState.value[reviewId] = needsTruncation;
+        }
+      } else {
+        if (truncatedState.value[reviewId] !== false) {
+          truncatedState.value[reviewId] = false;
+        }
+      }
+    };
+
+    const checkAllTruncation = (reviewsToCheck) => {
+      const newTruncatedState = { ...truncatedState.value };
+      let changed = false;
+      reviewsToCheck.forEach(review => {
+        const contentElement = reviewContentRefs.value[review.id];
+        let needsTruncation = false;
+        if (contentElement && contentElement.offsetParent !== null) { // Check if element is visible
+          needsTruncation = contentElement.scrollHeight > contentElement.clientHeight + 1;
+        }
+        if (newTruncatedState[review.id] !== needsTruncation) {
+          newTruncatedState[review.id] = needsTruncation;
+          changed = true;
         }
       });
+      if (changed) truncatedState.value = newTruncatedState;
     };
-    fetchInitialData();
+
+    const getCardStyle = (reviewId) => {
+      const expanded = isReviewExpanded(reviewId);
+      if (expanded) return { maxHeight: 'none', overflow: 'visible' }; // Or a very large max-height like '1000px'
+      return {}; // Collapsed max-height is now primarily CSS driven by --card-max-height-collapsed
+    };
+
+    // --- Watchers ---
+    watch(isLoggedIn, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        expandedState.value = {};
+        truncatedState.value = {};
+        activeTab.value = newValue ? 'my' : 'all';
+        switchTab(activeTab.value);
+      }
+    });
+
+    watch(tableReviewFilter, () => { currentPage.value = 1; });
+    watch(publicReviewFilter, () => { currentPublicPage.value = 1; });
+
+    watch(paginatedPublicReviews, (newPaginatedList) => {
+      nextTick(() => checkAllTruncation(newPaginatedList));
+    }, { deep: true, immediate: false });
+
+
+    // --- Lifecycle Hooks ---
+    onMounted(async () => {
+      fetchFilms();
+      updateItemsPerPage(); // Set initial itemsPerPage
+
+      if (activeTab.value === "my" && isLoggedIn.value) {
+        await fetchFavourites();
+      } else {
+        activeTab.value = 'all';
+        await fetchAllReviews();
+      }
+    });
+
+    onBeforeUnmount(() => {
+      clearTimeout(debounceTimer);
+    });
+
+    return {
+      headerContainerRef, tableWrapperRef, reviewsWrapperRef, tablePaginationRef, publicPaginationRef, cardRefs, reviewContentRefs,
+      authStore, loading, errorMessages, activeTab, tableReviewFilter, publicReviewFilter, searchQuery, films,
+      favourites, publicReviews, currentPage, currentPublicPage, itemsPerPage, showSearch, showTableFilter, showPublicFilter,
+      isModalVisible, modalItem, modalMessageYesNo, modalState, modalTitle, modalYes, modalNo, selectedRowId,
+      expandedState, truncatedState, modalFormTitleId, modalConfirmTitleId, modalConfirmDescId,
+      isLoggedIn, filteredFavourites, filteredPublicReviews, totalFavPages, paginatedFavourites, totalPublicPages, paginatedPublicReviews,
+      switchTab, handleSearch, toggleControl, onClickDelete, onClickUpdate, saveItemHandler, yesEventHandler, closeModal,
+      getStarClass, formatEvaluation, formatDate, handlePageChange, handlePublicPageChange,
+      isReviewExpanded, doesReviewNeedTruncation, toggleReadMore, getCardStyle,
+    };
   },
-  beforeUnmount() {
-    clearTimeout(this.debounceTimer);
-    clearTimeout(this.itemsUpdateTimer);
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-    }
-    window.removeEventListener("resize", this.debouncedUpdateItemsPerPage);
+  beforeUpdate() {
+    // This is useful in Options API for resetting refs that are collected in loops.
+    // In Composition API with `ref({})` for `cardRefs` and `reviewContentRefs`,
+    // Vue handles the updates to these objects more directly when elements are added/removed.
+    // So, explicitly clearing them here might not be necessary if refs are bound as
+    // :ref="(el) => (cardRefs[item.id] = el)"
+    // this.cardRefs = {};
+    // this.reviewContentRefs = {};
   },
+  updated() {
+    // This hook is called after the component has updated its DOM tree.
+    // Useful for DOM-dependent operations.
+    // For example, if `checkAllTruncation` needed to run after *any* DOM update affecting the grid:
+    // if (this.activeTab === 'all' || !this.isLoggedIn) {
+    //    this.checkAllTruncation(this.paginatedPublicReviews);
+    // }
+  }
 };
 </script>
 
@@ -1036,6 +764,7 @@ export default {
   --accent-blue: #2196f3;
   --border-color: #383838;
   --focus-ring-color: rgba(255, 215, 0, 0.3);
+  --card-max-height-collapsed: 300px;
 
   height: 90vh;
   display: flex;
@@ -1048,6 +777,19 @@ export default {
   background-attachment: fixed;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+/* Visually hidden class for accessibility */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* === Header Styles === */
@@ -1063,6 +805,9 @@ export default {
   gap: 1rem;
   flex-shrink: 0;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
 .tabs-wrapper {
@@ -1210,6 +955,7 @@ export default {
   font-size: 0.95rem;
 }
 
+
 /* === Loading Overlay === */
 .loading-overlay {
   position: absolute;
@@ -1280,6 +1026,7 @@ export default {
   overflow: hidden;
 }
 
+/* === Section Layout (Table and Grid) === */
 .table-section,
 .public-reviews-section {
   flex-grow: 1;
@@ -1289,9 +1036,9 @@ export default {
   height: 100%;
 }
 
-/* === Scrollable Wrappers === */
+/* === Scrollable Wrappers (Table and Grid Content) === */
 .table-wrapper,
-.reviews-wrapper {
+.reviews-scroll-content {
   flex-grow: 1;
   overflow-y: auto;
   padding-right: 10px;
@@ -1300,18 +1047,18 @@ export default {
 }
 
 .table-wrapper::-webkit-scrollbar,
-.reviews-wrapper::-webkit-scrollbar {
+.reviews-scroll-content::-webkit-scrollbar {
   width: 10px;
 }
 
 .table-wrapper::-webkit-scrollbar-track,
-.reviews-wrapper::-webkit-scrollbar-track {
+.reviews-scroll-content::-webkit-scrollbar-track {
   background: var(--bg-secondary);
   border-radius: 5px;
 }
 
 .table-wrapper::-webkit-scrollbar-thumb,
-.reviews-wrapper::-webkit-scrollbar-thumb {
+.reviews-scroll-content::-webkit-scrollbar-thumb {
   background-color: #5a6268;
   border-radius: 5px;
   border: 2px solid var(--bg-secondary);
@@ -1386,10 +1133,175 @@ export default {
 
 .date-cell {
   font-size: 0.75rem !important;
-  font-weight: italic;
   color: var(--text-muted) !important;
 }
 
+
+/* === Grid (Review Card) Styles === */
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  padding-bottom: 1rem;
+}
+
+.review-card {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow: hidden;
+  color: var(--text-primary);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, max-height 0.4s ease-out;
+  max-height: var(--card-max-height-collapsed);
+}
+
+.review-card.is-expanded {
+  max-height: 1200px;
+}
+
+
+.review-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+}
+
+.card-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex-grow: 1;
+}
+
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.review-author {
+  font-weight: 500;
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+}
+
+.review-date {
+  display: inline-flex;
+  align-items: center;
+}
+
+.edited-indicator {
+  font-style: italic;
+  margin-left: 0.3em;
+  font-size: 0.9em;
+}
+
+.film-title-rating {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+
+.review-film-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--accent-gold);
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-content {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: 0.25rem;
+}
+
+.review-content p {
+  margin: 0;
+}
+
+.review-content p.truncated {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: calc(1.5em * 3);
+}
+
+.review-card.is-expanded .review-content p.truncated {
+  -webkit-line-clamp: unset;
+  max-height: none;
+  overflow: visible;
+}
+
+
+.read-more-link {
+  color: var(--accent-blue);
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  display: inline-block;
+  transition: color 0.2s ease;
+}
+
+.read-more-link:hover,
+.read-more-link:focus {
+  color: var(--accent-gold);
+  text-decoration: underline;
+}
+
+/* === No Data Message === */
+.no-data-message {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  font-style: italic;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* === Pagination === */
+.pagination-wrapper {
+  padding: 1rem 0 0.5rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  border-top: 1px solid var(--border-color);
+  margin-top: auto;
+  background: var(--bg-primary);
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+/* === MODAL STYLES (User Provided) === */
 /* ---- Modal Container ---- */
 .modal-container {
   position: fixed;
@@ -1403,54 +1315,65 @@ export default {
   align-items: center;
   justify-content: center;
   z-index: 200;
+  /* Ensure modal is on top */
 }
 
-/* ---- Delete Modal Content ---- */
-.modal-content.delete-modal {
-  background: var(--bg-primary, #1f1f1f);
-  padding: 2rem;
-  border-radius: 8px;
-  max-width: 400px;
-  width: 90%;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
-}
-
-/* ---- Modal Content ---- */
+/* ---- Generic Modal Content (base for both delete and form) ---- */
 .modal-content {
   background: var(--bg-primary, #1f1f1f);
   padding: 2rem;
   border-radius: 8px;
-  max-width: 400px;
-  width: 90%;
-  text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+  width: 90%;
+  /* Responsive width */
 }
 
-/* ---- Modal Titles & Messages ---- */
+/* ---- Delete Modal Specific Content Styling ---- */
+.modal-content.delete-modal {
+  max-width: 400px;
+  /* Max width for smaller confirmation modals */
+  text-align: center;
+}
+
+/* ---- Update Form Modal Specific Content Styling ---- */
+.modal-content.modal-content-form {
+  max-width: 700px;
+  /* Wider for forms */
+  text-align: left;
+  /* Forms are typically left-aligned */
+  /* ReviewForm component will handle its internal layout and scrolling if needed */
+}
+
+
+/* ---- Modal Titles & Messages (Primarily for Delete Modal) ---- */
 .modal-title {
+  /* Used by delete modal's h5 */
   font-size: 1.4rem;
   font-weight: 700;
   margin-bottom: 1rem;
   color: #a71010;
+  /* Specific red color from user's CSS */
 }
 
 .modal-message {
+  /* Used by delete modal's p */
   font-size: 1rem;
   margin-bottom: 1.5rem;
   color: var(--text-primary);
   opacity: 0.7;
 }
 
-/* ---- Modal Actions ---- */
+/* ---- Modal Actions (Primarily for Delete Modal) ---- */
 .modal-actions {
   display: flex;
   justify-content: center;
+  /* Center buttons for delete modal */
   gap: 1rem;
+  margin-top: 1rem;
+  /* Added for spacing */
 }
 
-/* ---- Button Styles for Modal ---- */
-
+/* ---- Button Styles for Modal (Primarily for Delete Modal) ---- */
 /* Common modal button base style */
 .modal-actions .btn {
   min-width: 100px;
@@ -1468,157 +1391,43 @@ export default {
   background: #ffd700;
   /* yellow background */
   color: #1f1f1f;
+  /* dark text for contrast */
   box-shadow: 0 2px 6px rgba(255, 215, 0, 0.3);
 }
 
 .btn-yes:hover:not(:disabled) {
   background: #ffc107;
+  /* Slightly darker yellow */
   box-shadow: 0 4px 10px rgba(255, 215, 0, 0.5);
 }
 
-/* Style for the "Cancel" button in modal (making it visible and prominent) */
+/* Style for the "Cancel" button in modal */
 .btn-cancel {
   background: #555;
   /* dark background */
   color: #fff;
   border: 1px solid #777;
+  /* Subtle border */
 }
 
 .btn-cancel:hover:not(:disabled) {
   background: #666;
+  /* Slightly lighter dark */
   border-color: #888;
-  color: #fff;
 }
 
-/* === Grid (Review Card) Styles === */
-.reviews-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 0.8rem;
-  padding-bottom: 0.5rem;
-}
-
-.review-card {
-  background: var(--bg-secondary);
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  padding: 1.25rem;
-  gap: 0.75rem;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out,
-    max-height 0.4s ease-in-out;
-  overflow: hidden;
-  color: var(--text-primary);
-}
-
-.review-card:hover {
-  transform: translateY(1.5px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
-}
-
-.review-header {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.6rem;
-  color: var(--text-muted);
-}
-
-.review-author {
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.edited-indicator {
-  font-style: italic;
-  margin-left: 0.3em;
-  font-size: 0.65rem;
-  color: rgb(255, 93, 93);
-}
-
-.review-film-title {
-  font-size: 0.71rem;
-  font-weight: 650;
-  color: var(--accent-gold);
-}
-
-.film-title-rating {
-  display: flex;
-  justify-content: space-between;
-}
-
-.review-content {
-  font-size: 0.85rem;
-  color: var(--text-primary);
-  line-height: 1.5;
-  margin-top: 0.25rem;
-}
-
-.review-content p {
-  margin: 0;
-  /* By default, no clamping is applied. We'll use the truncated class to restrict to 2 lines. */
-}
-
-.review-content p.truncated {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  /* Limit to two lines */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.review-card.is-expanded .review-content p {
-  -webkit-line-clamp: unset;
-}
-
-/* "Read more" link styled as simple textual link */
-.read-more-link {
-  color: var(--accent-gold);
-  text-decoration: none;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-top: 0.5rem;
-}
-
-.read-more-link:hover,
-.read-more-link:focus {
-  text-decoration: underline;
-}
-
-/* === Pagination === */
-.pagination-wrapper {
-  padding: 1rem 0 0.5rem 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-shrink: 0;
-  border-top: 1px solid var(--border-color);
-  margin-top: auto;
-  background: var(--bg-primary);
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
-}
 
 /* === Responsive Adjustments === */
-@media (max-width: 1024px) {
-  .reviews-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-    padding: 20px;
-  }
-
-  .review-card {
-    min-height: 320px;
-  }
-}
-
 @media (max-width: 768px) {
   .header-container {
     flex-direction: column;
     align-items: stretch;
     padding: 0.75rem 1rem;
+    position: static;
+  }
+
+  .content-area {
+    padding: 1rem;
   }
 
   .tabs-wrapper {
@@ -1638,10 +1447,6 @@ export default {
     min-width: unset;
   }
 
-  .content-area {
-    padding: 1rem;
-  }
-
   .custom-table thead {
     display: none;
   }
@@ -1651,6 +1456,7 @@ export default {
   .custom-table td {
     display: block;
     width: 100%;
+    box-sizing: border-box;
   }
 
   .custom-table tr {
@@ -1671,6 +1477,13 @@ export default {
     align-items: center;
     justify-content: flex-end;
     background: transparent;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+  }
+
+  .custom-table tr td:last-child {
+    border-bottom: none;
   }
 
   .custom-table td::before {
@@ -1686,10 +1499,40 @@ export default {
     font-size: 0.85rem;
   }
 
-  .reviews-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+  .review-card {
+    max-height: var(--card-max-height-collapsed);
   }
+
+  .review-card.is-expanded {
+    max-height: 1200px;
+  }
+
+  .review-content p.truncated {
+    -webkit-line-clamp: 4;
+    max-height: calc(1.5em * 4);
+  }
+
+  /* Responsive modal content */
+  .modal-content.delete-modal,
+  .modal-content.modal-content-form {
+    width: 90%;
+    padding: 1.5rem;
+  }
+
+  .modal-title {
+    font-size: 1.2rem;
+  }
+
+  .modal-message {
+    font-size: 0.9rem;
+  }
+
+  .modal-actions .btn {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    min-width: 80px;
+  }
+
 }
 
 @media (max-width: 480px) {
@@ -1724,6 +1567,28 @@ export default {
   .review-card {
     padding: 1rem;
   }
+
+  .modal-content.delete-modal,
+  .modal-content.modal-content-form {
+    padding: 1rem;
+    /* Further reduce padding on very small screens */
+  }
+
+  .modal-title {
+    font-size: 1.1rem;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  /* Stack buttons on very small screens */
+  .modal-actions .btn {
+    width: 100%;
+  }
+
+  /* Make buttons full width in column layout */
 }
 
 /* === Animation === */
