@@ -12,4 +12,11 @@ class Role extends Model
     protected $table = 'roles';
     protected $fillable = ['id', 'role'];
     public $timestamps = true;
+
+    // Needed for DatabaseTest
+    public function tasks()
+    {
+        return $this->hasMany(Task::class, 'roleId');
+    }
+
 }

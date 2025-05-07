@@ -13,23 +13,15 @@ class Favourite extends Model
     public $timestamps = true;
     protected $fillable = ['id', 'userId', 'filmId', 'evaluation', 'content'];
 
+    // Needed for DatabaseTest
     // Define the relationship to the user
     public function user()
     {
         return $this->belongsTo(User::class, 'userId');
     }
-
     // Define the relationship to the film
     public function film()
     {
         return $this->belongsTo(Film::class, 'filmId');
     }
-
-    // protected function casts(): array
-    // {
-    //     return [
-    //         'evaluation' => 'double'
-           
-    //     ];
-    // }
 }

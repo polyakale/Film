@@ -24,9 +24,9 @@ class User extends Authenticatable
         ];
     }
 
-    // Remove the position relationship (no Position model needed)
-    // public function position()
-    // {
-    //     return $this->belongsTo(Position::class, 'positionId');
-    // }
+    // Needed for DatabaseTest
+    public function position()
+    {
+        return $this->belongsTo(Position::class, 'positionId');
+    }
 }

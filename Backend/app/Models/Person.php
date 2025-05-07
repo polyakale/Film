@@ -16,4 +16,11 @@ class Person extends Model
     {
         return ['gender' => 'boolean'];
     }
+
+    // Needed for DatabaseTest
+    public function tasks()
+    {
+        return $this->hasMany(Task::class, 'personId');
+    }
+
 }
