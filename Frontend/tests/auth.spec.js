@@ -25,17 +25,17 @@ test.describe('Authentication Tests', () => {
             response.url().includes('/api/users/login') && response.status() === 200,
             { timeout: 15000 }
         );
-        // Allow a bit more time for state update and navigation.
+        // Allow extra time for state update and navigation.
         await page.waitForTimeout(3000);
 
-        // Expect redirection to a dashboard page (e.g. admin-dashboard or guest-dashboard or home).
+        // Expect redirection to a dashboard page (which can be admin-dashboard, guest-dashboard or home).
         await expect(page).toHaveURL(/(admin-dashboard|guest-dashboard|\/)$/i, { timeout: 15000 });
-        // Verify that the username is displayed.
+        // Verify the username is displayed.
         await expect(page.locator('.username-span')).toContainText(/admin/i, { timeout: 15000 });
     });
 
     test('Login fails with wrong credentials', async ({ page }) => {
-        // Fill in the login form with wrong credentials.
+        // Fill in the form with incorrect credentials.
         await page.fill('input#email', 'wrong@example.com');
         await page.fill('input#password', 'wrongpassword');
 
@@ -49,70 +49,51 @@ test.describe('Authentication Tests', () => {
     });
 
     test('Logout works', async ({ page, browserName }) => {
-        // 1. Login with explicit success verification
+        // 1. Login first.
         await page.fill('input#email', 'admin@example.com');
         await page.fill('input#password', 'admin123');
-        await page.getByRole('button', { name: /log\s*in/i }).click();
+        const loginBtn = page.getByRole('button', { name: /log\s*in/i });
+        await expect(loginBtn).toBeVisible({ timeout: 10000 });
+        await loginBtn.click();
 
-        // Wait for both API response AND navigation
-        await Promise.all([
-            page.waitForResponse(res =>
-                res.url().includes('/api/users/login') && res.ok(),
-                { timeout: 15000 }
-            ),
-            page.waitForURL(/(admin-dashboard|\/)/i, { timeout: 15000 })
-        ]);
+        await page.waitForResponse(response =>
+            response.url().includes('/api/users/login') && response.ok(),
+            { timeout: 15000 }
+        );
+        await page.waitForTimeout(3000);
 
-        // 2. Open dropdown with animation awareness
+        // Make sure we're on a dashboard page.
+        await expect(page).toHaveURL(/(admin-dashboard|guest-dashboard|\/)$/i, { timeout: 15000 });
+        await expect(page.locator('.username-span')).toContainText(/admin/i, { timeout: 15000 });
+
+        // 2. Open the dropdown menu.
         const dropdown = page.locator('a.nav-link.dropdown-toggle');
+        await expect(dropdown).toBeVisible({ timeout: 10000 });
         await dropdown.click();
-        await page.waitForSelector('.dropdown-menu.show', { state: 'visible' });
 
-        // 3. Logout with multiple success conditions
-        const logoutPromise = page.getByRole('link', { name: /logout/i }).click();
+        // 3. Click the logout link.
+        const logoutLink = page.getByRole('link', { name: /logout/i });
+        await expect(logoutLink).toBeVisible({ timeout: 10000 });
+        await logoutLink.click();
 
-        await Promise.race([
-            // Condition 1: Successful API logout + navigation
-            Promise.all([
-                page.waitForResponse(res =>
-                    res.url().includes('/api/users/logout') && res.ok(),
-                    { timeout: 5000 }
-                ),
-                page.waitForURL(`${baseURL}/login`, { timeout: 8000 })
-            ]),
-            // Condition 2: Client-side redirect without API call
-            page.waitForURL(url =>
-                url.href === `${baseURL}/login` || url.href === `${baseURL}/`,
-                { timeout: 10000 }
-            )
-        ]).catch(() => {
-            console.log('Proceeding with fallback verification');
-        });
+        // 4. Wait for a short period to allow logout processing.
+        await page.waitForTimeout(3000);
 
-        // 4. Final verification with browser-specific handling
-        if (!page.url().startsWith(`${baseURL}/login`)) {
+        // 5. Check the current URL.
+        const currentURL = await page.url();
+        console.log('Current URL after logout:', currentURL);
+        // If the URL is not the login page, force navigation.
+        if (!currentURL.includes('/login')) {
             await page.goto(`${baseURL}/login`);
-            // Firefox-specific network stability wait
-            await page.waitForLoadState(browserName === 'firefox' ? 'networkidle' : 'domcontentloaded');
+            if (browserName === 'firefox') {
+                await page.waitForLoadState('networkidle');
+            } else {
+                await page.waitForLoadState('domcontentloaded');
+            }
         }
 
-        // Simplified bulletproof locator
+        // 6. Verify that the login button appears using its test ID.
         const loginButton = page.getByTestId('login-button');
-
-        // Firefox-specific element waiting strategy
-        if (browserName === 'firefox') {
-            await page.waitForFunction(() => {
-                const btn = document.querySelector('[data-testid="login-button"]');
-                return btn && getComputedStyle(btn).visibility !== 'hidden';
-            }, { timeout: 15000 });
-        }
-
-        // Unified visibility check with adjusted expectations
-        await expect(loginButton).toBeVisible({
-            timeout: 15000,
-            visible: true,
-            // Firefox often needs stricter visibility checks
-            // Removed unsupported 'checkVisibility' property
-        });
+        await expect(loginButton).toBeVisible({ timeout: 15000 });
     });
 });
