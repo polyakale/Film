@@ -227,7 +227,7 @@ php artisan test
 
 ### Tesztfájlok
 - Az egyéni tesztek általában a `tests/Feature/` mappában találhatók, például:  
-  `tests/Feature/AuthTest.php`, `tests/Feature/FavoritesTest.php`, stb.
+ `tests/Feature/FavoritesTest.php`, stb.
 
 Ha saját teszt adatbázist használsz (`.env.test` fájl), előfordulhat, hogy frissítened kell:
 ```bash
